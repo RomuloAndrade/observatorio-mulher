@@ -1,0 +1,80 @@
+if (interactive()) {
+  library(shiny)
+  library(bs4Dash)
+  
+  shiny::shinyApp(
+    ui = dashboardPage(
+      header = dashboardHeader(),
+      sidebar = dashboardSidebar(),
+      controlbar = dashboardControlbar(),
+      footer = dashboardFooter(),
+      title = "test",
+      body = dashboardBody(
+        fluidRow(
+          valueBoxOutput("vbox"),
+          infoBoxOutput("ibox")
+        )
+      )
+    ),
+    server = function(input, output) {
+      output$vbox <- renderValueBox({
+        valueBox(
+          value = 150,
+          subtitle = "New orders",
+          color = "primary",
+          icon = icon("shopping-cart"),
+          href = "#"
+        )
+      })
+      
+      output$ibox <- renderInfoBox({
+        infoBox(
+          title = "Comments",
+          fill = TRUE,
+          gradient = TRUE,
+          color = "success",
+          value = 41410,
+          icon = icon("comments")
+        )
+      })
+    }
+  )
+}
+if (interactive()) {
+  library(shiny)
+  library(bs4Dash)
+  
+  shinyApp(
+    ui = dashboardPage(
+      header = dashboardHeader(),
+      sidebar = dashboardSidebar(),
+      controlbar = dashboardControlbar(),
+      footer = dashboardFooter(),
+      title = "test",
+      body = bs4DashBody(
+        fluidRow(
+          valueBox(
+            value = 150,
+            subtitle = "New orders",
+            color = "primary",
+            icon = icon("cart-shopping")
+          ),
+          valueBox(
+            value = "53%",
+            subtitle = "New orders",
+            color = "indigo",
+            icon = icon("gears"),
+            footer = div("Hello World")
+          ),
+          valueBox(
+            value = "44",
+            subtitle = "User Registrations",
+            color = "teal",
+            icon = icon("sliders")
+          )
+        )
+      )
+    ),
+    server = function(input, output) {}
+  )
+}

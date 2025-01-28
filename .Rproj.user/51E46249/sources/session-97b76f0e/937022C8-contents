@@ -1,0 +1,777 @@
+
+# Load library --------------------------------------------------------------------------------
+box::use(
+  shiny[...],
+  bs4Dash[...],
+  echarts4r[e_theme_register],
+  waiter[...],
+  leaflet[leafletOutput],
+  reactable[reactableOutput],
+  shinycssloaders[withSpinner],
+  fresh[use_theme,
+        use_googlefont,
+        create_theme,
+        bs4dash_font,bs4dash_color,bs4dash_status,bs4dash_layout],
+)
+
+
+
+# Load data -----------------------------------------------------------------------------------
+
+# 
+# db<- readRDS('data/db_despesa_funcao_mes.rds')
+# 
+
+# Funcao --------------------------------------------------------------------------------------
+
+## funcao glossario
+
+glossario <-readRDS('Dados/glossario.rds')
+constroi_glossario <- function(nchunks = 3) {
+  df <- split(
+    glossario,
+    rep(1:nchunks,
+        length.out = nrow(glossario),
+        each = ceiling(nrow(glossario)/nchunks)))
+  
+  width <- 12%/%nchunks
+  
+  lapply(1:nchunks, function(i){
+    div(
+      class = sprintf("col-xl-%s", width),
+      bs4Dash::box(
+        width = 12,
+        closable = FALSE,
+        maximizable = TRUE,
+        collapsible = FALSE,
+        do.call("accordion", c(
+          list(id = sprintf('accordion_glossario_%s', i)),
+          apply(df[[i]], 1, function(r) bs4Dash::accordionItem(title = r[1], r[2]))))))})
+}
+
+
+
+# Tema ----------------------------------------------------------------------------------------
+
+
+light_blue <- "#014ffd"
+red <- "#ff585d"
+
+yellow <- "#fbb81c"
+
+cyan <- "#1eb1e7"
+blue2 <- "#1a649d"
+orange1 <- "#ff9900"
+violet2 <- "#5b5b9b"
+
+orange2 <- "#925106"
+
+
+
+## Status colors ##
+
+
+primary <- yellow
+secondary <- violet2
+success <- NULL
+info <- blue2
+warning <- orange1
+danger <- red
+light <- NULL
+dark <- NULL
+
+
+## Main colors ##
+
+blue <- light_blue
+lightblue <- cyan
+navy <- NULL
+cyan <- NULL
+teal <- NULL
+olive <- NULL
+green <- NULL
+lime <- NULL
+orange <- NULL
+yellow <- NULL
+fuchsia <- NULL
+purple <- NULL
+maroon <- NULL
+red <- red
+black <- NULL
+gray_x_light <- NULL
+gray_600 <- NULL
+gray_800 <- NULL
+gray_900 <- NULL
+white <- NULL
+
+main_bg <- NULL
+text_dark <- NULL
+text_light <- NULL
+sidebar_light_bg <- main_bg
+sidebar_light_color <- text_light
+sidebar_light_hover_color <- NULL
+sidebar_light_submenu_bg <- main_bg
+sidebar_light_submenu_color <- NULL
+sidebar_light_submenu_hover_color <- NULL
+
+
+font1 <- "Exo 2"
+
+font2 <- "Roboto"
+
+font3 <- "Roboto Mono"
+
+main_font <- "'Exo 2', sans-serif"
+
+secondary_font <- "'Roboto', sans-serif"
+
+monospace_font <- "'Roboto Mono', monospace"
+
+base_font <- "Exo 2"
+
+diobs_theme <- create_theme(
+  bs4dash_font(
+    size_base = "1rem",
+    size_lg = NULL,
+    size_sm = NULL,
+    size_xs = NULL,
+    size_xl = NULL,
+    weight_light = NULL,
+    weight_normal = NULL,
+    weight_bold = NULL,
+    family_sans_serif = main_font,
+    family_monospace = monospace_font,
+    family_base = main_font
+  ),
+  bs4dash_color(
+    blue = blue,
+    lightblue = lightblue,
+    navy = navy,
+    cyan = cyan,
+    teal = teal,
+    olive = olive,
+    green = green,
+    lime = lime,
+    orange = orange,
+    yellow = yellow,
+    fuchsia = fuchsia,
+    purple = purple,
+    maroon = maroon,
+    red = red,
+    black = black,
+    gray_x_light = gray_x_light,
+    gray_600 = gray_600,
+    gray_800 = gray_800,
+    gray_900 = gray_900,
+    white = white
+  ),
+  bs4dash_status(
+    primary = primary,
+    secondary = secondary,
+    success = success,
+    info = info,
+    warning = warning,
+    danger = danger,
+    light = light,
+    dark = dark
+  ),
+  bs4dash_layout(
+    font_size_root = NULL,
+    sidebar_width = NULL,
+    sidebar_padding_x = NULL,
+    sidebar_padding_y = NULL,
+    sidebar_mini_width = NULL,
+    control_sidebar_width = NULL,
+    boxed_layout_max_width = NULL,
+    screen_header_collapse = NULL,
+    main_bg = main_bg,
+    content_padding_x = NULL,
+    content_padding_y = NULL
+  )
+)
+
+
+
+# Load ui -------------------------------------------------------------------------------------
+
+
+ui <- dashboardPage(
+ 
+  
+  preloader = list(
+    html = tagList(
+      spin_cube_grid(),
+      br(),
+      "Carregando ..."
+    ),
+    color = primary
+  ),
+
+  dark = F,
+  help = NULL,
+  fullscreen = TRUE,
+  scrollToTop = TRUE,
+  header = dashboardHeader(
+    
+    title = dashboardBrand(
+     
+      title = "Estudo demográfico",
+      color = "primary",
+      # href = "https://observatoriodefortaleza.fortaleza.ce.gov.br/",
+      image = 'Brasão_de_Fortaleza.svg',
+      opacity = 1
+    ),
+    fixed = FALSE
+  ),
+  sidebar = dashboardSidebar(
+    fixed = TRUE,
+    skin = "light",
+    status = "indigo",
+    id = "sidebar",
+    collapsed = FALSE,
+    sidebarMenu(
+      id = "current_tab",
+      flat = FALSE,
+      compact = FALSE,
+      childIndent = TRUE,
+      sidebarHeader("Visualizações"),
+      menuItem(
+        "Início",
+        tabName = "Introdução",
+        icon = icon("bar-chart")
+      ),
+      menuItem(
+        "Territórios",
+        tabName = "Territórios",
+        icon = icon("book"),
+
+        menuSubItem("Bairros",
+                    tabName = "Bairros",
+                    icon = icon("map")
+        ),
+        menuSubItem("Zeis",
+                    tabName = "Zeis",
+                    icon = icon("map")
+        ),
+        menuSubItem("Assentamento Precário",
+                    tabName = "Assentamento",
+                    icon = icon("map")
+        )
+
+      ),
+      sidebarHeader("Metadados"),
+      menuItem(
+        "Glossário",
+        tabName = "glossario",
+        icon = icon("magnifying-glass-chart")
+      ),
+      menuItem(
+        "Referências",
+        tabName = "fonte",
+        icon = icon("server")
+      ),
+      menuItem(
+        "Sobre",
+        tabName = "sobre",
+        icon = icon("info")
+      )
+    )
+  ),
+  body = dashboardBody(
+    use_googlefont(font1),
+    use_googlefont(font2),
+    use_googlefont(font3),
+    use_theme(diobs_theme),
+    e_theme_register(
+      paste(readLines("www/atlas_capital_humano.json"), collapse = ""),
+      "diobs"),
+    tags$head(
+      tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
+      # Listen for dark-mode messages
+      tags$script("
+      $(document).ready(function(){
+        $('.brand-image').removeClass('elevation-3 img-circle');
+      })
+
+      Shiny.addCustomMessageHandler('dark-mode', function(dark_mode) {
+        if (dark_mode) {
+          $('#footer-logo').find('img').map(function() { $(this).attr('src', $(this).attr('src').replace('dark', 'light')) });
+        } else {
+          $('#footer-logo').find('img').map(function() { $(this).attr('src', $(this).attr('src').replace('light', 'dark')) });
+        }
+      });
+    "),
+      tags$script(src = "https://polyfill.io/v3/polyfill.min.js?features=es6"),
+      tags$script(id="MathJax-script", src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js")
+    ),
+  tabItems(
+     tabItem(
+       tabName = "Introdução",
+       h1("Estimativa demográfica de territórios via setores censitários - 2022"),
+       hr(),
+       
+       fluidRow(
+         br(),
+       
+       column(width=6,
+       
+         br(),
+       h2('Objetivo'),
+       
+       p(style="text-align: justify;",
+       "O objetivo desse trabalho é estimar indicadores territoriais e
+       demográficos inscritos nas Zonas Especiais de Interesse Social (Zeis) e
+       em Assentamentos Precários com base nas estatísticas divulgadas sobre
+       as malhas de setores censitários de 2022 do IBGE. Além da divulgação de
+       dados estatísticos do Censo Demográfico nessas Zonas, esses
+       levantamentos são voltados ao planejamento das políticas sociais
+       desenvolvidas pelas gestões públicas no país."
+       ),
+       br(),
+       
+       h2("Metodologia"),
+         
+       p(style="text-align: justify;",
+       "O método de estimação consiste em sobrepor as poligonais dos setores com
+       os territórios de interesse (ZEIS e assentamentos precários), de modo a
+       obter, via interseção das áreas, os setores; ou parte destes que
+       coincidem com as delimitações territoriais e demográficas das Zeis. Do
+       ponto de vista conceitual e metodológico, os setores censitários são
+       “constituídos por polígonos contínuos, integralmente contidos em área
+       urbana ou rural, cuja dimensão, número de domicílios e estabelecimentos
+       permitem ao recenseador cumprir suas atividades em um prazo determinado”
+       (IBGE, 2021b). Ou seja, o setor censitário corresponde à menor unidade
+       territorial utilizada pelo IBGE para fins de recenseamento e realização
+       de coleta de dados. Por essa razão ele foi utilizado para estimar
+       demograficamente as Zeis e os assentamentos precários."
+       ),
+       p(style="text-align: justify;",
+       "No trabalho que se segue foi considerado a divisão proporcional das
+       méticas apuradas nos setores censitários, como o número de pessoas
+       residentes e domicílios. Esses dados correspondem ao percentual da área
+       em comum com as áreas das Zeis. Desse modo, as estimativas dos
+       indicadores territoriais e demográficos dos Zeis são dadas pela
+       agregação de métricas dos setores e seus fragmentos proporcionais que
+       pertencem, ou fazem interseção, com as poligonais de Zeis. O mesmo
+       método se aplica aos territórios de assentamento precário."
+       ),
+       br(),
+       h3("Base de dados"),
+       
+       
+       h5('Malha de setores censitários 2022'),
+       
+       p("-   CE_Malha_Preliminar_2022.shp. Link para ", a("download", href = "https://geoftp.ibge.gov.br/organizacao_do_territorio/
+          malhas_territoriais/malhas_de_setores_censitarios__divisoes_intramunicipais/
+          censo_2022_preliminar/setores/shp/UF/CE/CE_Malha_Preliminar_2022.zip")), 
+       
+       p("-   Agregados_preliminares_por_setores_censitarios_CE.csv. Link para ", a("download", 
+                                                                                    href = "https://www.ibge.gov.br/estatisticas/sociais/populacao/
+       22827-censo-demografico-2022.html?=&t=downloads")),
+       
+       h5('Malha de bairros'), 
+       
+       p(" -   shp_BairrosA.shp'. Link para ", a("download",
+                                                 href = "https://github.com/RomuloAndrade/Dados/raw/main/bairros_fortaleza_shp/shp_Bairros.rds")), 
+       
+       
+       h5('Malha de ZEIS'), 
+       
+       
+       p(" -   ZEIS 1.shp'. Link para ", a("download",
+                                           href = "https://mapas.fortaleza.ce.gov.br/)")),
+       p(" -   ZEIS 2.shp'. Link para ", a("download",
+                                           href = "https://mapas.fortaleza.ce.gov.br/)")),
+       
+       h5('Malha de Assentamentos precários'), 
+       
+       p(" -   assentamentos_precarios_plhis.shp'. Link para ", a("download",
+                                                                  href = "https://mapas.fortaleza.ce.gov.br/)")),
+       
+      
+       
+    
+       ),
+       
+       column(width=6, 
+       br(),
+       
+       tabsetPanel(
+         id = "tabs_in",
+         tabPanel(
+           title = "Mapa das bases utilizadas",
+           p(style="text-align: justify;",
+             "Territórios de interresse sobrepostos nos Setores censitários."
+           ),
+           withSpinner(leafletOutput('bases_usadas',width = '100%', height = 600)),
+           
+           #icon = icon("gamepad")
+         ),
+         tabPanel(
+           title = "Processamento para poligonais de Zeis",
+           p(style="text-align: justify;",
+             "Setores censitários que fazem interseção com os territórios de Zeis."
+           ),
+           withSpinner(leafletOutput('setores',width = '100%', height = 600)),
+           
+         )),
+       
+      
+       
+     
+     
+     br(),
+     h3("Referências"),
+     p("IBGE – INSTITUTO BRASILEIRO DE GEOGRAFIA E ESTATÍSTICA. Estrutura
+      territorial: malha dos setores censitários. Rio de Janeiro, RJ, 2021b.
+      Disponível em:
+        <https://www.ibge.gov.br/geociencias/organizacao-do-territorio/estrutura-territorial/26565->
+        malhas-de-setores-censitarios-divisoes-intramunicipais.html?=&t=saiba-mais-edicao.
+      Acesso: 08 mar. 2021."),
+     
+     p("BARREIRA, Irlys. GONÇALVES, Danyelle. DANTAS, Eustógio (org).
+      Aprendizados e desafios da participação: a experiência do Plano
+      Integrado de Regularização Fundiária (PIRF). Fortaleza: Expressão
+      Gráfica e Editora, 2021."),
+     
+     p("R Core Team (2024). *R: A Language and Environment for Statistical
+      Computing*. R Foundation for Statistical Computing, Vienna, Austria.
+      <https://www.R-project.org/>."),
+     
+     
+   
+     # p('Exemplo do processamento da sobreposição para o caso dos assentamentos precário'),
+     
+     #leafletOutput('Setores_pertencentes_assent', width = '90%', height = 700)
+     
+     ),
+       ),
+     hr(),
+      ),
+     
+     tabItem(
+       tabName = "Bairros",
+       h2('Bairros - 2022'),
+       br(),
+       fluidRow(
+         column(6,
+                p(style="text-align: justify;",
+"De acordo com último censo demográfico do Ibge, Fortaleza possuía 2.428.708 residentes 
+em 2022. Isso representa uma redução de 23.477 habitantes em relação ao censo de de 2010
+(2.452.185 pessoas residentes).
+Nos bairros, as principais mudanças ocorreram, respectivamente, no Jangurussu e Prefeito José Walter, com 
+aumento de 20.172 e 20.028 residentes. Os bairros que mais sofreram redução de residentes 
+foram: a Barra do Ceará (-8.946), Vila Velha (-8.736) e Conjunto Palmeiras (-8.376).
+Os 3 bairros mais populosos foram o Jangurussu (70.651 residentes), a Barra do Ceará (63.477) e 
+a Granja Lisboa (63.420). Em termos de densidade demográfica (população relativa), os bairros do Pirambu
+e o Cristo Redentor apresentaram as maiores concentrações populacionais. 
+O primeiro com cerca de 25 mil, e o segundo com 23 mil habitantes por quilômetro quadrado."),
+
+               
+                h5('Tabela'),
+                withSpinner( reactableOutput("table_bairro")),
+        
+         ),
+         column(6,
+                tabsetPanel(
+                  id = "tabs_ba",
+                  tabPanel(
+                    title = "População",
+                    br(),
+                    h5("População nos bairros"),
+                    
+                    #icon = icon("gamepad")
+                  ),
+                  tabPanel(
+                    title = "Densidade",
+                    br(),
+                    h5("Densidade populacional nos bairros.")
+                  )),
+                
+                withSpinner(leafletOutput('map_bairro',width = '95%', height = 600)),
+                br(),
+                fluidRow( downloadButton("down_bairro", ".GEOJSON"), downloadButton("down_bairro_xlsx", ".XLSX"))
+         )
+       ),
+       hr()
+       
+     ), 
+     
+     
+     
+     tabItem(
+       tabName = "Zeis",
+       h2('ZEIS tipo I - 2022'),
+       br(),
+       fluidRow(
+         column(6,
+                p(style="text-align: justify;",
+                  "A combinação das informações demográficas apuradas nos setores
+                  censitários de 2022 com as delimitações territoriais das ZEIS, estimou
+                  que 209.350 pessoas residem nas 41 áreas de ZEIS tipo 1, correspondendo a
+                  8,62% da população de Fortaleza. Foi contabilizado também cerca
+                  72.124 domicílios ocupados, representando uma média de 2,9 pessoas por domicílio. 
+                  A densidade média em áreas de ZEIS 1 foi de 19.710 de pessoas por Km²."),
+                
+                h5('Tabela'),
+                withSpinner( reactableOutput("table_zeis")),
+                h6('Nota: Foi adotado por convenção dado numérico igual a zero resultante de arredondamento de
+um valor numérico originalmente positivo.')
+                
+               
+         ),
+         column(6,
+                tabsetPanel(
+                  id = "tabs_ze",
+                  tabPanel(
+                    title = "População",
+                    br(),
+                    h5("População em ZEIS tipo I."),
+                    
+                    #icon = icon("gamepad")
+                  ),
+                  tabPanel(
+                    title = "Densidade",
+                    br(),
+                    h5("Densidade populacional em ZEIS tipo I.")
+                  )),
+                
+                withSpinner(leafletOutput('map_zeis',width = '90%', height = 600)),
+                br(),
+                fluidRow( downloadButton("down_zeis", ".GEOJSON"), downloadButton("down_zeis_xlsx", ".XLSX"))
+         )
+       ),
+       hr()
+       
+     ), 
+     
+     
+     
+     tabItem(
+       tabName = "Assentamento",
+      h2('Assentamentos Precários - 2022'),
+      br(),
+      fluidRow(
+      column(6,
+      p(style="text-align: justify;",
+        "Os assentamentos precários em Fortaleza representam uma área aproximada
+            de 39,82km². Neles residem cerca de 708.846
+            pessoas. Em termos demográficos, 29,19%
+            dos fortalezense residem em áreas de assentamentos precários, ou seja,
+            em 12,75% do território municipal."),
+      
+      h5('Tabela'),
+      withSpinner( reactableOutput("table_assent")),
+      h6('Nota: Foi adotado por convenção dado numérico igual a zero resultante de arredondamento de
+um valor numérico originalmente positivo.')
+      
+      ),
+      column(6,
+      tabsetPanel(
+        id = "tabs",
+        tabPanel(
+          title = "População",
+          br(),
+          h5("População em assentamentos precários."),
+          
+          #icon = icon("gamepad")
+        ),
+        tabPanel(
+          title = "Densidade",
+          br(),
+          h5("Densidade populacional em assentamentos precários.")
+        )),
+  
+      withSpinner(leafletOutput('map_assent',width = '90%', height = 600)),
+      br(),
+      fluidRow( downloadButton("down_assent", ".GEOJSON"), downloadButton("down_assent_xlsx", ".XLSX"))
+      )
+      ),
+      hr()
+      
+     ), 
+     
+     
+     
+    tabItem(
+      tabName = "glossario",
+      tagList(
+        fluidRow(
+          class = "align-center justify-content-center text-center mt-2",
+          column(
+            width = 8,
+            h1("Glossário"),
+            hr(class = "divider")
+          )
+        ),
+        fluidRow(
+          constroi_glossario(nchunks = 3)
+        )
+        
+      )
+    ),
+    tabItem(
+      tabName = "fonte",
+      
+      h2('Referências bibliográficas'),
+      br(),
+      column(8,
+      p("BARREIRA, Irlys. GONÇALVES, Danyelle. DANTAS, Eustógio (org).",
+      strong('Aprendizados e desafios da participação: a experiência do Plano
+      Integrado de Regularização Fundiária (PIRF).'), "Fortaleza: Expressão
+      Gráfica e Editora, 2021."),
+      
+      p("BRASIL.",
+        strong('Estatuto da Cidade Lei no 10.257/2001.'),"Brasília, DF: Senado Federal, Coordenação de Edições Técnicas, 2024. "),
+      
+      
+      p("BRASIL. ",
+        strong('Guia para o mapeamento e caracterização de assentamentos precários.'),"Brasília: Ministério das Cidades, 2010."),
+      
+     
+      
+      p("BRASIL. ",
+        strong('O que é regularização fundiária de assentamentos urbanos?'), "Brasília: Ministério das cidades, 2023. 
+        Disponível em: https://www.gov.br/cidades/pt-br/acesso-a-informacao/perguntas-frequentes/desenvolvimento-regional/regularizacao-fundiaria/1-o-que-e-regularizacao"),
+      
+      
+      p("BRASIL. ",
+        strong('Sistema Nacional de Habitação de Interesse Social.'), "Brasília: Ministério das cidades, 2024. 
+        Disponível em: https://www.gov.br/cidades/pt-br/assuntos/habitacao/sistema-nacional-de-habitacao-de-interesse-social"),
+      
+      p("FORTALEZA. ",
+        strong('Conheça as etapas.'), "Fortaleza: plataforma do Plano Diretor de Fortaleza, 2024. Disponível em: https://planodiretor.fortaleza.ce.gov.br"),
+      
+      
+      p("IBGE – INSTITUTO BRASILEIRO DE GEOGRAFIA E ESTATÍSTICA.",
+        strong(' Estrutura
+      territorial: malha dos setores censitários.'), "Rio de Janeiro, RJ, 2021b.
+      Disponível em:
+        <https://www.ibge.gov.br/geociencias/organizacao-do-territorio/estrutura-territorial/26565->
+        malhas-de-setores-censitarios-divisoes-intramunicipais.html?=&t=saiba-mais-edicao.
+      Acesso: 08 mar. 2021."),
+      
+      p("IBGE.",
+        strong(' Malha de Setores Censitários.')," Brasília: IBGE 2022. Disponível em:  https://www.ibge.gov.br/geociencias/organizacao-do-territorio/malhas-territoriais/26565-malhas-de-setores-censitarios-divisoes-intramunicipais.html?=&t=o-que-e"),
+      
+      p("OBSERVATÓRIO DAS METRÓPOLES.",
+        strong(' Zonas Especiais de Interesse Social (ZEIS) de Fortaleza.'), "Fortaleza: Observatório das metrópoles, 2021. Disponível em: https://www.observatoriodasmetropoles.net.br/zonas-especiais-de-interesse-social-zeis-de-fortaleza/"),
+      
+      p("R Core Team (2024). ",
+        strong('R: A Language and Environment for Statistical
+      Computing.'), "R Foundation for Statistical Computing, Vienna, Austria.
+      <https://www.R-project.org/>."),
+      
+      )
+     
+      
+     
+      
+
+     
+      
+      
+      
+    ),
+    tabItem(
+      tabName = "sobre",
+      fluidPage(
+        h1("Sobre o painel"),
+        p("Atualização de dados demográficos das Zonas Especiais de Interesse Social, 
+        Assentamentos Precários e bairros de Fortaleza com base nas informações dos setores censitários
+          do Ibge de 2022."),
+  
+        h2("Autor"),
+        p(
+          "Rômulo Andrade",
+          a(
+            href = "mailto:romulo.andrade@iplanfor.fortaleza.ce.gov.br",
+            "<romulo.andrade@iplanfor.fortaleza.ce.gov.br>"
+          ),
+          br(),
+          tags$i("Analista de Planejamento e Gestão - IPPLAN")
+        ),
+        h2("Contribuições"),
+ 
+        p(
+          "Felipe Neto",
+          a(
+            href = "mailto:felipefranklinneto@gmail.com",
+            "felipefranklinneto@gmail.com"
+          ),
+          br(),
+          tags$i("Núcleo de Difusão de Conhecimento - IPPLAN")
+        ),
+        p(
+          "Larissa Tabita",
+          a(
+            href = "mailto:larissatabita@gmail.com ",
+            "larissatabita@gmail.com "
+          ),
+          br(),
+          tags$i("Estagiária de Estatística - IPPLAN")
+        ),
+        
+        
+        # h2("Código-Fonte"),
+        # p(
+        #   a(
+        #     href="https://github.com/RomuloAndrade/Previo",
+        #     "https://github.com/RomuloAndrade/Previo"
+        #   )
+        # )
+      )
+    )
+  )
+  ),
+footer = dashboardFooter(
+  fixed = FALSE,
+  left = tagList(
+    # Versão mobile
+    div(
+      span(
+        format(Sys.Date(), "%Y, "),
+        a(
+          href = "https://observatoriodefortaleza.fortaleza.ce.gov.br/",
+          target = "_blank", "Observatório de Fortaleza"
+        )
+      )
+    )
+  ),
+  right = tagList(
+    tags$ul(
+      id = "footer-logo",
+      tags$li(
+        a(
+          href = "https://observatoriodefortaleza.fortaleza.ce.gov.br/",
+          target = "_blank",
+          alt = "",
+          img(
+            src = "img/logo-diobs-dark.svg",
+            height = "30"
+          )
+        )
+      ),
+      tags$li(
+        img(
+          src = "img/logo-iplanfor-dark.svg",
+          height = "25"
+        )
+      ),
+      tags$li(
+        a(
+          href = "https://www.fortaleza.ce.gov.br/",
+          target = "_blank",
+          alt = "",
+          img(
+            src = "img/logo-pmf-dark.svg",
+            height = "35"
+          )
+        )
+      )
+    )
+  )
+),
+ 
+  title = "Estimativa demográfica de territórios via setores censitários - 2022"
+)

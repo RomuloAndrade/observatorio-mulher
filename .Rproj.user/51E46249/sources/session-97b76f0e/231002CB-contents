@@ -1,0 +1,1332 @@
+---
+title: "Frente Verso Contextos das desigualdades socioeconômicas e de gênero em Fortaleza: trajetórias,  avanços e desafios"
+author: "Rômulo Andrade"
+date: "2023-03-16"
+output:
+  html_document:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=F, warning=F)
+```
+
+## Pacotes e dados
+
+```{r pacote, echo=T, results='hold', message=F, warning=F }
+library(tidyverse)
+library(skimr)
+library(echarts4r)
+
+pnadc_12_21 <- readRDS('C:/Romulo/Iplanfor/Pnadc/Pnadc_Visita_5/pnadc_12_23BR.rds')
+```
+
+# Indicadores de Mercado de Trabalho
+
+```{r,}
+Mercado_trabalho <- pnadc_12_21  |>  
+  filter(UF %in% c('Ceará','Maranhão','Piauí','Rio Grande do Norte','Paraíba','Pernambuco','Alagoas','Sergipe','Bahia')) |> 
+  group_by(Ano,Capital,V2007,V2010)   |>
+   summarise(
+    Pop_idade_trab = sum(V1032[V2009>=14],na.rm = TRUE),
+    ocupacao = sum(V1032[VD4002=="Pessoas ocupadas"],na.rm = TRUE),
+    desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE),
+    forc_trab = sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),
+    forca_trab_potenc = sum(V1032[VD4003=="Pessoas fora da força de trabalho e na força de trabalho potencial"],na.rm = TRUE),
+    subocupacao =sum(V1032[VD4004A=='Pessoas subocupadas'],na.rm = TRUE),
+    desalentos = sum(V1032[VD4005=='Pessoas desalentadas'],na.rm = TRUE),
+    Pop_subutilizada=sum(V1032[VD4004A=='Pessoas subocupadas'|
+                                 VD4002=="Pessoas desocupadas" |
+                                 VD4003=="Pessoas fora da força de trabalho e na força de trabalho potencial"],
+                         na.rm = TRUE),
+    Trab_formal = sum(V1032[VD4012 == "Contribuinte" &
+                              VD4009 %in% c("Conta-própria",
+                                            "Empregado no setor privado com carteira de trabalho assinada",
+                                            "Empregado no setor público com carteira de trabalho assinada",
+                                            "Empregador",
+                                            "Militar e servidor estatutário",
+                                            "Trabalhador doméstico com carteira de trabalho assinada")],na.rm = TRUE),
+    Trab_informal = sum(V1032[VD4009 %in% c("Empregado no setor privado sem carteira de trabalho assinada",
+                                            "Trabalhador doméstico sem carteira de trabalho assinada",
+                                            "Trabalhador familiar auxiliar",
+                                            "Empregado no setor público sem carteira de trabalho assinada") |
+                                (VD4012 == "Não contribuinte" & VD4009 == "Conta-própria")|
+                                (VD4012 == "Não contribuinte" & VD4009 == "Empregador") ],na.rm = TRUE)
+  )  |>
+    mutate(Taxa_composta_subutilizacao=(desocupacao+forca_trab_potenc+subocupacao)/(forc_trab+forca_trab_potenc),
+         Taxa_desocupação=desocupacao/forc_trab,
+         Nivel_ocupacao=ocupacao/(forc_trab+forca_trab_potenc),
+        Perc_ocup=ocupacao/sum(ocupacao)) |> 
+  ungroup()
+
+
+```
+
+## Desemprego
+
+```{r}
+  
+  df <- pnadc_12_21 |>
+  group_by(Ano,V2007) |> 
+  filter(Capital=='Município de Fortaleza (CE)') |>
+  #filter(UF=='Mato Grosso') |> 
+   mutate(V2007 = fct_recode(V2007,
+                      Homem= "Masculino",
+                      Mulher="Feminino")) |>
+      summarise( Tx_desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+                   sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) 
+
+
+ a <-  df |>
+   filter(V2007=='Homem') |>
+   group_by(V2007) |> 
+ e_charts(x=Ano) |>
+ e_line(Tx_desocupacao,bind=V2007 ,fontSize =13,
+       label=list(formatter=  htmlwidgets::JS("
+       function (params) {
+       x = params.value[1]*100;
+        return x.toFixed(2) + '%' }"),
+       show= T,position= "top",color='green',fontWeight= "bold" ),
+       endLabel=list( show=T, color='green',fontWeight= "bold" ,fontSize =15,
+formatter= htmlwidgets::JS("
+       function (params) {
+        return params.name }")),
+             emphasis=list(focus= 'series' )
+ ) |> 
+   e_data( df |>
+   filter(V2007=='Mulher') |>
+   group_by(V2007)
+   ,x=Ano) |> 
+ e_line(Tx_desocupacao,bind=V2007 , fontSize =13,
+       label=list(formatter=  htmlwidgets::JS("
+       function (params) {
+       x = params.value[1]*100;
+        return x.toFixed(2) + '%' }"),
+       show= T,position= "top",color='#c90076',fontWeight= "bold" ),
+       endLabel=list( show=T, color='#c90076',fontWeight= "bold" ,fontSize =15,
+formatter= htmlwidgets::JS("
+       function (params) {
+        return params.name }")),
+             emphasis=list(focus= 'series' )
+ ) |> 
+    e_y_axis(
+    formatter = e_axis_formatter("percent")
+  ) |> 
+   e_y_axis(name='%',min=0.025, max=0.2) |> 
+   e_title('Taxa de desemprego em Fortaleza')  |> 
+   e_legend(show=F) |> 
+  e_color(    c("green","#c90076" )  )
+ 
+ a
+
+ #salvar
+htmlwidgets::saveWidget(a, "temp1.html");webshot2::webshot("temp1.html","taxadesempregoFortaleza_23.png",vwidth = 1000, vheight = 650,delay = 1) # 1200 450
+
+```
+
+## Função plot
+
+```{r}
+plot_dif <- function(dados,filtro){
+library(RColorBrewer)
+library(circlize)
+color_palette <- thematic::okabe_ito(8)
+bar_height <- 0.2 
+no_highlight_col <- 'grey40'
+average_highlight_col <- 'grey40'
+below_highlight <- '#174A7E'
+
+sorted_dat <- dados %>% 
+  mutate(
+    rect_color = case_when(
+     Capital == "Fortaleza (CE)" ~ below_highlight,
+      #location == 'REGION AVERAGE' ~ average_highlight_col,
+      T ~ 'grey70'
+    )    ,
+    rect_alpha = if_else(
+  Capital == "Fortaleza (CE)",0.5,1),
+  
+  point_color = if_else(
+      Capital == "Fortaleza (CE)",
+      below_highlight,
+      'black'
+   )    ,
+    point_fill = if_else(
+    Capital == "Fortaleza (CE)",
+      below_highlight,
+      'white'
+    ),
+    point_size = if_else(
+      Capital == "Fortaleza (CE)",
+      2.8,
+      1.5
+    ),
+  color_lower= '#c90076',
+  color_upper= '#38761d',
+  ajuste=if_else( Mulher>Homem ,0.02,  -0.02)   )
+
+sorted_dat_with_new_labels <- sorted_dat %>% 
+  mutate(location_label = case_when(
+    Capital == "Fortaleza (CE)" ~ glue::glue(
+      '<span style = "color:{below_highlight}">**{Capital}**</span>'
+    ),
+    T ~ Capital),
+    rank=if_else(Capital == "Fortaleza (CE)",
+    glue::glue('<span style = "color:{below_highlight}">**{rank}**</span>' ),
+    as.character(rank))
+   ) 
+
+library(ggtext)
+
+title_lab <- glue::glue(
+  "Distância da taxa de **desemprego** entre <span style = 'color:#38761d;'>**homens**</span> e <span style = 'color:#c90076;'>**mulheres**</span> <br>"
+
+    )
+title_size <- 14
+axis_label_size <- 8
+text_size <- 15
+y_axis_text_size <- 3
+p <-  sorted_dat %>% 
+  ggplot() +
+  geom_rect(aes(xmax  = Homem-0.04 ,xmin  = -0.03,ymin = num - 0.01, ymax = num + 0.01,fill = '#E6BAB7',
+      alpha = .3)  )+
+  # geom_vline(xintercept =0.15, color = 'pink',linetype = 2)+
+  # scale_color_manual(name = "statistics", values = c(median = "blue", mean = "red"))
+  #ggchicklet:::geom_rrect(
+  geom_rect(  
+  aes(
+     xmax  = store_lower, 
+     xmin  = store_upper, 
+      ymin = num - bar_height, 
+      ymax = num + bar_height, 
+      fill = rect_color,
+      alpha = rect_alpha
+    ),
+    # Use relative npc unit (values between 0 and 1)
+    # This ensures that radius is not too large for your canvas
+   #r = unit(0.5, "npc")
+  ) +
+  geom_point(
+    aes(
+      x = Tx_desocupacao,
+      y = num,
+      fill = point_fill,
+      col = point_color,
+      size = point_size
+    ),
+    shape = 21,
+    stroke = 1
+  ) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  scale_size_identity() +
+  scale_alpha_identity() +
+  theme_minimal()+
+  scale_x_continuous(
+    #breaks = seq(0, plyr::round_any(max(dados$Homem, dados$Mulher), 0.05), 0.05),
+     breaks = seq(0, 0.35, 0.05),
+    position = 'top'
+  ) +
+  coord_cartesian(
+    #xlim = c(-0.17, (max(dados$Homem, dados$Mulher)+0.06 )),
+    xlim = c(-0.16, 0.38), 
+    ylim = c(0.75, 27.75),  
+    expand = F,
+    clip = 'off'
+  ) +
+  annotate('segment',
+    x = 0,
+    #xend = plyr::round_any(max(dados$Homem, dados$Mulher), 0.05),
+    xend = seq(0, 0.35, 0.05),
+    y = 27.75,
+    yend = 27.75,
+    col = no_highlight_col,
+    size = 0.25
+  ) +
+  labs(x = 'TAXA DE DESEMPREGO (2023)',
+    y = element_blank() ) +
+  theme(  text = element_text(
+      size = text_size,
+      color = average_highlight_col   ),
+  plot.title.position = 'plot',
+  panel.grid = element_blank(),
+  axis.title.x = element_text(
+      size = axis_label_size,
+      hjust = 0.21,
+      color = no_highlight_col
+    ),
+    axis.text.x = element_text(
+      size = axis_label_size,
+      color = no_highlight_col
+    ),
+    axis.ticks.x = element_line(color = no_highlight_col, size = 0.25),
+    axis.text.y = element_blank(),
+    axis.line.x = element_blank() )+
+geom_richtext(  data = sorted_dat_with_new_labels,
+    aes(
+      x = -0.08,
+      y = num,
+      label = location_label,
+      col = '#414040',
+      hjust = 1,
+      size = y_axis_text_size
+    ),
+    label.colour = NA,
+    fill = NA
+  )+
+  labs(title = title_lab) +
+  theme(
+    plot.title = element_markdown(),
+    panel.background = element_rect(color = NA, fill = 'white')
+  )
+library(scales)
+pct = function(x, digits=1) {
+  sprintf(paste0("%1.", digits, "f%%"), x*100)
+}
+
+library(mapmisc)
+
+pal = colorRamp2(c(quantile(sorted_dat$Diferença[sorted_dat$Diferença<0], seq(0, 1, by = 0.25)),
+                        0,
+                        quantile(sorted_dat$Diferença[sorted_dat$Diferença>0], seq(0, 1, by = 0.25))), 
+                      c( rev(brewer.pal(5,"RdPu")), "white", brewer.pal(5,"YlGn")))
+
+p <- p+
+  geom_point(aes(x = store_lower, y = num, color = color_lower),size=4)+
+  geom_point(aes(x = store_upper, y = num, color = color_upper),size=4)+
+  geom_text(data= sorted_dat,aes(x=store_lower, y=num, label = pct(store_lower, 2), color = color_lower), nudge_x = sorted_dat$ajuste ,size = 2.8) +
+  geom_text(aes(x=store_upper, y=num, label = pct(store_upper, 2), color = color_upper), nudge_x = -sorted_dat$ajuste,size = 2.8)+
+  ggchicklet:::geom_rrect(
+  aes(
+     xmax  = -0.015,
+     xmin  = -0.045,
+      ymin = num - 0.45,
+      ymax = num + 0.45,
+      fill =pal(Diferença),# 'gray80'
+      alpha = .75
+    ),
+
+  r = unit(0.5, "npc")
+  )+
+  geom_text(aes(x=-0.03, y=28, label = 'distância', color = average_highlight_col), size = 2.9)+
+  geom_text(aes(x=-0.065, y=28, label = 'posição', color = average_highlight_col), size = 2.9)+
+  geom_richtext(data=sorted_dat_with_new_labels ,
+                aes(x=-0.065, y=num, label = paste0(rank,"ª"), 
+                color ='black' ),size = 2.8,
+                label.colour = NA,
+                fill = NA)+
+  geom_text(aes(x=-0.05, y=num, label = pct(abs(Diferença), 2), color = 'black'), nudge_x = 0.02,size = 2.8)+
+  geom_text(aes(x=.25, y=29, label = filtro, color = 'gray60'), size = 5)
+ 
+p
+}
+```
+
+## Plot geral desemprego
+
+```{r,fig.width=7, fig.height=7}
+df_sexo <- pnadc_12_21 |>
+  group_by(Ano,V2007,Capital) |>
+ filter(!is.na(Capital)) |>
+ mutate(Capital=str_sub(Capital,14,80),
+        V2007 = fct_recode(V2007,
+                      Homem= "Masculino",
+                      Mulher="Feminino")) |>
+      summarise( Tx_desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+                   sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) |>
+  pivot_wider(names_from = V2007,values_from = Tx_desocupacao)
+
+df_geral <- pnadc_12_21 |>
+  group_by(Ano,Capital) |> 
+ filter(!is.na(Capital)) |> 
+ mutate(Capital=str_sub(Capital,14,80)) |>
+      summarise( Tx_desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+                   sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) 
+
+df <- full_join(df_geral,df_sexo) |> 
+  filter(Ano==2023) |> 
+  ungroup() |> 
+  mutate(Diferença = (Homem-Mulher),
+    num = row_number(-abs(Diferença)))
+
+df_m <- df |> 
+ mutate(store_lower=Mulher,
+        store_upper=Homem) |> 
+  arrange(Diferença) |> 
+  mutate(rank=rank(-num))
+
+p <- plot_dif(df_m,'')
+p
+#ggsave('desemprego_cap.pdf',device = "pdf", dpi=1000)
+ggsave('desemprego_cap_23.jpeg',p,device = "jpeg", dpi=1000,width=8.5,height =10)
+```
+
+## Prepara dados filtro raça
+
+```{r}
+df_desemp <- function(filtro=c('Branca')){
+df_sexo <- pnadc_12_21 |>
+  filter(V2010 %in% filtro) |> 
+  group_by(Ano,V2007,Capital) |>
+ filter(!is.na(Capital)) |>
+ mutate(Capital=str_sub(Capital,14,80),
+        V2007 = fct_recode(V2007,
+                      Homem= "Masculino",
+                      Mulher="Feminino")) |>
+      summarise( Tx_desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+                   sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) |>
+  mutate(Tx_desocupacao=round(Tx_desocupacao,4)) |> 
+  pivot_wider(names_from = V2007,values_from = Tx_desocupacao)
+
+df_geral <- pnadc_12_21 |>
+   filter(V2010 %in% filtro) |>
+  group_by(Ano,Capital) |> 
+ filter(!is.na(Capital)) |> 
+ mutate(Capital=str_sub(Capital,14,80)) |>
+      summarise( Tx_desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+                   sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) 
+
+df <- full_join(df_geral,df_sexo) |> 
+  filter(Ano==2021) |> 
+  ungroup() |> 
+  mutate(Diferença = (Homem-Mulher),
+    num = row_number(-abs(Diferença)))
+
+df_final <- df |> 
+ mutate(store_lower=Mulher,
+        store_upper=Homem) |> 
+  arrange(Diferença) |> 
+  mutate(rank=rank(-num))
+df_final
+}
+
+
+
+```
+
+## Plot por raça desemprego
+
+```{r,fig.width=7, fig.height=7}
+p2 <- plot_dif(df_desemp('Branca'),'Em pessoas de cor branca')
+p2
+#ggsave('desemprego_Branca.jpeg',p2,device = "jpeg", dpi=1000,width=8)
+#plot_dif(df_desemp('Parda'),'Em pardos')
+#plot_dif(df_desemp('Preta'),'Em pretos')
+p3<- plot_dif(df_desemp(c('Preta','Parda')),'Em pessoas de cor parda e preta')
+p3
+#ggsave('desemprego_pardosepretos2.jpeg',p3,device = "jpeg", dpi=1000,width=8)
+# library(patchwork)
+# p1/p2
+```
+
+# Informalidade
+
+## Prepara dados informal
+
+```{r}
+  Tipos_trab2 <-  rbind(   ### Organizando dados
+    group_by(pnadc_12_21[!is.na(pnadc_12_21$Capital) , ],
+             Capital,Ano,V2007,V2010)  |> 
+      summarise(Qtd. = sum(V1032[  (VD4012 == "Contribuinte" & VD4009 == "Empregador")    |
+                                     (VD4012 == "Contribuinte" & VD4009 == "Conta-própria") |
+                                     VD4009 %in% c("Empregado no setor privado com carteira de trabalho assinada",
+                                                   "Empregado no setor público com carteira de trabalho assinada",
+                                                   "Trabalhador doméstico com carteira de trabalho assinada",
+                                                   "Militar e servidor estatutário") ],
+                           na.rm = TRUE),.groups="keep")   |> 
+      filter(Qtd.!=0) |> 
+      mutate(Tipo="Trabalho formal")
+    ,
+    group_by(pnadc_12_21[!is.na(pnadc_12_21$Capital) , ],
+             Capital,Ano,V2007,V2010)   |> 
+      summarise(Qtd. = sum(V1032[VD4009 %in% c("Empregado no setor privado sem carteira de trabalho assinada",
+                                               "Trabalhador doméstico sem carteira de trabalho assinada",
+                                               "Trabalhador familiar auxiliar",
+                                               "Empregado no setor público sem carteira de trabalho assinada") |
+                                   (VD4012 == "Não contribuinte" & VD4009 == "Conta-própria")|
+                                   (VD4012 == "Não contribuinte" & VD4009 == "Empregador") ],
+                           na.rm = TRUE),.groups="keep")  |> 
+      filter(Qtd.!=0)  |> 
+      mutate(Tipo="Trabalho informal"))# %>%
+```
+
+## Plot line informal
+
+```{r}
+  
+
+
+  df <- Mercado_trabalho |>
+   ungroup() |>
+   filter(Capital=='Município de Fortaleza (CE)') |>
+   mutate(V2007 = fct_recode(V2007,
+                      Homem= "Masculino",
+                      Mulher="Feminino")) |>
+   group_by(Ano,V2007) |>
+   summarise(Tx_Informalidade=round(100*sum(Trab_informal)/sum(ocupacao),2),
+             ocupacao=sum(ocupacao)) 
+
+a <- df |> filter(V2007=='Homem') |> 
+  group_by(V2007) |> 
+   e_chart(x=Ano) |>
+   e_line(Tx_Informalidade,bind=V2007 ,
+          label=list(show= T,position= "top",color='green',fontWeight= "bold",fontSize =13 ),
+          endLabel=list( show=T, color='green',fontWeight= "bold" ,fontSize =15,
+   formatter= htmlwidgets::JS("
+          function (params) {
+           return params.name }")),
+                emphasis=list(focus= 'series' )
+    ) |> 
+  e_data(df |>
+           filter(V2007=='Mulher')|> 
+  group_by(V2007) ,
+  x=Ano) |> 
+   e_line(Tx_Informalidade,bind=V2007 ,
+          label=list(show= T,position= "top",color='#c90076',fontWeight= "bold",fontSize =13 ),
+          endLabel=list( show=T, color='#c90076',fontWeight= "bold" ,fontSize =15,
+   formatter= htmlwidgets::JS("
+          function (params) {
+           return params.name }")),
+                emphasis=list(focus= 'series' )
+    ) |>
+  e_legend(show=F) |> 
+  e_y_axis(name="%",min=30) |> 
+  e_color(    c("green", "#c90076")  )|> 
+  e_title('Taxa de informalidade em Fortaleza')
+a
+htmlwidgets::saveWidget(a, "temp.html");webshot2::webshot("temp.html","informalidadeFortaleza.png",vwidth = 1000, vheight = 650,delay = 1)
+```
+
+## Prepara filtros informal
+
+```{r}
+
+df_sexo<- pivot_wider( aggregate(Qtd.~ Ano+Tipo+V2007+Capital,Tipos_trab2,sum) |> 
+               mutate(Capital=str_sub(Capital,14,80),
+                V2007 = fct_recode(V2007,
+                      Homem= "Masculino",
+                      Mulher="Feminino")) 
+               ,names_from=Tipo,values_from = Qtd.,values_fill = 0) |> 
+                 group_by(Ano,V2007,Capital) |> 
+                 summarise(Informalidade=`Trabalho informal`/(`Trabalho formal`+`Trabalho informal`),.groups="keep") |> 
+  pivot_wider(names_from=V2007,values_from = Informalidade)
+
+df_geral <- pivot_wider( aggregate(Qtd.~ Ano+Tipo+Capital,Tipos_trab2,sum) |> 
+               mutate(Capital=str_sub(Capital,14,80)) 
+               ,names_from=Tipo,values_from = Qtd.,values_fill = 0) |> 
+                 group_by(Ano,Capital) |> 
+                 summarise(Informalidade=`Trabalho informal`/(`Trabalho formal`+`Trabalho informal`),.groups="keep")
+
+df <- full_join(df_geral,df_sexo) |> 
+  filter(Ano==2021) |> 
+  ungroup() |> 
+  mutate(Diferença = (Homem-Mulher),
+    num = row_number(-abs(Diferença)))
+
+df_m <- df |> 
+ mutate(store_lower=Mulher,
+        store_upper=Homem) |> 
+  arrange(Diferença) |> 
+  mutate(rank=rank(-num))
+######## 
+
+df_infor_raca <- function(filtro){
+df_sexo<- pivot_wider( aggregate(Qtd.~ Ano+Tipo+V2007+Capital,Tipos_trab2[Tipos_trab2$V2010 %in% filtro,],sum) |> 
+               mutate(Capital=str_sub(Capital,14,80),
+                V2007 = fct_recode(V2007,
+                      Homem= "Masculino",
+                      Mulher="Feminino")) 
+               ,names_from=Tipo,values_from = Qtd.,values_fill = 0) |> 
+                 group_by(Ano,V2007,Capital) |> 
+                 summarise(Informalidade=`Trabalho informal`/(`Trabalho formal`+`Trabalho informal`),.groups="keep") |>   mutate(Informalidade=round(Informalidade,4)) |> 
+  pivot_wider(names_from=V2007,values_from = Informalidade)
+
+df_geral <- pivot_wider( aggregate(Qtd.~ Ano+Tipo+Capital,Tipos_trab2[Tipos_trab2$V2010 %in% filtro,],sum) |> 
+               mutate(Capital=str_sub(Capital,14,80)) 
+               ,names_from=Tipo,values_from = Qtd.,values_fill = 0) |> 
+                 group_by(Ano,Capital) |> 
+                 summarise(Informalidade=`Trabalho informal`/(`Trabalho formal`+`Trabalho informal`),.groups="keep")
+
+df <- full_join(df_geral,df_sexo) |> 
+  filter(Ano==2021) |> 
+  ungroup() |> 
+  mutate(Diferença = (Homem-Mulher),
+    num = row_number(-abs(Diferença)))
+
+df_m <- df |> 
+ mutate(store_lower=Mulher,
+        store_upper=Homem) |> 
+  arrange(Diferença) |> 
+  mutate(rank=rank(-num))
+df_m}
+
+
+```
+
+## Funcao plot informal
+
+```{r}
+plot_dif_informal <- function(dados,filtro){
+library(RColorBrewer)
+library(circlize)
+color_palette <- thematic::okabe_ito(8)
+bar_height <- 0.2 
+no_highlight_col <- 'grey40'
+average_highlight_col <- 'grey40'
+below_highlight <- '#174A7E'
+
+sorted_dat <- dados %>% 
+  mutate(
+    rect_color = case_when(
+     Capital == "Fortaleza (CE)" ~ below_highlight,
+      #location == 'REGION AVERAGE' ~ average_highlight_col,
+      T ~ 'grey70'
+    )    ,
+    rect_alpha = if_else(
+  Capital == "Fortaleza (CE)",0.5,1),
+  
+  point_color = if_else(
+      Capital == "Fortaleza (CE)",
+      below_highlight,
+      'black'
+   )    ,
+    point_fill = if_else(
+    Capital == "Fortaleza (CE)",
+      below_highlight,
+      'white'
+    ),
+    point_size = if_else(
+      Capital == "Fortaleza (CE)",
+      2.8,
+      1.5
+    ),
+  color_lower= '#c90076',
+  color_upper= '#38761d',
+  ajuste=if_else( Mulher>Homem ,0.023,  -0.023)   )
+
+sorted_dat_with_new_labels <- sorted_dat %>% 
+  mutate(location_label = case_when(
+    Capital == "Fortaleza (CE)" ~ glue::glue(
+      '<span style = "color:{below_highlight}">**{Capital}**</span>'
+    ),
+    T ~ Capital),
+    rank=if_else(Capital == "Fortaleza (CE)",
+    glue::glue('<span style = "color:{below_highlight}">**{rank}**</span>' ),
+    as.character(rank))
+   ) 
+
+library(ggtext)
+
+title_lab <- glue::glue(
+  "Distância da taxa de **informalidade** entre <span style = 'color:#38761d;'>**homens**</span> e <span style = 'color:#c90076;'>**mulheres**</span> <br>"
+
+    )
+title_size <- 14
+axis_label_size <- 8
+text_size <- 15
+y_axis_text_size <- 3
+p <-  sorted_dat %>% 
+  ggplot() +
+  geom_rect(aes(xmax  = Homem-0.04 ,xmin  = -0.03+0.1,ymin = num - 0.01, ymax = num + 0.01,fill = '#E6BAB7',
+      alpha = .3)  )+
+  # geom_vline(xintercept =0.15, color = 'pink',linetype = 2)+
+  # scale_color_manual(name = "statistics", values = c(median = "blue", mean = "red"))
+  #ggchicklet:::geom_rrect(
+  geom_rect(  
+  aes(
+     xmax  = store_lower, 
+     xmin  = store_upper, 
+      ymin = num - bar_height, 
+      ymax = num + bar_height, 
+      fill = rect_color,
+      alpha = rect_alpha
+    ),
+    # Use relative npc unit (values between 0 and 1)
+    # This ensures that radius is not too large for your canvas
+   #r = unit(0.5, "npc")
+  ) +
+  geom_point(
+    aes(
+      x = Informalidade,
+      y = num,
+      fill = point_fill,
+      col = point_color,
+      size = point_size
+    ),
+    shape = 21,
+    stroke = 1
+  ) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  scale_size_identity() +
+  scale_alpha_identity() +
+  theme_minimal()+
+  scale_x_continuous(
+    #breaks = seq(0, plyr::round_any(max(dados$Homem, dados$Mulher), 0.05), 0.05),
+     breaks = seq(0.1, 0.55, 0.05),
+    position = 'top'
+  ) +
+  coord_cartesian(
+    #xlim = c(-0.17, (max(dados$Homem, dados$Mulher)+0.06 )),
+    xlim = c(-0.06, 0.60), 
+    ylim = c(0.75, 27.75),  
+    expand = F,
+    clip = 'off'
+  ) +
+  annotate('segment',
+    x = 0.1,
+    #xend = plyr::round_any(max(dados$Homem, dados$Mulher), 0.05),
+    xend = seq(0.1, 0.55, 0.05),
+    y = 27.75,
+    yend = 27.75,
+    col = no_highlight_col,
+    size = 0.25
+  ) +
+  labs(x = 'TAXA DE INFORMALIDADE (2021)',
+    y = element_blank() ) +
+  theme(  text = element_text(
+      size = text_size,
+      color = average_highlight_col   ),
+  plot.title.position = 'plot',
+  panel.grid = element_blank(),
+  axis.title.x = element_text(
+      size = axis_label_size,
+      hjust = 0.21,
+      color = no_highlight_col
+    ),
+    axis.text.x = element_text(
+      size = axis_label_size,
+      color = no_highlight_col
+    ),
+    axis.ticks.x = element_line(color = no_highlight_col, size = 0.25),
+    axis.text.y = element_blank(),
+    axis.line.x = element_blank() )+
+geom_richtext(  data = sorted_dat_with_new_labels,
+    aes(
+      x = -0.08+0.1,
+      y = num,
+      label = location_label,
+      col = '#414040',
+      hjust = 1,
+      size = y_axis_text_size
+    ),
+    label.colour = NA,
+    fill = NA
+  )+
+  labs(title = title_lab) +
+  theme(
+    plot.title = element_markdown(),
+    panel.background = element_rect(color = NA, fill = 'white')
+  )
+library(scales)
+pct = function(x, digits=1) {
+  sprintf(paste0("%1.", digits, "f%%"), x*100)
+}
+
+library(mapmisc)
+
+pal = colorRamp2(c(quantile(sorted_dat$Diferença[sorted_dat$Diferença<0], seq(0, 1, by = 0.25)),
+                        0,
+                        quantile(sorted_dat$Diferença[sorted_dat$Diferença>0], seq(0, 1, by = 0.25))), 
+                      c( rev(brewer.pal(5,"RdPu")), "white", brewer.pal(5,"YlGn")))
+
+p <- p+
+  geom_point(aes(x = store_lower, y = num, color = color_lower),size=4)+
+  geom_point(aes(x = store_upper, y = num, color = color_upper),size=4)+
+  geom_text(data= sorted_dat,aes(x=store_lower, y=num, label = pct(store_lower, 2), color = color_lower), nudge_x = sorted_dat$ajuste ,size = 2.8) +
+  geom_text(aes(x=store_upper, y=num, label = pct(store_upper, 2), color = color_upper), nudge_x = -sorted_dat$ajuste,size = 2.8)+
+  ggchicklet:::geom_rrect(
+  aes(
+     xmax  = -0.015+0.1,
+     xmin  = -0.045+0.1,
+      ymin = num - 0.45,
+      ymax = num + 0.45,
+      fill =pal(Diferença),# 'gray80'
+      alpha = .75
+    ),
+
+  r = unit(0.5, "npc")
+  )+
+  geom_text(aes(x=-0.03+0.1, y=28, label = 'distância', color = average_highlight_col), size = 2.9)+
+  geom_text(aes(x=-0.065+0.1, y=28, label = 'posição', color = average_highlight_col), size = 2.9)+
+  geom_richtext(data=sorted_dat_with_new_labels ,
+                aes(x=-0.065+0.1, y=num, label = paste0(rank,"ª"), 
+                color ='black' ),size = 2.8,
+                label.colour = NA,
+                fill = NA)+
+  geom_text(aes(x=-0.05+0.1, y=num, label = pct(abs(Diferença), 2), color = 'black'), nudge_x = 0.02,size = 2.8)+
+  geom_text(aes(x=.3+.15, y=29, label = filtro, color = 'gray60'), size = 5)
+ 
+p
+}
+```
+
+## Plot informal por raça
+
+```{r ,fig.width=7, fig.height=8.5}
+p1 <- plot_dif_informal(df_m,'')
+ggsave('informal_geral.jpeg',p1,device = "jpeg", dpi=1000,width=8.5,height =10)  
+p1  
+p2 <- plot_dif_informal(df_infor_raca('Branca'),'Em pessoas de cor branca')
+#ggsave('informal_branco2.jpeg',p2,device = "jpeg", dpi=1000,width=8.5)
+p2
+p3 <- plot_dif_informal(df_infor_raca(c('Preta','Parda')),'Em pessoas de cor parda e preta')
+p3
+#ggsave('informal_parda_pretos.jpeg',p3,device = "jpeg", dpi=1000,width=8.5)
+```
+
+# Renda
+
+```{r}
+library(PNADcIBGE)
+pnadc_12_21_df <-  pnadc_deflator(pnadc_12_21,
+                 "C:/Romulo/Iplanfor/Pnadc/Pnadc_Visita_5/deflator_PNADC_2023.xls")
+
+```
+
+## Preparando dados renda
+
+```{r}
+library(tidyverse)
+w <- pnadc_12_21_df |> 
+  filter(Capital=="Município de Fortaleza (CE)") |> 
+  group_by(Ano) |> 
+  summarise(Rendimento = weighted.mean(VD4019*CO2,w = V1032,na.rm =TRUE))
+w
+
+ws <- pnadc_12_21_df |> 
+  filter(Capital=="Município de Fortaleza (CE)") |> 
+   mutate(V2007 = fct_recode(V2007,
+                      Homem= "Masculino",
+                      Mulher="Feminino")) |> 
+  group_by(Ano,V2007) |> 
+  summarise(Rendimento = weighted.mean(VD4019*CO2,w = V1032,na.rm =TRUE)) 
+
+ 
+df <- full_join(w,pivot_wider(ws,values_from = Rendimento,names_from = V2007))
+df
+
+
+
+```
+
+```{r}
+library(echarts4r)
+library(scales)
+optOrig <- options()
+options(OutDec=",",
+scipen=100,
+digits=4,
+big.mark = ".")
+
+
+a <- ws |> filter(V2007=='Homem') |> 
+  group_by(V2007) |> 
+   e_chart(x=Ano) |>
+   e_line(Rendimento,bind=V2007 ,
+          label=list(show= T,position= "top",color='green',fontWeight= "bold",fontSize =13      ),
+          endLabel=list( show=T, color='green',fontWeight= "bold" ,fontSize =15,
+   formatter= htmlwidgets::JS("
+          function (params) {
+           return params.name }")),
+                emphasis=list(focus= 'series' )
+    ) |> 
+  e_data(ws |>
+           filter(V2007=='Mulher')|> 
+  group_by(V2007) ,
+  x=Ano) |> 
+   e_line(Rendimento,bind=V2007 ,
+          label=list(show= T,position= "top",color='#c90076',fontWeight= "bold",fontSize =13                 ),
+          endLabel=list( show=T, color='#c90076',fontWeight= "bold" ,fontSize =15,
+   formatter= htmlwidgets::JS("
+          function (params) {
+           return params.name }")),
+                emphasis=list(focus= 'series' )
+    ) |>
+  e_legend(show=F) |> 
+  e_y_axis(name="R$",min=1800, formatter=e_axis_formatter(
+  style = c("decimal"),
+  digits = 0,
+  locale = 'pt-BR',
+  #currency = "BRL"
+)
+) |> 
+  e_color(    c("green", "#c90076")  ) |> 
+e_title('Rendimento médio habitual (R$/mês) em Fortaleza')
+a
+ htmlwidgets::saveWidget(a, "temp.html");webshot2::webshot("temp.html","rendaFortaleza.png",vwidth = 1000, vheight = 600,delay = 2) #1200 450
+
+
+
+
+
+```
+
+## Prepara dados por raça
+
+```{r}
+df_renda <- function(filtro=c('Branca')){
+
+df_geral <- pnadc_12_21_df |> 
+  filter(Ano==2023) |> 
+  filter(V2010 %in% filtro) |> 
+  group_by(Ano,Capital) |>
+  filter(!is.na(Capital)) |>
+  mutate(Capital=str_sub(Capital,14,80)) |> 
+  summarise(Rendimento = weighted.mean(VD4019*CO2,w = V1032,na.rm =TRUE))
+
+
+df_sexo <- pnadc_12_21_df |> 
+  filter(Ano==2023) |> 
+   filter(V2010 %in% filtro) |> 
+  group_by(Ano,V2007,Capital) |>
+  filter(!is.na(Capital)) |>
+  mutate(Capital=str_sub(Capital,14,80),
+         V2007 = fct_recode(V2007,
+                      Homem= "Masculino",
+                      Mulher="Feminino")) |> 
+  summarise(Rendimento = weighted.mean(VD4019*CO2,w = V1032,na.rm =TRUE)) |>
+  pivot_wider(names_from = V2007,values_from = Rendimento)
+
+
+df <- full_join(df_geral,df_sexo) |> 
+  ungroup() |> 
+  mutate(Diferença = (Homem-Mulher),
+    num = row_number(-abs(Diferença)))
+
+df_final <- df |> 
+ mutate(store_lower=Mulher,
+        store_upper=Homem) |> 
+  arrange(Diferença) |> 
+  mutate(rank=rank(-num))
+df_final
+
+}
+
+
+
+df_geral <- pnadc_12_21_df |>
+   filter(Ano==2023) |> 
+  group_by(Ano,Capital) |>
+  filter(!is.na(Capital)) |>
+  mutate(Capital=str_sub(Capital,14,80)) |> 
+  summarise(Rendimento = weighted.mean(VD4019*CO2,w = V1032,na.rm =TRUE))
+
+
+df_sexo <- pnadc_12_21_df |> 
+   filter(Ano==2023) |> 
+  group_by(Ano,V2007,Capital) |>
+  filter(!is.na(Capital)) |>
+  mutate(Capital=str_sub(Capital,14,80),
+         V2007 = fct_recode(V2007,
+                      Homem= "Masculino",
+                      Mulher="Feminino")) |> 
+  summarise(Rendimento = weighted.mean(VD4019*CO2,w = V1032,na.rm =TRUE)) |>
+  pivot_wider(names_from = V2007,values_from = Rendimento)
+
+
+df <- full_join(df_geral,df_sexo) |> 
+   ungroup() |> 
+  mutate(Diferença = (Homem-Mulher),
+    num = row_number(-abs(Diferença)))
+
+df_final <- df |> 
+ mutate(store_lower=Mulher,
+        store_upper=Homem) |> 
+  arrange(Diferença) |> 
+  mutate(rank=rank(-num))
+df_final
+
+```
+
+## Prepara dados pra homem branco x mulher negra
+
+```{r}
+
+
+df_geral <- pnadc_12_21_df |> 
+  filter(Ano==2023) |> 
+  #filter(V2010 %in% filtro) |> 
+  group_by(Ano,Capital) |>
+  filter(!is.na(Capital)) |>
+  mutate(Capital=str_sub(Capital,14,80)) |> 
+  summarise(Rendimento = weighted.mean(VD4019*CO2,w = V1032,na.rm =TRUE))
+
+
+df_Masculino_branco <- pnadc_12_21_df |> 
+  filter(Ano==2023) |> 
+  filter(V2010 %in% c('Branca'), #,
+        V2007 == 'Homem') |> 
+  group_by(Ano,V2007,Capital) |>
+  filter(!is.na(Capital)) |>
+  mutate(Capital=str_sub(Capital,14,80),
+         V2007 = fct_recode(V2007,
+                      Homem= "Masculino",
+                      Mulher="Feminino")) |> 
+  summarise(Rendimento = weighted.mean(VD4019*CO2,w = V1032,na.rm =TRUE)) |>
+  pivot_wider(names_from = V2007,values_from = Rendimento)
+
+df_Feminino_negra <- pnadc_12_21_df |> 
+  filter(Ano==2023) |> 
+  filter(V2010 %in% c('Preta','Parda'), #,
+        V2007 == 'Mulher') |> 
+  group_by(Ano,V2007,Capital) |>
+  filter(!is.na(Capital)) |>
+  mutate(Capital=str_sub(Capital,14,80),
+         V2007 = fct_recode(V2007,
+                      Homem= "Masculino",
+                      Mulher="Feminino")) |> 
+  summarise(Rendimento = weighted.mean(VD4019*CO2,w = V1032,na.rm =TRUE)) |>
+  pivot_wider(names_from = V2007,values_from = Rendimento)
+
+
+df <- left_join(df_geral,df_Feminino_negra) |> 
+       left_join(df_Masculino_branco) |> 
+  ungroup() |> 
+  mutate(Diferença = (Homem-Mulher),
+    num = row_number(-abs(Diferença)))
+
+df_final <- df |> 
+ mutate(store_lower=Mulher,
+        store_upper=Homem) |> 
+  arrange(Diferença) |> 
+  mutate(rank=rank(-num))
+df_final
+
+
+# 
+# 
+# 
+# df_geral <- pnadc_12_21_df |>
+#    filter(Ano==2023) |> 
+#   group_by(Ano,Capital) |>
+#   filter(!is.na(Capital)) |>
+#   mutate(Capital=str_sub(Capital,14,80)) |> 
+#   summarise(Rendimento = weighted.mean(VD4019*CO2,w = V1032,na.rm =TRUE))
+# 
+# 
+# df_sexo <- pnadc_12_21_df |> 
+#    filter(Ano==2023) |> 
+#   group_by(Ano,V2007,Capital) |>
+#   filter(!is.na(Capital)) |>
+#   mutate(Capital=str_sub(Capital,14,80),
+#          V2007 = fct_recode(V2007,
+#                       Homem= "Masculino",
+#                       Mulher="Feminino")) |> 
+#   summarise(Rendimento = weighted.mean(VD4019*CO2,w = V1032,na.rm =TRUE)) |>
+#   pivot_wider(names_from = V2007,values_from = Rendimento)
+# 
+# 
+# df <- full_join(df_geral,df_sexo) |> 
+#    ungroup() |> 
+#   mutate(Diferença = (Homem-Mulher),
+#     num = row_number(-abs(Diferença)))
+# 
+# df_final <- df |> 
+#  mutate(store_lower=Mulher,
+#         store_upper=Homem) |> 
+#   arrange(Diferença) |> 
+#   mutate(rank=rank(-num))
+# df_final
+
+```
+
+# Funcao plot renda
+
+```{r }
+plot_dif_renda <- function(dados,filtro){
+library(RColorBrewer)
+library(circlize)
+  color_palette <- thematic::okabe_ito(8)
+bar_height <- 0.2 
+no_highlight_col <- 'grey40'
+average_highlight_col <- 'grey40'
+below_highlight <- '#174A7E'
+
+sorted_dat <- dados %>% 
+  mutate(
+    rect_color = case_when(
+      Capital == "Fortaleza (CE)" ~ below_highlight,
+      #location == 'REGION AVERAGE' ~ average_highlight_col,
+      T ~ 'grey70'
+    )    ,
+    rect_alpha = if_else(
+      Capital == "Fortaleza (CE)",0.5,1),
+    
+    point_color = if_else(
+      Capital == "Fortaleza (CE)",
+      below_highlight,
+      'black'
+    )    ,
+    point_fill = if_else(
+      Capital == "Fortaleza (CE)",
+      below_highlight,
+      'white'
+    ),
+    point_size = if_else(
+      Capital == "Fortaleza (CE)",
+      2.8,
+      1.5
+    ),
+    color_lower= '#c90076',
+    color_upper= '#38761d',
+    ajuste=if_else( Mulher>Homem ,158,  -158)   )
+
+sorted_dat_with_new_labels <- sorted_dat %>% 
+  mutate(location_label = case_when(
+    Capital == "Fortaleza (CE)" ~ glue::glue(
+      '<span style = "color:{below_highlight}">**{Capital}**</span>'
+    ),
+    T ~ Capital),
+    rank=if_else(Capital == "Fortaleza (CE)",
+                 glue::glue('<span style = "color:{below_highlight}">**{rank}**</span>' ),
+                 as.character(rank))
+  ) 
+
+
+library(ggtext)
+
+title_lab <- glue::glue(
+  "Distância do **rendimento** entre <span style = 'color:#38761d;'>**homens brancos**</span> e <span style = 'color:#c90076;'>**mulheres negras**</span> <br> "
+  
+)
+title_size <- 14
+axis_label_size <- 8
+text_size <- 15 #18
+y_axis_text_size <- 3
+p <-  sorted_dat %>% 
+  ggplot() +
+  geom_rect(aes(xmax  = Mulher-200 ,xmin  = 950+90,ymin = num - 0.01, ymax = num + 0.01,fill = '#E6BAB7',
+                alpha = .3)  )+
+  # geom_vline(xintercept =0.15, color = 'pink',linetype = 2)+
+  # scale_color_manual(name = "statistics", values = c(median = "blue", mean = "red"))
+  #ggchicklet:::geom_rrect(
+  geom_rect(  
+    aes(
+      xmax  = store_lower, 
+      xmin  = store_upper, 
+      ymin = num - bar_height, 
+      ymax = num + bar_height, 
+      fill = rect_color,
+      alpha = rect_alpha
+    ),
+    # Use relative npc unit (values between 0 and 1)
+    # This ensures that radius is not too large for your canvas
+    #r = unit(0.5, "npc")
+  ) +
+  geom_point(
+    aes(
+      x = Rendimento,
+      y = num,
+      fill = point_fill,
+      col = point_color,
+      size = point_size
+    ),
+    shape = 21,
+    stroke = 1
+  ) +
+  scale_fill_identity() +
+  scale_color_identity() +
+  scale_size_identity() +
+  scale_alpha_identity() +
+  theme_minimal()+
+  scale_x_continuous(
+    #breaks = seq(0, plyr::round_any(max(dados$Homem, dados$Mulher), 0.05), 0.05),
+    breaks = seq(1000, 9000, 500),
+    position = 'top'
+  ) +
+  coord_cartesian(
+    #xlim = c(-0.17, (max(dados$Homem, dados$Mulher)+0.06 )),
+    xlim = c(-2, 9200), 
+    ylim = c(0.75, 27.75),  
+    expand = F,
+    clip = 'off'
+  ) +
+  annotate('segment',
+           x = 1000,
+           #xend = plyr::round_any(max(dados$Homem, dados$Mulher), 0.05),
+           xend = seq(1150, 9200, 500),
+           y = 27.75,
+           yend = 27.75,
+           col = no_highlight_col,
+           size = 0.25
+  ) +
+  labs(x = 'RENDIMENTO MÉDIO HABITUAL (R$/MÊS) (2023)',
+       y = element_blank() ) +
+  theme(  text = element_text(
+    size = text_size,
+    color = average_highlight_col   ),
+    plot.title.position = 'plot',
+    panel.grid = element_blank(),
+    axis.title.x = element_text(
+      size = axis_label_size,
+      hjust = 0.21,
+      color = no_highlight_col
+    ),
+    axis.text.x = element_text(
+      size = axis_label_size,
+      color = no_highlight_col
+    ),
+    axis.ticks.x = element_line(color = no_highlight_col, size = 0.25),
+    axis.text.y = element_blank(),
+    axis.line.x = element_blank() )+
+  geom_richtext(  data = sorted_dat_with_new_labels,
+                  aes(
+                    x = 550,
+                    y = num,
+                    label = location_label,
+                    col = '#414040',
+                    hjust = 1,
+                    size = y_axis_text_size
+                  ),
+                  label.colour = NA,
+                  fill = NA
+  )+
+  labs(title = title_lab) +
+  theme(
+    plot.title = element_markdown(vjust= 50),
+    panel.background = element_rect(color = NA, fill = 'white')
+  )
+
+library(scales)
+pct = function(x, digits=1) {
+  sprintf(paste0("%1.", digits, "f%%"), x*100)
+}
+
+#library(mapmisc)
+
+pal = colorRamp2(c(
+  0,
+  quantile(sorted_dat$Diferença[sorted_dat$Diferença>0], seq(0, 1, by = 0.20))), 
+  c( "white", brewer.pal(6,"YlGn")))
+
+p2 <- p+
+  geom_point(aes(x = store_lower, y = num, color = color_lower),size=4)+
+  geom_point(aes(x = store_upper, y = num, color = color_upper),size=4)+
+  geom_text(data= sorted_dat,aes(x=store_lower, y=num, label =paste0("R$ ",round(store_lower,0)), color = color_lower), nudge_x = sorted_dat$ajuste ,size = 2.8) +
+  geom_text(aes(x=store_upper, y=num, label = paste0("R$ ",round(store_upper,0)), color = color_upper), nudge_x = -sorted_dat$ajuste,size = 2.8)+
+  ggchicklet:::geom_rrect(
+    aes(
+      xmax  = 950+130,
+      xmin  = 950-130,
+      ymin = num - 0.45,
+      ymax = num + 0.45,
+      fill =pal(Diferença),# 'gray80'
+      alpha = .75
+    ),
+    
+    r = unit(0.5, "npc")
+  )+
+  geom_text(aes(x=950, y=28, label = 'distância', color = average_highlight_col), size = 2.9)+
+  geom_text(aes(x=700, y=28, label = 'posição', color = average_highlight_col), size = 2.9)+
+  geom_richtext(data=sorted_dat_with_new_labels ,
+                aes(x=700, y=num, label = paste0(rank,"ª"), 
+                    color ='black' ),size = 2.8,
+                label.colour = NA,
+                fill = NA)+
+  geom_text(aes(x=950, y=num, label = round(abs(Diferença),0), color = 'black'), nudge_x = 0.02,size = 2.8)+
+  #geom_text(aes(x=3600, y=29, label = 'Em pessoas pardas e pretas', color = 'gray60'), size = 5)
+  geom_text(aes(x=3600, y=29, label = '', color = 'gray60'), size = 5)
+
+p2
+}
+```
+
+```{r,fig.width=7, fig.height=8}
+# dados <- df_renda(c('Parda','Preta'))
+# graf <- plot_dif_renda(dados,'') #'Em pessoas de cor parda e preta'
+# graf
+# ggsave('rendaPretospardos23.jpeg',graf,device = "jpeg", dpi=1000,width=8)
+
+
+
+dados <- df_final
+graf <- plot_dif_renda(dados,'') #'Em pessoas de cor parda e preta'
+graf
+ggsave('rendaHb_vs_Mn23.jpeg',graf,device = "jpeg", dpi=1000,width=8)
+```
+
+# Razao rendimento
+
+```{r}
+
+setwd('C:/Dados/Desigualdade')
+abas <- as.character(2012:2021)
+
+ler <- function(abas){
+  readxl::read_excel("Tabela 2.14 (RazRend_Geo).xls",skip = 4,sheet = abas)  |>  
+    dplyr::select(1,2,3,6) |> 
+    drop_na() |> 
+     rename(Local="...1",
+            "Relação entre rendimentos médios B/A" = '...6') |> 
+    mutate(ano=abas) |> 
+    filter(Local=="Fortaleza")
+}
+
+Razao <- map_dfr(abas,ler)
+Razao_M <-Razao |> 
+  mutate(`10% com maiores rendimentos (B)`=round(`10% com maiores rendimentos (B)`,0),
+         `40% com menores rendimentos (A)`=round(`40% com menores rendimentos (A)`,0),
+         `Relação entre rendimentos médios B/A`=round(`Relação entre rendimentos médios B/A`,2),
+         razao= 'Relação entre rendimentos médios B/A'
+         )
+
+```
+
+## Plot line renda
+
+```{r}
+library(echarts4r)
+a <- Razao_M |> 
+ e_charts(x=ano) |> 
+  e_bar(`40% com menores rendimentos (A)`,
+        fontSize =13,
+       label=list(show= T,position= "top",color='blue',fontWeight= "bold" ),
+        emphasis=list(focus= 'series' )) |> 
+     e_bar( `10% com maiores rendimentos (B)`,
+         label=list(show= T,position= "top",color='green',fontWeight= "bold" ),
+        emphasis=list(focus= 'series' )) |>  
+  e_y_axis(name="R$") |> 
+  e_grid(right='20%') |> 
+   e_data(Razao_M,x=ano) |> 
+  e_line(`Relação entre rendimentos médios B/A`, bind=razao, y_index = 1,
+         label=list(show= T,color='orange',fontWeight= "bold" ),
+         endLabel=list( show=T, color='#CC5500',fontWeight= "bold" ,fontSize =12,
+   formatter= htmlwidgets::JS("
+         function (params) {
+         return params.name }"))) |> 
+  e_axis(axis="y",index=1,show=F) |> 
+  e_animation(show = FALSE)
+
+
+#htmlwidgets::saveWidget(a, "temp.html");webshot2::webshot("temp.html","razaoFortaleza.png",vwidth = 1200, vheight = 450,delay = 1)
+
+```
+
+```{r}
+a
+```
+
+# Proporção da renda domiciliar Palmas
+
+```{r}
+
+# setwd('C:/Romulo/Iplanfor/Pnadc/SIS2022/2_Padrao_de_vida_e_distribuicao_de_rendimentos_xls')
+# abas <- as.character(2012:2021)
+# 
+# ler <- function(abas){
+#   readxl::read_excel("Tabela 2.13 (Indic_Palma_Geo).xls",skip = 6,sheet = abas)  |>  
+#     dplyr::select(1,2,3,4,5) |> 
+#      drop_na() |> 
+#     rename(Local="...1",
+#            "40% mais pobres" = 'Até 40% (A)',
+#            "50% intermediários" = 'Mais de 40% a 90% (B)',
+#            "10% mais ricos" ='Mais de 90% (C)',
+#            'Índice de Palma'='...5') |> 
+#     mutate(ano=abas) |> 
+#     filter(Local=="Fortaleza")
+# }
+# 
+# Palmas <- map_dfr(abas,ler)
+
+```

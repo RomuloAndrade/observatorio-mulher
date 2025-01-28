@@ -1,0 +1,13 @@
+name: Censo_teste
+title: Censo_teste
+username: romulo-andrade
+account: romulo-andrade
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 13768808
+bundleId: 9678706
+url: https://romulo-andrade.shinyapps.io/Censo_teste/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData|Auxiliar.R|Censobairros181224.zip|graficos_piramid.R

@@ -1,0 +1,26 @@
+{
+    "id": "2FA8DE67",
+    "path": "/cloud/project/ui.R",
+    "project_path": "ui.R",
+    "type": "r_source",
+    "hash": "819662228",
+    "contents": "",
+    "dirty": false,
+    "created": 1734443742686.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "338,16",
+        "scrollLine": "331"
+    },
+    "folds": "21|12|24|0|\n25|9|54|0|\n39|32|49|87|\n55|7|196|0|\n232|11|292|0|\n395|14|416|0|\n417|16|475|6|\n476|10|532|0|\n533|11|600|86|\n",
+    "lastKnownWriteTime": 1734545756,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1734545756673,
+    "read_only": false,
+    "read_only_alternatives": []
+}

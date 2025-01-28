@@ -1,0 +1,26 @@
+{
+    "id": "1C085EEA",
+    "path": "/cloud/project/server.R",
+    "project_path": "server.R",
+    "type": "r_source",
+    "hash": "2156301555",
+    "contents": "",
+    "dirty": false,
+    "created": 1732802078213.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "89,0",
+        "scrollLine": "57"
+    },
+    "folds": "64|17|80|1|\n93|30|101|2|\n103|40|137|2|\n138|40|172|0|\n173|38|207|0|\n",
+    "lastKnownWriteTime": 1734545674,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1734545674342,
+    "read_only": false,
+    "read_only_alternatives": []
+}

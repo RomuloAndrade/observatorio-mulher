@@ -1,0 +1,212 @@
+# Load library --------------------------------------------------------------------------------
+
+
+box::use(
+  shiny[...],
+  bs4Dash[...],
+  #echarts4r[e_theme_register],
+  waiter[...],
+    # sf[sf_use_s2,
+    #    st_read,
+    #    st_drop_geometry],
+    dplyr[left_join,
+          mutate,
+          rename,
+          select,
+          filter,
+          summarise,
+          group_by],
+    # readr[read_csv2,read_csv],
+    leaflet[leaflet,
+            renderLeaflet,
+            addProviderTiles,
+            providers,
+            addPolygons,
+            addLegend,
+            hideGroup,
+            labelOptions,
+            addScaleBar,
+            setView,
+            clearControls,
+            clearGroup,
+            addLabelOnlyMarkers,
+            addMeasure,
+            removeMeasure,
+            scaleBarOptions,
+            highlightOptions,
+            addLayersControl,
+            colorNumeric,
+            colorBin,
+            labelFormat,
+            leafletProxy,
+            colorFactor],
+    leaflet.extras[addFullscreenControl,
+                   setMapWidgetStyle],
+    leafpop[popupTable],
+    reactable[reactable,
+              colDef,
+              renderReactable,
+              reactableOutput],
+    htmltools[div],
+    mapmisc[colourScale],
+    writexl[write_xlsx]
+    
+)
+
+
+
+# Load data -----------------------------------------------------------------------------------
+
+
+shp_Bairros <- readRDS('Dados/bairros_CD2022.rds')
+bairros_demografia <- readRDS('Dados/bairros_demografia.rds') 
+df_faixa <- readRDS('Dados/df_faixa.rds')
+
+# Load functions ------------------------------------------------------------------------------
+bar_chart <- function(label, width = "100%", height = "1rem", fill = "#00bfc4", background = NULL) {
+  bar <- div(style = list(background = fill, width = width, height = height))
+  chart <- div(style = list(flexGrow = 1, marginLeft = "0.375rem", background = background), bar)
+  div(style = list(display = "flex", alignItems = "center"), label, chart)
+}
+
+
+my_labelFormat <- function(...) {
+  fun <- labelFormat(...)
+  evalq(
+    formatNum <-  function(x) {
+    format(round(transform(x), digits), trim = TRUE, scientific = FALSE, 
+           big.mark = big.mark, decimal.mark = ',')
+  }, environment(fun))
+  return(fun)
+}
+# Server --------------------------------------------------------------------------------------
+
+
+server <- function(input, output, session) {
+
+
+# Cards -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+  
+# Piramide --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+observeEvent(input$select_1 ,{
+   if(length(input$select_1)==3)  { 
+      print(input$select_1)
+   
+updateSelectizeInput(session = getDefaultReactiveDomain(),
+                     inputId = "select_1",
+                     selected = input$select_1[2:3] )
+  }
+  },ignoreInit =T)
+
+output$piramide_1.1 <- renderEcharts4r({
+    df_faixa |> 
+      filter(NM_BAIRRO == input$select_1[1]) |> 
+      e_charts(x=grupo_de_idade) |> 
+      e_bar(Masculina,stack = "grp2",bind=perc_masc,name='Homens',
+            label=list(fontSize =14,formatter=  htmlwidgets::JS("
+       function (params) {
+        return Math.abs(params.name)+'%';}"),
+                       show= T,position= "left",fontWeight= "bold"#,color='green'#
+            )
+      ) |> 
+      e_bar(Feminina,stack = "grp2",bind=perc_fem,name='Mulheres',
+            label=list(fontSize =14,formatter=  htmlwidgets::JS("
+       function (params) {
+        return Math.abs(params.name)+'%';}"),
+                       show= T,position= "right",fontWeight= "bold"#,color='blue'#
+            )
+      ) |> 
+      e_flip_coords() |> 
+      e_y_axis(offset=30) |> 
+      e_x_axis(#max=117799,
+        #min=-127799,
+        type= 'value',
+        show= F,
+        axisLabel=list(
+          formatter= htmlwidgets::JS("function(params) {
+               return Math.abs(params);
+             }")
+        )
+      ) |>
+      e_grid(left='20%') |> 
+      e_theme('macarons') |> 
+      e_legend( top= "3%") |> 
+    e_title(text=input$select_1[1])#,subtext="Segundo sexo e grupo de idade" )  
+  })  
+output$piramide_1.2 <- renderEcharts4r({
+    df_faixa |> 
+    filter(NM_BAIRRO == input$select_1[1]) |> 
+    e_charts(x=grupo_de_idade) |> 
+    e_bar(Masculina,stack = "grp2",bind=perc_masc,name='Homens',
+          label=list(fontSize =14,formatter=  htmlwidgets::JS("
+       function (params) {
+        return Math.abs(params.name)+'%';}"),
+                     show= T,position= "left",fontWeight= "bold"#,color='green'#
+          )
+    ) |> 
+    e_bar(Feminina,stack = "grp2",bind=perc_fem,name='Mulheres',
+          label=list(fontSize =14,formatter=  htmlwidgets::JS("
+       function (params) {
+        return Math.abs(params.name)+'%';}"),
+                     show= T,position= "right",fontWeight= "bold"#,color='blue'#
+          )
+    ) |> 
+    e_flip_coords() |> 
+    e_y_axis(offset=30) |> 
+    e_x_axis(#max=117799,
+      #min=-127799,
+      type= 'value',
+      show= F,
+      axisLabel=list(
+        formatter= htmlwidgets::JS("function(params) {
+               return Math.abs(params);
+             }")
+      )
+    ) |>
+    e_grid(left='20%') |> 
+    e_theme('macarons') |> 
+    e_legend( top= "3%")|> 
+    e_title(text=input$select_1[1])#,subtext="Segundo sexo e grupo de idade" )  
+})  
+output$piramide_2 <- renderEcharts4r({
+  df_faixa |> 
+    filter(NM_BAIRRO == input$select_1[2]) |> 
+    e_charts(x=grupo_de_idade) |> 
+    e_bar(Masculina,stack = "grp2",bind=perc_masc,name='Homens',
+          label=list(fontSize =14,formatter=  htmlwidgets::JS("
+       function (params) {
+        return Math.abs(params.name)+'%';}"),
+                     show= T,position= "left",fontWeight= "bold"#,color='green'#
+          )
+    ) |> 
+    e_bar(Feminina,stack = "grp2",bind=perc_fem,name='Mulheres',
+          label=list(fontSize =14,formatter=  htmlwidgets::JS("
+       function (params) {
+        return Math.abs(params.name)+'%';}"),
+                     show= T,position= "right",fontWeight= "bold"#,color='blue'#
+          )
+    ) |> 
+    e_flip_coords() |> 
+    e_y_axis(offset=30) |> 
+    e_x_axis(#max=117799,
+      #min=-127799,
+      type= 'value',
+      show= F,
+      axisLabel=list(
+        formatter= htmlwidgets::JS("function(params) {
+               return Math.abs(params);
+             }")
+      )
+    ) |>
+    e_grid(left='20%') |> 
+    e_theme('macarons') |> 
+    e_legend( top= "3%")|> 
+    e_title(text=input$select_1[2])#,subtext="Segundo sexo e grupo de idade" )  
+})  
+
+
+
+}

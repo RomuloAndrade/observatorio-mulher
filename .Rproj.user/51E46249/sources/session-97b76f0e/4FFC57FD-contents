@@ -1,0 +1,649 @@
+devtools::install_github('paulofelipe/D3plusR')
+
+saveWidget(map_leaflet, file="testing.html")
+
+
+library(dplyr)
+escola %>% group_by(abbrev_state) %>%
+  count %>%
+  inner_join(regionDay,.)
+region_tot
+
+
+mtcars %>%
+  group_by(cyl) %>%
+  summarize(mean = mean(disp), n = n())
+summarise.sf(data.p, 
+          "Frequencies"= count(data.p), 
+          "Percent" = count(data.p)[,2]/ sum(count(data.p)[2]))
+
+add_count(gender, wt = runs)
+
+library(tidyverse)
+library(readxl)
+library(janitor)
+library(rvest)
+library(httr)
+library(plotly)
+setwd("C:/Romulo/Iplanfor/PIB/Pib2019")
+
+
+Ce <- read.csv("CE_2019.csv",sep="|") %>% 
+  mutate(ANO=str_sub(as.character(DTOBITO),start=-4))
+
+?table(Ce$ANO)
+glimpse(Ce)
+x=1
+as.character(x)
+
+
+
+x <-1:10
+y <- 5:15
+
+XX=as_tibble(x)
+
+XX %>% filter(value %in% y)
+
+
+files <- str_glue("data/purrr-extras/file_00{1:3}.csv")
+files
+#> data/purrr-extras/file_001.csv
+#> data/purrr-extras/file_002.csv
+#> data/purrr-extras/file_003.csv
+
+files %>% 
+  map_dfr(read_csv)
+#> # A tibble: 3 × 2
+#>      id genus        
+#>   <dbl> <chr>        
+#> 1     1 Hoplitosaurus
+
+browseURL('https://www.youtube.com/watch?v=QH2-TGUlwu4')
+
+shell.exec("foo/Born.to.be.wild.mp3")
+
+describe(v)
+object_size(a)
+memory.limit()
+[1] 1535.875  original 7891
+> memory.limit(size=7891)
+future_map_dbl(1:4, function(x){
+  Sys.sleep(1)
+  x^2
+}, .progress = TRUE)
+gfg <- c("7g8ee6ks1", "5f9o1r0", "geeks10")		
+print(gfg)
+
+res = as.numeric(gsub(".*?([0-9]+).*", "\\1", gfg))			
+print(res)
+
+res = as.numeric(?gsub(".*?([0-9]+).*", "\\1", gfg))             
+print(res)
+
+gfg_numbers <- regmatches(gfg, gregexpr("[[:digit:]]+", gfg))
+as.numeric(unlist(gfg_numbers))
+
+pattern <- "([[:alpha:]]+)([[:digit:]]+)"
+s <- "Test: A1 BC23 DEF456"
+m <- gregexec(pattern, s)
+m
+regmatches(s, m)
+?gsub
+str <- "Now is the time      "
+
+stringr::str_extract(x,"[:digit:]+")  ## spaces only
+sub(x,"d","www")
+parse_number(x)
+removeNumbers(x)
+parse_character(x)
+library(tm)
+library(readr)
+?availableCores()
+x <- c("dsf12","sdf2csd4")
+gregexpr("[[:digit:]]+", x)
+
+gsub(x,"[:digit:]","w")
+x <- rerun(5, x = runif(1), y = runif(5))
+x %>% str()
+x %>% transpose() %>% str()
+# Back to where we started
+x %>% transpose() %>% transpose() %>% str()
+
+# transpose() is useful in conjunction with safely() & quietly()
+x <- list(3, 1, 2)
+y <- x %>% map(log)
+y %>% str()
+y %>% transpose() %>% str()
+
+# Use simplify_all() to reduce to atomic vectors where possible
+x <- list(list(a = 1, b = 2), list(a = 3, b = 4), list(a = 5, b = 6))
+x %>% transpose()
+x %>% transpose() %>% simplify_all()
+
+# Provide explicit component names to prevent loss of those that don't
+# appear in first component
+ll <- list(
+  list(x = 1, y = "one"),
+  list(z = "deux", x = 2)
+)
+ll %>% transpose()
+nms <- ll %>% map(names) %>% reduce(union)
+ll %>% transpose(.names = nms)
+
+colors <- c("red", "green", "yellow")
+vehicles <- c("bicycle", "car", "submarine", "airplane")
+colored_vehicles <- colors %>% 
+  purrr::map(function(color) {
+    purrr::map_chr(vehicles, ~paste(color, .))
+  }) %>% 
+  purrr::flatten() %>% 
+  unlist()
+
+animals <- c("lion", "tiger", "rhinoceros")
+animal_nchars <- animals %>% 
+  purrr::set_names() %>% 
+  purrr::map(nchar)
+
+
+
+  colors <- c("red", "green", "yellow")
+  vehicles <- c("bicycle", "car", "submarine", "airplane")
+  colored_vehicles <- purrr::cross2(colors, vehicles) %>% 
+    purrr::map_chr(~paste(.[[1]], .[[2]]))
+  
+  
+  seq_along(x)
+  x=3:5
+  y=-1:9
+  seq_along(y)
+  
+  
+l="casa de cor verde é top"
+la="casa de cor "
+x<-c("branca","verde","azul")
+
+paste0(la,x," né top")
+
+
+
+
+  # Let's create a list of data structures:
+  obj1 <- list("a", list(1, elt = "foo"))
+  obj2 <- list("b", list(2, elt = "bar"))
+  x <- list(obj1, obj2)
+  
+  
+  # pluck() provides a way of retrieving objects from such data
+  # structures using a combination of numeric positions, vector or
+  # list names, and accessor functions.
+  
+  # Numeric positions index into the list by position, just like `[[`:
+  pluck(x, 1)
+  x[[1]]
+  
+  pluck(x, 1, 2)
+  x[[1]][[2]]
+  
+  # Supply names to index into named vectors:
+  pluck(x, 1, 2, "elt")
+  x[[1]][[2]][["elt"]]
+  
+  
+  # By default, pluck() consistently returns `NULL` when an element
+  # does not exist:
+  pluck(x, 10)
+  try(x[[10]])
+  
+  # You can also supply a default value for non-existing elements:
+  pluck(x, 10, .default = NA)
+  
+  # If you prefer to consistently fail for non-existing elements, use
+  # the opinionated variant chuck():
+  chuck(x, 1)
+  try(chuck(x, 10))
+  try(chuck(x, 1, 10))
+  
+  
+  # The map() functions use pluck() by default to retrieve multiple
+  # values from a list:
+  map(x, 2)
+  
+  # Pass multiple indexes with a list:
+  map(x, list(2, "elt"))
+  
+  # This is equivalent to:
+  map(x, pluck, 2, "elt")
+  
+  # You can also supply a default:
+  map(x, list(2, "elt", 10), .default = "superb default")
+  
+  # Or use the strict variant:
+  try(map(x, chuck, 2, "elt", 10))
+  
+  
+  # You can also assign a value in a pluck location with pluck<-:
+  pluck(x, 2, 2, "elt") <- "quuux"
+  x
+  
+  # This is a shortcut for the prefix function assign_in():
+  y <- assign_in(x, list(2, 2, "elt"), value = "QUUUX")
+  y
+  
+  
+  # pluck() also supports accessor functions:
+  my_element <- function(x) x[[2]]$elt
+  
+  # The accessor can then be passed to pluck:
+  pluck(x, 1, my_element)
+  pluck(x, 2, my_element)
+  
+  # Even for this simple data structure, this is more readable than
+  # the alternative form because it requires you to read both from
+  # right-to-left and from left-to-right in different parts of the
+  # expression:
+  my_element(x[[1]])
+  
+  
+  # If you have a list of accessors, you can splice those in with `!!!`:
+  idx <- list(1, my_element)
+  pluck(x, !!!idx)
+  
+library(tidyverse)
+library(readr)
+library(readxl)
+library(tm)
+#assign(eval(paste0("Pop",i)), p_temp)
+#O {readr} transforma arquivos de textos em tibbles usando as funções:
+#read_csv(): para arquivos separados por vírgula.
+#read_tsv(): para arquivos separados por tabulação.
+#read_delim(): para arquivos separados por um delimitador genérico. O argumento delim= indica qual caracter separa cada coluna no arquivo de texto.
+#read_table(): para arquivos de texto tabular com colunas separadas por espaço.
+#read_fwf(): para arquivos compactos que devem ter a largura de cada coluna especificada.
+#read_log(): para arquivos padrões de log.
+
+#A maioria das funções de leitura do {readr} possuem argumentos muito úteis para resolver problemas de importação:
+#col_names=: indica se a primeira linha da base contém ou não o nome das colunas. Também pode ser utilizado para (re)nomear colunas.
+#col_types=: caso alguma coluna seja importada com a classe errada (uma coluna de números foi importada como texto, por exemplo), você pode usar esse argumento para especificar a classe das colunas.
+#locale=: útil para tratar problema de encoding.
+#skip=: pula linhas no começo do arquivo antes de iniciar a importação. Útil para quando o arquivo a ser importado vem com metadados ou qualquer tipo de texto nas primeiras linhas, antes da base.
+#na=: indica quais strings deverão ser considaras NA na hora da importação.
+################# Codigos Capitais
+
+#####################
+linkcap="https://docs.google.com/spreadsheets/d/19Odixt9fevDcPirEPn5pK3hU0Kl_M3bp/edit?usp=sharing&ouid=107699958784325543255&rtpof=true&sd=true"
+
+Capitais  <- rvest::read_html(linkcap) %>% 
+  rvest::html_node("table") %>% 
+  rvest::html_table() %>% 
+  select(L) %>% 
+  slice_head(n=27) %>% 
+  row_to_names(row_number = 1) %>% 
+  clean_names() 
+
+
+####################################
+?parse_number("5,0", locale = locale(decimal_mark = ","))
+## [1] 5
+locale(decimal_mark = ",")
+# Inglês
+parse_date(
+  "01/June/2010", 
+  format = "%d/%B/%Y"
+)
+
+
+set.seed(0)
+data=data.frame("V1"=sample(1:10,size=4,rep=T),
+                "V2"=sample(1:10,size=4,rep=T),
+                "V3"=sample(1:10,size=4,rep=T),
+                "V4"=sample(1:10,size=4,rep=T))
+
+names = data.frame("vars"=c( "V2", "V3", "V4"),
+                   "labels"=c("toast","cheese","cow"))
+
+
+want=data.frame("whale"=sample(1:10,size=4,rep=T),
+                "toast"=sample(1:10,size=4,rep=T),
+                "cheese"=sample(1:10,size=4,rep=T),
+                "cow"=sample(1:10,size=4,rep=T))
+
+
+Pop <- Pop %>% 
+  rename_at(vars(nomes$orig), ~ nomes$Desc)
+
+## [1] "2010-06-01"
+read_csv(readr_example("mtcars.csv"))
+read_csv(readr_example("mtcars.csv.zip"))
+read_csv(readr_example("mtcars.csv.bz2"))
+
+install.packages("tabulizer")
+
+if (!require("remotes")) {
+  install.packages("remotes")
+}
+# on 64-bit Windows
+remotes::install_github(c("ropensci/tabulizerjars", "ropensci/tabulizer"), INSTALL_opts = "--no-multiarch")
+2# elsewhere
+remotes::install_github(c("ropensci/tabulizerjars", "ropensci/tabulizer"))
+setwd("C:/Romulo/Iplanfor/População/Censo2010/CE/Base informaçoes setores2010 universo CE/CSV")
+
+# }
+# NOT RUN {
+# Including remote paths
+read_csv("https://github.com/tidyverse/readr/raw/master/inst/extdata/mtcars.csv")
+# }
+# NOT RUN {
+# Or directly from a string (must contain a newline)
+read_csv("x,y\n1,2\n3,4")
+
+# Column types --------------------------------------------------------------
+# By default, readr guesses the columns types, looking at the first 1000 rows.
+# You can override with a compact specification:
+read_csv("x,y\n1,2\n3,4", col_types = "n")
+
+# Or with a list of column types:
+read_csv("x,y\n1,2\n3,4", col_types = list(col_double(), col_character()))
+
+# If there are parsing problems, you get a warning, and can extract
+# more details with problems()
+y <- read_csv("x\n1\n2\nb", col_types = list(col_double()))
+y
+problems(y)
+
+# File types ----------------------------------------------------------------
+read_csv("a,b\n1.0,2.0")
+read_csv2("a;b\n1,0;2,0")
+read_tsv("a\tb\n1.0\t2.0")
+read_delim("a|b\n1.0|2.0", delim = "|")
+# }
+# Português
+parse_date(
+  "01/Junho/2010", 
+  format = "%d/%B/%Y",
+  locale = locale(date_names = "pt")
+)
+## [1] "2010-06-01"
+
+x=c("adfa251")
+
+deparse(x)
+x = unlist(strsplit(x, split = '\\s+'))
+getwd()
+
+x <- c("-2 is an integer.  -4.3 and w_3.33 are not.",
+       "123,456 is 0 alot -123456 more than -.2", "and 3456789123 fg for 345.",
+       "fg 12,345 23 .44 or 18.", "don't remove this 444,44", "hello world -.q")
+
+
+parse_double(x)
+removeNumbers(x)
+ex_number(x)
+
+readxl_example()
+
+caminho_datasets <- ?readxl_example("datasets.xlsx")
+caminho_datasets
+
+excel_sheets(caminho_datasets)
+names(D)
+read_excel(caminho_datasets)
+D <- read_excel(caminho_datasets,sheet = 2 )
+names(D)                    
+
+D  %>% select(1:2) %>%
+  group_by(cyl) %>% 
+ dplyr::summarise  (mpg)
+
+df1 %>% group_by(State,Name) %>% summarise(sum_sales = sum(Sales))
+
+contratos %>% 
+  mutate(
+    valor=parse_number(valor_total,locale = locale(decimal_mark = ",")),
+    data=lubridate::dmy(prazo),
+    mes=lubridate::month(data,label=TRUE,abbr=FALSE)
+  ) %>% 
+  group_by(mes) %>% 
+  summarise(
+    n=n(),
+    valor=sum(valor,na.rm=TRUE)
+  ) %>% 
+  mutate(
+    scales::dollar(valor,prefix="R$",big.mark = ".",decimal.mark = ",")
+  )
+iris %>%
+  # create a fake "col2" to demonstrate Normal1, Normal2, Normal3
+  mutate(
+    options = runif(nrow(iris)),
+    col2 = ifelse(options  > 0.333, "Normal2", "Normal1"),
+    col2 = ifelse(options > 0.666, "Normal3", col2),
+    options = NULL) %>%
+  filter(grepl("virginica", .$Species)) %>%
+  # example of how wrapping gsub in mutate can accomplish the goal
+  mutate(col2 = gsub("Normal.*", "Normal", .$col2))
+
+glimpse(D)
+x <- rnorm(100)
+glimpse(starwars)
+
+docker pull ghcr.io/curso-r/exemplo-deploy:latest
+
+x.pos <- x[x>0]
+
+media <- mean(x.pos)
+
+saida <- round(media, 1)
+
+x <- rnorm(100) %>% select(x>0)
+
+
+read_excel(caminho_datasets, sheet = 'chickwts')
+
+install.packages("writexl")
+
+library(writexl)
+
+write_excel(mtcars, "imdb.xlsx")
+
+#################################7#
+#############################
+###############################3
+---
+  title: "Mercado de Trabalho no Brasil"
+output: 
+  flexdashboard::flex_dashboard:
+  orientation: columns
+vertical_layout: fill
+source_code: embed
+---
+  
+  Este dashboard apresenta algumas informações básicas sobre o mercado de trabalho brasileiro a partir dos dados da PNAD contínua. Os dados estão atualizados para o terceiro trimestre de 2019. 
+
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(D3plusR)
+library(janitor)
+
+# Icons made by Freepik from www.flaticon.com
+
+dados_pnad <- read_csv('../data/dados_pnadc_2019_3.csv') %>% 
+  clean_names()
+
+serie_desemprego <- read_csv('../data/serie_desemprego.csv') %>% 
+  clean_names()
+
+uf_sigla <- tibble(
+  uf = c("Rondônia", "Acre", "Amazonas", "Roraima", "Pará", "Amapá", 
+         "Tocantins", "Maranhão", "Piauí", "Ceará", "Rio Grande do Norte", 
+         "Paraíba", "Pernambuco", "Alagoas", "Sergipe", "Bahia", "Minas Gerais", 
+         "Espírito Santo", "Rio de Janeiro", "São Paulo", "Paraná", 
+         "Santa Catarina", "Rio Grande do Sul", "Mato Grosso do Sul", 
+         "Mato Grosso", "Goiás", "Distrito Federal"),
+  bra_id = c("RO", "AC", "AM", "RR", "PA", "AP", "TO", "MA", "PI", "CE", 
+             "RN", "PB", "PE", "AL", "SE", "BA", "MG", "ES", "RJ", "SP", "PR", 
+             "SC", "RS", "MS", "MT", "GO", "DF")
+)
+
+dicionario <- list(
+  tx_desemprego = "Taxa de Desemprego",
+  pessoas_ocupadas = "Pessoas Ocupadas",
+  pessoas_desocupadas = "Pessoas Desocupadas",
+  date = "Período"
+)
+
+texto_numeros <- c("Mil", "Milhão", "Milhões", "Bilhão", "Bilhões")
+
+genero_attr <- data.frame(
+  v2007 = c("Homem", "Mulher"),
+  cor = c("#2980b9", "#9b59b6"),
+  icon = c("man.png", "woman.png")
+)
+```
+
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+  
+  ### Milhões de Pessoas Ocupadas
+  
+  ```{r}
+totais <- dados_pnad %>% 
+  group_by(vd4002) %>%
+  summarise(n = round(sum(v1028)/1e6, 1)) %>% 
+  na.omit() %>% 
+  spread(key = vd4002, value = n) %>% 
+  clean_names()
+
+totais %>% 
+  pull(pessoas_ocupadas) %>% 
+  valueBox(value = ., icon = 'fa-users')
+```
+
+### Milhões de Pessoas Desocupadas
+
+```{r}
+totais %>% 
+  pull(pessoas_desocupadas) %>% 
+  valueBox(value = ., icon = 'fa-user-times')
+```
+
+
+### Taxa de Desemprego por Unidade da Federação
+
+```{r}
+dados_pnad %>% 
+  group_by(uf, v2007, v2010, vd4002) %>%
+  summarise(n = sum(v1028)) %>%
+  na.omit() %>% 
+  ungroup() %>% 
+  spread(key = vd4002, value = n) %>% 
+  clean_names() %>% 
+  replace_na(list(pessoas_desocupadas = 0)) %>% 
+  group_by(uf) %>% 
+  ?summarise(
+    pessoas_ocupadas = sum(pessoas_ocupadas),
+    pessoas_desocupadas = sum(pessoas_desocupadas),
+    tx_desemprego = sum(pessoas_desocupadas)/sum(pessoas_desocupadas + pessoas_ocupadas) * 100
+  ) %>% 
+  arrange(-tx_desemprego) %>% 
+  left_join(uf_sigla) %>% 
+  d3plus(data = .,
+         type = "geo_map",
+         locale = "pt_BR",
+         percent_var = "tx_desemprego",
+         id = "bra_id",
+         currency = "US$",
+         number_text = c("Mil", "Milhão", "Milhões", "Bilhão", "Bilhões"),
+         dictionary = dicionario) %>% 
+  d3plusCoords(
+    value = "https://gist.githubusercontent.com/ruliana/1ccaaab05ea113b0dff3b22be3b4d637/raw/196c0332d38cb935cfca227d28f7cecfa70b412e/br-states.json",
+    projection = "equirectangular"
+  ) %>% 
+  d3plusColor(value = "tx_desemprego",
+              heatmap = RColorBrewer::brewer.pal(n = 6, name = "YlOrBr")) %>% 
+  d3plusText("uf") %>% 
+  d3plusTooltip(value = c("pessoas_ocupadas", "pessoas_desocupadas"))
+```
+
+Column
+-----------------------------------------------------------------------
+  
+  ### Evolução da Taxa de Desemprego
+  
+  ```{r}
+serie_desemprego %>% 
+  mutate(
+    date = paste0(ano, "T", trimestre),
+    id = "Brasil"
+  ) %>% 
+  d3plus(
+    data = .,
+    id = "id",
+    type = "line",
+    percent_var = "tx_desemprego",
+    number_text = texto_numeros,
+    dictionary = dicionario
+  ) %>% 
+  d3plusX("date", grid = FALSE) %>% 
+  d3plusY("tx_desemprego") %>% 
+  d3plusOrder("date", sort = "asc") %>% 
+  d3plusTooltip(c("date", "pessoas_ocupadas", "pessoas_desocupadas")) %>% 
+  d3plusAxes(ticks = FALSE, background = list(color = "#FFFFFF", stroke = 0))
+```
+
+### Taxa de Desemprego por Gênero e Cor/Raça
+
+```{r}
+dados_pnad %>% 
+  group_by(v2007, v2010, vd4002) %>%
+  summarise(n = sum(v1028)) %>%
+  na.omit() %>% 
+  ungroup() %>% 
+  spread(key = vd4002, value = n) %>% 
+  clean_names() %>%
+  replace_na(list(pessoas_desocupadas = 0)) %>% 
+  group_by(v2007, v2010) %>% 
+  summarise(
+    pessoas_ocupadas = sum(pessoas_ocupadas),
+    pessoas_desocupadas = sum(pessoas_desocupadas),
+    tx_desemprego = sum(pessoas_desocupadas)/sum(pessoas_desocupadas + pessoas_ocupadas) * 100
+  ) %>% 
+  filter(v2010 != "Ignorado") %>% 
+  d3plus(
+    data = .,
+    type = "bar",
+    id = "v2007",
+    dictionary = dicionario,
+    locale = "pt_BR",
+    percent_var = "tx_desemprego",
+    number_text = texto_numeros,
+    d3plus_number_format = TRUE
+  ) %>% 
+  d3plusX(value = "v2010", label = "Cor/Raça", grid = FALSE) %>% 
+  d3plusY("tx_desemprego", label = "Taxa de Desemprego") %>% 
+  d3plusOrder(value = "v2010", sort = "asc") %>% 
+  d3plusLegend(value = TRUE, data = FALSE, title = "Gênero", align = "end") %>% 
+  d3plusTooltip(value = c("pessoas_ocupadas", "pessoas_desocupadas")) %>% 
+  d3plusAxes(ticks = FALSE, background = list(color = "#FFFFFF", stroke = 0)) %>% 
+  d3plusAttrs(genero_attr) %>% 
+  d3plusColor("cor") %>% 
+  d3plusIcon("icon", style = "knockout")
+```
+##################################3
+###############################
+#####################
+
+
+glimpse(msleep)
+msleep <- msleep
+
+m <- msleep %>%
+  select(name, contains("sleep")) %>%
+  gather(key = "sleep_measure", value = "time", -name)
+
+
+%>%
+  select(name, sleep_total) %>%
+  mutate(sleep_total_min = sleep_total * 60)

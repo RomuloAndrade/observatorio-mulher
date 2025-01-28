@@ -1,0 +1,34 @@
+library(shiny)
+my_choices <- c('Hello', 'World')
+
+ui <- fluidPage(
+  selectInput(
+    inputId = "ManyDuplicated",
+    label = 'SelectInput',
+    choices = my_choices,
+    selected = NULL,
+    multiple = TRUE
+  )
+)
+
+server <- function(input, output, session) {
+  observeEvent(input$ManyDuplicated, {
+    
+    selected_values <- input$ManyDuplicated
+    names(selected_values) <- gsub("\\..*", "", selected_values)
+    
+    print( paste( "Current selection :", 
+                  paste( names(selected_values), collapse = ", ")))
+    
+    number_of_items <- length(input$ManyDuplicated)
+    new_choices <- paste(my_choices, number_of_items + 1, sep = ".")
+    names(new_choices) <- my_choices
+    
+    all_choices <- c(selected_values, new_choices )
+    updateSelectInput(session, "ManyDuplicated", 
+                      choices = all_choices, 
+                      selected = isolate(input$ManyDuplicated))
+  })
+}
+
+shinyApp(ui = ui, server = server)

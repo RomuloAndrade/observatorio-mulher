@@ -1,0 +1,1225 @@
+# Load library --------------------------------------------------------------------------------
+
+
+box::use(
+  shiny[...],
+  bs4Dash[...],
+  #echarts4r[e_theme_register],
+  waiter[...],
+    sf[sf_use_s2,
+       write_sf,
+       st_drop_geometry],
+    dplyr[left_join,
+          mutate,
+          rename,
+          select,
+          filter,
+          summarise,
+          group_by],
+    readr[read_csv2],
+    leaflet[leaflet,
+            renderLeaflet,
+            addProviderTiles,
+            providers,
+            addPolygons,
+            addLegend,
+            hideGroup,
+            labelOptions,
+            addScaleBar,
+            setView,
+            clearControls,
+            clearGroup,
+            addLabelOnlyMarkers,
+            addMeasure,
+            removeMeasure,
+            scaleBarOptions,
+            highlightOptions,
+            addLayersControl,
+            colorNumeric,
+            colorBin,
+            labelFormat,
+            leafletProxy],
+    leaflet.extras[addFullscreenControl,
+                   setMapWidgetStyle],
+    leafpop[popupTable],
+    reactable[reactable,
+              colDef,
+              renderReactable,
+              reactableOutput],
+    htmltools[div],
+    mapmisc[colourScale],
+    writexl[write_xlsx]
+    
+)
+
+
+# Load data -----------------------------------------------------------------------------------
+
+
+
+shp_Setor_censo <- readRDS('Dados/shp_Setor_censo.rds')
+
+
+# setores <- read_csv2('dados/Agregados_preliminares_por_setores_censitarios_CE.csv') |> 
+#   filter(NM_MUN=='Fortaleza') |> 
+#   select(CD_SETOR,
+#          v0001:v0007) 
+#saveRDS(setores,'dados/setores.rds')
+setores <- readRDS('Dados/setores.rds')
+
+shp_Bairros <- readRDS('Dados/shp_Bairros.rds')
+
+ZEIS_1 <- readRDS('Dados/ZEIS_1.rds')
+
+ZEIS_2 <- readRDS('Dados/ZEIS_2.rds')
+
+zeis_1_pop <- readRDS('Dados/zeis_1_pop.rds')
+df_inter1 <- readRDS('Dados/df_inter1.rds')
+
+setores_zeis1 <- readRDS('Dados/setores_zeis1.rds')
+#zeis_2_pop <- readRDS('dados/zeis_2_pop.rds')
+#df_inter2 <- readRDS('dados/df_inter2.rds')
+
+assent_pop <- readRDS('Dados/assent_pop.rds')
+
+
+
+
+#df_inter3 <- readRDS('dados/df_inter3.rds')
+
+
+malha_setor <- left_join(shp_Setor_censo,setores,by=c('CD_SETOR'='CD_SETOR'))
+
+rm(shp_Setor_censo,
+   setores)
+
+Assentamento <- readRDS("Dados/assentamentos_precarios_plhis.rds") 
+
+# Load functions ------------------------------------------------------------------------------
+bar_chart <- function(label, width = "100%", height = "1rem", fill = "#00bfc4", background = NULL) {
+  bar <- div(style = list(background = fill, width = width, height = height))
+  chart <- div(style = list(flexGrow = 1, marginLeft = "0.375rem", background = background), bar)
+  div(style = list(display = "flex", alignItems = "center"), label, chart)
+}
+
+
+my_labelFormat <- function(...) {
+  fun <- labelFormat(...)
+  evalq(formatNum <- function(x) {
+    format(round(transform(x), digits), trim = TRUE, scientific = FALSE, 
+           big.mark = big.mark, decimal.mark = ',')
+  }, environment(fun))
+  return(fun)
+}
+# Server --------------------------------------------------------------------------------------
+
+
+#' @export
+server <- function(input, output, session) {
+
+# Mapa das bases utilizadas --------------------------------------------------------------------------
+
+  
+
+output$bases_usadas <-  renderLeaflet({  
+  
+  leaflet() |>
+    setMapWidgetStyle(list(background = "white"))  |> 
+    addProviderTiles(providers$CartoDB.PositronNoLabels, group = "CartoDB.PositronNoLabels")|> #CartoDB.Positron
+    addProviderTiles(providers$OpenStreetMap, group = "OpenStreetMap")  |> 
+    addProviderTiles(providers$CartoDB.DarkMatter, group = "CartoDB.DarkMatter")  |>
+    addProviderTiles(providers$Esri.WorldImagery, group = "WorldImagery")  |>
+    addLayersControl(
+      baseGroups = c("CartoDB.Positron","OpenStreetMap",'CartoDB.DarkMatter','WorldImagery'),
+      overlayGroups = c(
+        "Bairros",
+        "Assentamento",
+        "Setores censitários",
+        "Zeis 1",
+        "Zeis 2",
+        'Nomes dos bairros')
+    ) |>
+    hideGroup("Elementos do mapa")  |>
+    hideGroup('Nomes dos bairros') |>
+    addScaleBar(position = "bottomright",
+                options = scaleBarOptions(imperial = F))  |>
+    setView(-38.52782, -3.785804, zoom = 12) |>
+    addFullscreenControl(pseudoFullscreen = T)|> 
+    addPolygons(data=shp_Bairros,
+                weight=1,
+                color='black',
+                opacity = 1,
+                fillColor = "white",
+                popup =  ~Bairro,
+                dashArray = "0",
+                fillOpacity = 0,
+                group = "Bairros"
+    )  |>
+    addLabelOnlyMarkers(data = shp_Bairros,group='Nomes dos bairros',
+                        lng = ~x, lat = ~y, label = ~shp_Bairros$Bairro  ,
+                        labelOptions = labelOptions(noHide = T,  textOnly = T,
+                                                    direction = "right",
+                                                    style = list(
+                                                      "color" = "black",
+                                                      'background-color'= 'rgba(255,255,255, 0)',
+                                                      'padding'= '0px 0px 0px 0px'      ))) |> 
+    addMeasure(
+      position = "topright",
+      primaryLengthUnit = "meters",
+      primaryAreaUnit = "sqmeters",
+      secondaryLengthUnit = "kilometers",
+      activeColor = "#3D535D",
+      completedColor = "#7D4479",
+      localization = "pt_BR",
+      captureZIndex = 10000
+    )   |> 
+    addPolygons(data=malha_setor,
+                weight=.2,
+                color='black',
+                opacity = 1,
+                fillColor = "#268468",
+                dashArray = "0",
+                fillOpacity = 0.3,
+                group="Setores censitários"
+                # highlightOptions=highlightOptions(
+                #   color = "green", weight = 3, bringToFront = T)
+    ) |>
+    addPolygons(data=ZEIS_1,
+                weight=.2,
+                color='#234',
+                opacity = .5,
+                fillColor = "red",
+                popup =  ~Name,
+                dashArray = "0",
+                fillOpacity = 0.4,
+                group="Zeis 1"
+    ) |>
+    addPolygons(data=ZEIS_2,
+                weight=.2,
+                color='#234',
+                opacity = .5,
+                fillColor = "purple",
+                popup =  ~Name,
+                dashArray = "0",
+                fillOpacity = 0.4,
+                group="Zeis 2"
+    )   |> 
+    addPolygons(data=Assentamento,
+              weight=1,
+              color='black',
+              opacity = .5,
+              fillColor = "#E0B119",
+              popup =  ~nome_assen,
+              dashArray = "0",
+              fillOpacity = 0.5,
+              group="Assentamento"#,
+              #  highlightOptions=highlightOptions(bringToFront = F,
+              # color = "#E06425", weight = 3)
+  ) |>
+  addLegend(position = "bottomright", values = NULL,
+            colors = c("red",  "purple","#E0B119",'#268468'),
+            labels = c("ZEIS 1", "ZEIS 2",'Assentamento','Setor censitário'),
+            title = "Tipo de território",
+            opacity = 1)
+  
+})   
+
+
+
+# Processamento -------------------------------------------------------------------------------
+
+{
+  # PARA ZEIS 1
+
+  # setores_zeis1 <-  malha_setor |>
+  #   st_filter(y = ZEIS_1_ok, .predicate = st_intersects)
+  # 
+  # 
+  # # Calculando interseção
+  # 
+  # inter <- st_intersection(ZEIS_1_ok,malha_setor)
+  # 
+  # # Calculando percentuais de areas dos setores em sobreposição
+  # df_inter1 <- inter |>
+  #   mutate(area_inter_m2 = round(as.numeric(st_area(geometry))),
+  #          perc_area = round(area_inter_m2/area_setor,2)  ,
+  #          est_pessoas = round(perc_area*v0001),
+  #          est_domic = round(perc_area*v0007)
+  #   )
+  # 
+  # zeis_1_pop <- df_inter1 |>
+  #   mutate(area_zeis_km2 = area_zeis/1000000) |>
+  #   group_by(Name,area_zeis,area_zeis_km2) |>
+  #   summarise(Pessoas = sum(est_pessoas),
+  #             Domicilios = sum(est_domic)) |>
+  #   mutate(Densidade = round(Pessoas/area_zeis_km2)) |>
+  #   rename(Nome = Name) |> 
+  #   dplyr::ungroup()
+  # 
+  # saveRDS(df_inter1,'dados/df_inter1.rds')
+  # saveRDS(zeis_1_pop,'dados/zeis_1_pop.rds')
+  # write_sf(zeis_1_pop,'C:/Romulo/Dados/ZEIS/zeis_1_populacao.shp')
+  
+  
+  # # PARA ZEIS 2
+  # # Coordinate Reference System utilizada
+  # sf_use_s2(F)
+  # #st_crs(malha_setor)
+  # #st_crs(ZEIS_2)
+  # 
+  # # Validação de geometrias
+  # all(st_is_valid(malha_setor)) # Ok
+  # all(st_is_valid(ZEIS_2)) # Ok
+  # 
+  # # Setores q tocam a zeis
+  # setores_zeis2 <-  malha_setor |>
+  #   st_filter(y = ZEIS_2, .predicate = st_intersects)
+  # 
+  # # Calculando interseção
+  # 
+  # inter <- st_intersection(ZEIS_2,malha_setor) 
+  # 
+  # # Calculando percentuais de areas dos setores e de pessoas por area
+  # df_inter2 <- inter |> 
+  #   mutate(area_inter_m2 = round(as.numeric(st_area(geometry))),
+  #          perc_area = round(area_inter_m2/area_setor,2)  ,
+  #          est_pessoas = round(perc_area*v0001),
+  #          est_domic = round(perc_area*v0007)
+  #   )
+  # 
+  # zeis_2_pop <- df_inter2 |>
+  #   mutate(area_zeis_km2 = area_zeis/1000000) |> 
+  #   group_by(Name,area_zeis,area_zeis_km2) |> 
+  #   summarise(Pessoas = sum(est_pessoas),
+  #             Domicilios = sum(est_domic)) |> 
+  #   mutate(Densidade = round(Pessoas/area_zeis_km2)) |> 
+  #   rename(Nome=Name)
+  # 
+  # saveRDS(df_inter2,'dados/df_inter2.rds')
+  # saveRDS(zeis_2_pop,'dados/zeis_2_pop.rds')  
+  # 
+  # # PARA ASSENTAMENTO PRECARIO
+  # 
+  # # Validação de geometrias
+  # all(st_is_valid(malha_setor)) # Ok
+  # 
+  # all(st_is_valid(Assentamento)) #  geometrias inválidas
+  # 
+  # Assentamento_ok = st_make_valid(Assentamento)  # Corrigir
+  # 
+  # all(st_is_valid(Assentamento_ok))
+  # 
+  # # Setores q tocam os assentamentos
+  # 
+  # setores_assentamentos <-  malha_setor |>
+  #   st_filter(y = Assentamento_ok, .predicate = st_intersects)
+  # 
+  # # Calculando interseção
+  # 
+  # inter <- st_intersection(Assentamento_ok |>
+  #                            st_cast('MULTIPOLYGON')
+  #                          ,setores_assentamentos)
+  # 
+  # # Calculando percentuais de areas dos setores em sobreposição
+  # df_inter3 <- inter |>
+  #   mutate(area_inter_m2 = round(as.numeric(st_area(geometry))),
+  #          perc_area = round(area_inter_m2/area_setor,2)  ,
+  #          est_pessoas = round(perc_area*v0001),
+  #          est_domic = round(perc_area*v0007)
+  #   )
+  # 
+  # rm(inter,
+  #    df_inter1,
+  #    df_inter2)
+  # assent_pop <- df_inter3 |>
+  #   mutate(area_assent_km2 = area_assent_m2/1000000) |>
+  #   group_by(nome_assen,area_assent_m2,area_assent_km2) |>
+  #   summarise(Pessoas = sum(est_pessoas),
+  #             Domicilios = sum(est_domic)) |>
+  #   mutate(Densidade = round(Pessoas/area_assent_km2)) |>
+  #   st_cast('MULTIPOLYGON') |> 
+  #   rename(Nome_assent=nome_assen)
+  # 
+  # 
+  #  saveRDS(df_inter3,'dados/df_inter3.rds')
+  #  saveRDS(assent_pop,'dados/assent_pop.rds')  
+  # 
+  
+  
+    
+  # write_sf(zeis_1_pop,'C:/Romulo/Dados/ZEIS/zeis_1_populacao.shp')
+  
+  # pz1 <-  sum(zeis_1_pop$Pessoas)
+  # pfor <- sum(malha_setor$v0001)
+  # pz1_perc <-  pz1/pfor
+  # dz1 <-  sum(zeis_1_pop$Domicilios)
+  # p_dz1 <- pz1/dz1
+  # densz1 <- pz1/sum(zeis_1_pop$area_zeis_km2)
+  # 
+  # pz2 <-  sum(zeis_2_pop$Pessoas)
+  # pz2_perc <-  pz2/pfor
+  # dz2 <-  sum(zeis_2_pop$Domicilios)
+  # p_dz2 <- pz2/dz2
+  # densz2 <- pz2/sum(zeis_2_pop$area_zeis_km2)
+  # 
+  # pas <- sum(assent_pop$Pessoas)
+  # pas_perc <- pas/pfor
+  
+}
+
+
+
+
+
+
+# setores zeis --------------------------------------------------------------------------------
+
+output$setores <-  renderLeaflet({ 
+  leaflet() |>
+    #setMapWidgetStyle(list(background = "white"))  |> 
+    addProviderTiles(providers$CartoDB.PositronNoLabels)|> #CartoDB.Positron
+    # addProviderTiles(providers$OpenStreetMap, group = "OpenStreetMap")  |> 
+    # addProviderTiles(providers$CartoDB.DarkMatter, group = "CartoDB.DarkMatter")  |>
+    # addProviderTiles(providers$Esri.WorldImagery, group = "WorldImagery")  |>
+    # addLayersControl(
+    #   baseGroups = c("CartoDB.Positron","OpenStreetMap",'CartoDB.DarkMatter','WorldImagery'),
+    #   overlayGroups = c(
+    #     "Bairros",
+    #     "Assentamento",
+    #     "Setores censitários",
+    #     "Zeis 1",
+    #     "Zeis 2",
+    #     'Nomes dos bairros')
+    # ) |>
+    # hideGroup("Elementos do mapa")  |>
+    # hideGroup('Nomes dos bairros') |>
+    addScaleBar(position = "bottomright",
+                options = scaleBarOptions(imperial = F))  |>
+    setView(-38.52782, -3.785804, zoom = 12) |>
+    addFullscreenControl(pseudoFullscreen = T)|> 
+    addPolygons(data=shp_Bairros,
+                weight=1,
+                color='black',
+                opacity = 1,
+                fillColor = "white",
+                popup =  ~Bairro,
+                dashArray = "0",
+                fillOpacity = 0,
+                group = "Bairros"
+    )  |>
+    addPolygons(data=setores_zeis1,
+            weight=.5,
+            color='darkgreen',
+            opacity = 0.9,
+            fillColor = "green",
+            dashArray = "0",
+            fillOpacity = 0.35,
+            popup =  popupTable(setores_zeis1,zcol = c("CD_SETOR", 'area_setor', "v0001", 'v0007'),
+                                feature.id = FALSE,
+                                row.numbers = FALSE),
+            highlightOptions=highlightOptions(
+              color = "darkgreen", weight = 3, bringToFront = F)) |>
+  addPolygons(data=df_inter1,
+              weight=.2,
+              color='red',
+              opacity = 1,
+              fillColor = "#E1014D",
+              popup =  popupTable(df_inter1,zcol = c("Name", "CD_SETOR", "AREA_KM2","area_setor","area_inter_m2","perc_area","est_pessoas",'est_domic',"v0001", 'v0007'),
+                                  feature.id = FALSE,
+                                  row.numbers = FALSE),
+              dashArray = "0",
+              fillOpacity = 0.4,
+              highlightOptions=highlightOptions(
+                color = "#CC0000", weight = 3, bringToFront = F))|>
+  addLegend("bottomright", 
+                 colors = c("#E1014D",  "green"),
+                 labels = c("Área Zeis", "Setor censitário"),
+                 title = "",
+                 opacity = 1)
+})
+# Assentamento --------------------------------------------------------------------------------
+
+
+observeEvent(input$current_tab, { 
+
+output$map_assent <-  renderLeaflet({
+    
+    leaflet() |>
+      setMapWidgetStyle(list(background = "white"))  |> 
+      addProviderTiles(providers$CartoDB.PositronNoLabels, group = "CartoDB.PositronNoLabels")|> #CartoDB.Positron
+      addLayersControl(
+      overlayGroups = c(
+          "Bairros"#,
+          # "Assentamento",
+          # "Setores censitários",
+          #'Nomes dos bairros'
+      )) |>
+     # hideGroup("Elementos do mapa")  |>
+     # hideGroup('Nomes dos bairros') |>
+      addScaleBar(position = "bottomright",
+                  options = scaleBarOptions(imperial = F))  |>
+      setView(-38.52782, -3.785804, zoom = 12) |>
+      addFullscreenControl(pseudoFullscreen = T)|> 
+      addPolygons(data=shp_Bairros,
+                  weight=1,
+                  color='black',
+                  opacity = 1,
+                  fillColor = "white",
+                  popup =  ~Bairro,
+                  dashArray = "0",
+                  fillOpacity = 0,
+                  group = "Bairros"
+      ) # |>
+      # addLabelOnlyMarkers(data = shp_Bairros,group='Nomes dos bairros',
+      #                     lng = ~x, lat = ~y, label = ~shp_Bairros$bairro  ,
+      #                     labelOptions = labelOptions(noHide = T,  textOnly = T,
+      #                                                 direction = "right",
+      #                                                 style = list(
+      #                                                   "color" = "black",
+      #                                                   'background-color'= 'rgba(255,255,255, 0)',
+      #                                                   'padding'= '0px 0px 0px 0px'      ))) |> 
+      # addMeasure(
+      #   position = "topright",
+      #   primaryLengthUnit = "meters",
+      #   primaryAreaUnit = "sqmeters",
+      #   secondaryLengthUnit = "kilometers",
+      #   activeColor = "#3D535D",
+      #   completedColor = "#7D4479",
+      #   localization = "pt_BR",
+      #   captureZIndex = 10000
+      # )   
+  }) 
+output$table_assent <- renderReactable({
+  
+  areaA <- round(sum(assent_pop$area_assent_km2),2)      
+  pessoA <- sum(assent_pop$Pessoas)   
+  domiA <- sum(assent_pop$Domicilios)   
+  densA <-round( sum(assent_pop$Pessoas)/sum(assent_pop$area_assent_km2) )
+
+  
+assent_pop  <- assent_pop  |>
+    st_drop_geometry() |> 
+    select(-area_assent_m2) |> 
+    mutate(area_assent_km2=round(area_assent_km2,2))
+  
+  reactable(assent_pop,
+            bordered = TRUE,compact = TRUE,defaultPageSize = 10,
+            highlight = TRUE, searchable = TRUE,defaultColDef = colDef(#headerClass = "sort-header",
+              footerStyle = list(fontWeight = "bold",align = "right")),
+            columns = list(
+              Nome_assent = colDef(name = "Nome", footer= 'Geral', style = list(fontFamily = "monospace"
+                                                                                # whiteSpace = "pre",fontSize = "1.5rem"
+              )),
+              
+area_assent_km2 = colDef(name = "Area km2",footer=format(areaA,big.mark = ".",decimal.mark=","), #cell = function(value) {
+                #width <- paste0(value / max(assent_pop$area_assent_km2) * 100, "%")
+               # value <- format(value,big.mark = ".",decimal.mark=",")
+                # value <- format(value, width = 7, justify = "right")
+                # bar_chart(value, width = width,background = "#e1e1e1")
+              #},
+              style = list(fontFamily = "monospace", whiteSpace = "pre")),
+Pessoas = colDef(footer=format(pessoA,big.mark = ".",decimal.mark=","),  align = "left", cell = function(value) {
+                width <- paste0(value / max(assent_pop$Pessoas) * 100, "%")
+                value <- format(value,big.mark = ".",decimal.mark=",")
+                value <- format(value, width = 7, justify = "right")
+                bar_chart(value, width = width,background = "#e1e1e1")
+              }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
+              Domicilios = colDef(name= "Domicílios",footer=format(domiA,big.mark = ".",decimal.mark=","), 
+                                  align = "left", cell = function(value) {
+                width <- paste0(value / max(assent_pop$Domicilios) * 100, "%")
+                value <- format(value,big.mark = ".",decimal.mark=",")
+                value <- format(value, width = 7, justify = "right")
+                bar_chart(value, width = width, fill = "#fc5185", background = "#e1e1e1")
+              }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
+              Densidade = colDef(align = "left",footer=format(densA,big.mark = ".",decimal.mark=","),  cell = function(value) {
+                width <- paste0(value / max(assent_pop$Densidade) * 100, "%")
+                value <- format(value,big.mark = ".",decimal.mark=",")
+                value <- format(value, width = 7, justify = "right")
+                bar_chart(value, width = width, fill = "#245", background = "#e1e1e1")
+              }, style = list(fontFamily = "monospace", whiteSpace = "pre"))
+            )
+  ) 
+  
+  
+  
+  
+  
+})
+},once=T) 
+observeEvent(req(input$current_tab=='Assentamento'), {
+
+leafletProxy('map_assent') |>
+  addPolygons(data=assent_pop,
+              weight=.6,
+              fillColor=~pal_as(assent_pop$Pessoas),
+              color = '#452',
+              opacity = 1,
+              group = 'id_Final',
+              popup =  popupTable(assent_pop_,zcol = c("Nome_assent", "Pessoas",
+                                                       "Domicilios","Densidade",
+                                                       "area_assent_km2"),
+                                  feature.id = FALSE,
+                                  row.numbers = FALSE),
+              dashArray = "0",
+              fillOpacity =1 ,
+              highlightOptions=highlightOptions(
+                color = "#CC0000", weight = 3, bringToFront = F)
+  ) |>
+  addLegend(data = assent_pop,"bottomright", pal = pal_as, values = ~Pessoas,
+            title = "População",
+            opacity = 1
+  )
+
+},once=T)
+# 
+{ # aux
+pal_as <- colorNumeric(
+  palette = "YlGnBu",
+  domain = assent_pop$Pessoas
+)
+
+
+assent_pop_ <- st_drop_geometry(assent_pop) |>
+  mutate(Pessoas = format(Pessoas, big.mark = ".", decimal.mark = ","),
+         Domicilios = format(Domicilios, big.mark = ".", decimal.mark = ","),
+         Densidade = format(Densidade, big.mark = ".", decimal.mark = ","),
+         area_assent_km2 = format(area_assent_km2, big.mark = ".", decimal.mark = ",")
+  )
+
+sca_as <- colourScale(assent_pop$Densidade, breaks=6,
+                   style="quantile",dec=1,revCol=F)
+
+colorpal_dens_as <- colorBin("YlOrBr", assent_pop$Densidade, bins = sca_as$breaks)
+
+} # Aux mapa
+ 
+observeEvent(req(input$tabs),{ 
+
+
+  leafletProxy("map_assent" )  |> 
+    clearGroup(c('id_Final')) |> 
+    clearControls()# |> 
+    # removeMeasure() |> 
+    # addMeasure(
+    #   position = "topright",
+    #   primaryLengthUnit = "meters",
+    #   primaryAreaUnit = "sqmeters",
+    #   secondaryLengthUnit = "kilometers",
+    #   activeColor = "#3D535D",
+    #   completedColor = "#7D4479",
+    #   localization = "pt_BR",
+    #   captureZIndex = 10000
+    # )
+
+  if(input$tabs == 'População' )
+  {
+   
+    
+    leafletProxy('map_assent') |>
+      addPolygons(data=assent_pop,
+                  weight=.6,
+                  fillColor=~pal_as(assent_pop$Pessoas),
+                  color = '#452',
+                  opacity = 1,
+                  group = 'id_Final',
+                  popup =  popupTable(assent_pop_,zcol = c("Nome_assent", "Pessoas",
+                                                           "Domicilios","Densidade",
+                                                           "area_assent_km2"),
+                                      feature.id = FALSE,
+                                      row.numbers = FALSE),
+                  dashArray = "0",
+                  fillOpacity =1 ,
+                  highlightOptions=highlightOptions(
+                    color = "#CC0000", weight = 3, bringToFront = F)
+      ) |>
+      addLegend(data = assent_pop,"bottomright", pal = pal_as, values = ~Pessoas,
+                title = "População",
+                opacity = 1
+      )
+  }
+
+
+  if(input$tabs == 'Densidade' )
+  {
+
+    leafletProxy('map_assent') |>
+      addPolygons(data=assent_pop ,
+                  weight=.6,
+                  fillColor=~colorpal_dens_as(assent_pop$Densidade),
+                  color = '#452',
+                  opacity = 1,
+                  group = 'id_Final',
+                  popup =  popupTable(assent_pop_,zcol = c("Nome_assent", "Pessoas",
+                                                           "Domicilios","Densidade",
+                                                           "area_assent_km2"),
+                                      feature.id = FALSE,
+                                      row.numbers = FALSE),
+                  dashArray = "0",
+                  fillOpacity =1 ,
+                  highlightOptions=highlightOptions(
+                    color = "#CC0000", weight = 3, bringToFront = F)
+      ) |>
+      addLegend(data = assent_pop,position ="bottomright", pal = colorpal_dens_as,
+                values = ~Densidade,
+                labFormat = my_labelFormat(
+                  big.mark='.',
+                  digits=0),
+                title = "Densidade populacional",
+                opacity = 1
+      )
+    
+    
+  }
+  
+},ignoreInit = T) # 
+
+
+
+
+# Zeis ----------------------------------------------------------------------------------------
+
+{
+  observeEvent(input$current_tab, { 
+    
+    output$map_zeis <-  renderLeaflet({
+        leaflet() |>
+        setMapWidgetStyle(list(background = "white"))  |> 
+        addProviderTiles(providers$CartoDB.PositronNoLabels, group = "CartoDB.PositronNoLabels")|> #CartoDB.Positron
+        # addProviderTiles(providers$OpenStreetMap, group = "OpenStreetMap")  |> 
+        # addProviderTiles(providers$CartoDB.DarkMatter, group = "CartoDB.DarkMatter")  |>
+        # addProviderTiles(providers$Esri.WorldImagery, group = "WorldImagery")  |>
+        addLayersControl(
+         # baseGroups = c("CartoDB.Positron","OpenStreetMap",'CartoDB.DarkMatter','WorldImagery'),
+          overlayGroups = c(
+            "Bairros",
+            'id_final'
+            # "Assentamento",
+            # "Setores censitários"#,
+            #'Nomes dos bairros')
+          )) |>
+        # hideGroup("Elementos do mapa")  |>
+        # hideGroup('Nomes dos bairros') |>
+        addScaleBar(position = "bottomright",
+                    options = scaleBarOptions(imperial = F))  |>
+        setView(-38.52782, -3.785804, zoom = 12) |>
+        addFullscreenControl(pseudoFullscreen = T)|> 
+        addPolygons(data=shp_Bairros,
+                    weight=1,
+                    color='black',
+                    opacity = 1,
+                    fillColor = "white",
+                    popup =  ~Bairro,
+                    dashArray = "0",
+                    fillOpacity = 0,
+                    group = "Bairros"
+        )  #|>
+        # addLabelOnlyMarkers(data = shp_Bairros,group='Nomes dos bairros',
+        #                     lng = ~x, lat = ~y, label = ~shp_Bairros$bairro  ,
+        #                     labelOptions = labelOptions(noHide = T,  textOnly = T,
+        #                                                 direction = "right",
+        #                                                 style = list(
+        #                                                   "color" = "black",
+        #                                                   'background-color'= 'rgba(255,255,255, 0)',
+        #                                                   'padding'= '0px 0px 0px 0px'      ))) |> 
+        # addMeasure(
+        #   position = "topright",
+        #   primaryLengthUnit = "meters",
+        #   primaryAreaUnit = "sqmeters",
+        #   secondaryLengthUnit = "kilometers",
+        #   activeColor = "#3D535D",
+        #   completedColor = "#7D4479",
+        #   localization = "pt_BR",
+        #   captureZIndex = 10000
+        # )   
+    }) 
+    output$table_zeis <- renderReactable({
+    
+      dens_tot =  round(sum(zeis_1_pop$Pessoas)/sum(zeis_1_pop$area_zeis_km2))
+      
+      zeis_1_pop  <-  zeis_1_pop |>
+        st_drop_geometry() |>
+        dplyr::select(-area_zeis  ) |> 
+        mutate(area_zeis_km2=round(area_zeis_km2,2))
+      
+
+        
+      reactable(zeis_1_pop ,
+                bordered = TRUE,compact = TRUE,defaultPageSize = 10,
+                highlight = TRUE, searchable = TRUE,defaultColDef = colDef(#headerClass = "sort-header",
+                  footerStyle = list(fontWeight = "bold",align = "right")),
+                columns = list(
+                  Nome = colDef(name = "Nome",footer='Geral', style = list(fontFamily = "monospace"
+                                                            # whiteSpace = "pre",fontSize = "1.5rem"
+                  )),
+  area_zeis_km2 = colDef(name = "area_zeis km2", 
+                  footer=format(sum(zeis_1_pop$area_zeis_km2),big.mark = ".",decimal.mark=","), 
+                  align = "left",cell = function(value) {
+                    width <- paste0(value / max(zeis_1_pop$area_zeis_km2) * 100, "%")
+                    value <- format(value,big.mark = ".",decimal.mark=",")
+                    value <- format(value, width = 7, justify = "right")
+                    bar_chart(value, width = width,background = "#e1e1e1")
+                  }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
+  Pessoas = colDef(footer=format(sum(zeis_1_pop$Pessoas),big.mark = ".",decimal.mark=","),
+                                   align = "left", cell = function(value) {
+                    width <- paste0(value / max(zeis_1_pop$Pessoas) * 100, "%")
+                    value <- format(value,big.mark = ".",decimal.mark=",")
+                    value <- format(value, width = 7, justify = "right")
+                    bar_chart(value, width = width,background = "#e1e1e1")
+                  }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
+  Domicilios = colDef(name = "Domicílios",
+                      footer=format(sum(zeis_1_pop$Domicilios),big.mark = ".",decimal.mark=","),
+                                      align = "left", cell = function(value) {
+                    width <- paste0(value / max(zeis_1_pop$Domicilios) * 100, "%")
+                    value <- format(value,big.mark = ".",decimal.mark=",")
+                    value <- format(value, width = 7, justify = "right")
+                    bar_chart(value, width = width, fill = "#fc5185", background = "#e1e1e1")
+                  }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
+  Densidade = colDef(footer=format(dens_tot,big.mark = ".",decimal.mark=","),
+                     align = "left", cell = function(value) {
+                    width <- paste0(value / max(zeis_1_pop$Densidade) * 100, "%")
+                    value <- format(value,big.mark = ".",decimal.mark=",")
+                    value <- format(value, width = 7, justify = "right")
+                    bar_chart(value, width = width, fill = "#245", background = "#e1e1e1")
+                  }, style = list(fontFamily = "monospace", whiteSpace = "pre"))
+                )
+      )
+      
+      
+    })
+  },once=T)
+  
+  observeEvent(req(input$current_tab=='Zeis'), {
+   
+    leafletProxy('map_zeis') |>
+      addPolygons(data=zeis_1_pop,
+                  weight=.6,
+                  fillColor=~pal_ze(zeis_1_pop$Pessoas),
+                  color = '#452',
+                  opacity = 1,
+                  group = 'id_final',
+                  popup =  popupTable(zeis_1_pop_,zcol = c("Nome", "Pessoas",
+                                                           "Domicilios","Densidade",
+                                                           "area_zeis_km2"),
+                                      feature.id = FALSE,
+                                      row.numbers = FALSE),
+                  dashArray = "0",
+                  fillOpacity =1 ,
+                  highlightOptions=highlightOptions(
+                    color = "#CC0000", weight = 3, bringToFront = F)
+      ) |>
+      addLegend(data = zeis_1_pop,"bottomright", pal = pal_ze, values = ~Pessoas,
+                title = "População ZEIS 1",
+                opacity = 1
+      )
+    
+  },once=T)
+  # 
+  { # aux
+    pal_ze <- colorNumeric(
+      palette = "YlGnBu",
+      domain = zeis_1_pop$Pessoas
+    )
+    
+    
+    zeis_1_pop_ <- st_drop_geometry(zeis_1_pop) |>
+      mutate(Pessoas = format(Pessoas, big.mark = ".", decimal.mark = ","),
+             Domicilios = format(Domicilios, big.mark = ".", decimal.mark = ","),
+             Densidade = format(Densidade, big.mark = ".", decimal.mark = ","),
+             area_zeis_km2 = format(area_zeis_km2, big.mark = ".", decimal.mark = ","),
+             
+      )
+    
+    sca_ze <- colourScale(zeis_1_pop$Densidade, breaks=6,
+                          style="quantile",dec=1,revCol=F)
+    
+    colorpal_dens_ze <- colorBin("YlOrBr", zeis_1_pop$Densidade, bins = sca_ze$breaks)
+    
+
+    
+   
+  } # Aux mapa
+  
+  observeEvent(req(input$tabs_ze),{ 
+
+    
+    leafletProxy("map_zeis" )  |> 
+      clearGroup(c('id_final')) |> 
+      clearControls()# |> 
+      #removeMeasure() |> 
+      # addMeasure(
+      #   position = "topright",
+      #   primaryLengthUnit = "meters",
+      #   primaryAreaUnit = "sqmeters",
+      #   secondaryLengthUnit = "kilometers",
+      #   activeColor = "#3D535D",
+      #   completedColor = "#7D4479",
+      #   localization = "pt_BR",
+      #   captureZIndex = 10000
+      # )
+    
+    if(input$tabs_ze == 'População' )
+    {
+    
+      
+      leafletProxy('map_zeis') |>
+        addPolygons(data=zeis_1_pop,
+                    weight=.6,
+                    fillColor=~pal_ze(zeis_1_pop$Pessoas),
+                    color = '#452',
+                    opacity = 1,
+                    group = 'id_final',
+                    popup =  popupTable(zeis_1_pop_,zcol = c("Nome", "Pessoas",
+                                                             "Domicilios","Densidade",
+                                                             "area_zeis_km2"),
+                                        feature.id = FALSE,
+                                        row.numbers = FALSE),
+                    dashArray = "0",
+                    fillOpacity =1 ,
+                    highlightOptions=highlightOptions(
+                      color = "#CC0000", weight = 3, bringToFront = F)
+        ) |>
+        addLegend(data = zeis_1_pop,"bottomright", pal = pal_ze, values = ~Pessoas,
+                  title = "População ZEIS 1",
+                  opacity = 1
+        )
+    }
+    
+    
+    if(input$tabs_ze == 'Densidade' )
+    {
+  
+      leafletProxy('map_zeis') |>
+        addPolygons(data=zeis_1_pop ,
+                    weight=.6,
+                    fillColor=~colorpal_dens_ze(zeis_1_pop$Densidade),
+                    color = '#452',
+                    opacity = 1,
+                    group = 'id_final',
+                    popup =  popupTable(zeis_1_pop_,zcol = c("Nome", "Pessoas",
+                                                             "Domicilios","Densidade",
+                                                             "area_zeis_km2"),
+                                        feature.id = FALSE,
+                                        row.numbers = FALSE),
+                    dashArray = "0",
+                    fillOpacity =1 ,
+                    highlightOptions=highlightOptions(
+                      color = "#CC0000", weight = 3, bringToFront = F)
+        ) |>
+        addLegend(data = zeis_1_pop,position ="bottomright", pal = colorpal_dens_ze,
+                  values = ~Densidade,
+                  labFormat = my_labelFormat(
+                    big.mark='.',
+                    digits=0),
+                  title = "Densidade populacional ZEIS 1",
+                  opacity = 1
+        )
+      
+      
+    }
+    
+  },ignoreInit = T) # 
+}
+
+
+# Bairro --------------------------------------------------------------------------------------
+
+
+
+{
+  observeEvent(input$current_tab, { 
+    
+    output$map_bairro <-  renderLeaflet({
+      leaflet() |>
+        setMapWidgetStyle(list(background = "white"))  |> 
+        addProviderTiles(providers$CartoDB.PositronNoLabels, group = "CartoDB.PositronNoLabels")|> #CartoDB.Positron
+        # addProviderTiles(providers$OpenStreetMap, group = "OpenStreetMap")  |> 
+        # addProviderTiles(providers$CartoDB.DarkMatter, group = "CartoDB.DarkMatter")  |>
+        # addProviderTiles(providers$Esri.WorldImagery, group = "WorldImagery")  |>
+        addLayersControl(
+         # baseGroups = c("CartoDB.Positron","OpenStreetMap",'CartoDB.DarkMatter','WorldImagery'),
+          overlayGroups = c(
+            "Bairros",
+            'id_final'
+            # "Assentamento",
+            # "Setores censitários"#,
+            #'Nomes dos bairros')
+          )) |>
+        # hideGroup("Elementos do mapa")  |>
+        # hideGroup('Nomes dos bairros') |>
+        addScaleBar(position = "bottomright",
+                    options = scaleBarOptions(imperial = F))  |>
+        setView(-38.52782, -3.785804, zoom = 12) |>
+        addFullscreenControl(pseudoFullscreen = T)#|> 
+        # addPolygons(data=shp_Bairros,
+        #             weight=1,
+        #             color='black',
+        #             opacity = 1,
+        #             fillColor = "white",
+        #             popup =  ~bairro,
+        #             dashArray = "0",
+        #             fillOpacity = 0,
+        #             group = "Bairros"
+        # )  |>
+        # addLabelOnlyMarkers(data = shp_Bairros,group='Nomes dos bairros',
+        #                     lng = ~x, lat = ~y, label = ~shp_Bairros$bairro  ,
+        #                     labelOptions = labelOptions(noHide = T,  textOnly = T,
+        #                                                 direction = "right",
+        #                                                 style = list(
+        #                                                   "color" = "black",
+        #                                                   'background-color'= 'rgba(255,255,255, 0)',
+        #                                                   'padding'= '0px 0px 0px 0px'      ))) |> 
+        # addMeasure(
+        #   position = "topright",
+        #   primaryLengthUnit = "meters",
+        #   primaryAreaUnit = "sqmeters",
+        #   secondaryLengthUnit = "kilometers",
+        #   activeColor = "#3D535D",
+        #   completedColor = "#7D4479",
+        #   localization = "pt_BR",
+        #   captureZIndex = 10000
+        # )   
+    }) 
+    output$table_bairro <- renderReactable({
+      
+
+      areaB <- round(sum(shp_Bairros$Área_km2),2)      
+      pessoB <- sum(shp_Bairros$Pessoas)   
+      domiB <- sum(shp_Bairros$Domicílios)   
+      densB <-round( sum(shp_Bairros$Pessoas)/sum(shp_Bairros$Área_km2) )
+      medB <- round(sum(shp_Bairros$Pessoas)/sum(shp_Bairros$Domicílios),2)
+      
+shp_Bairros <-   shp_Bairros |>
+        st_drop_geometry() |> 
+        select(-x,-y,) |> 
+        mutate(Densidade=round(Densidade),
+               Área_km2=round(Área_km2,2),
+               Média_moradores=round(Média_moradores,2))
+      
+      
+      reactable(shp_Bairros,
+                bordered = TRUE,compact = TRUE,defaultPageSize = 10,
+                highlight = TRUE, searchable = TRUE,defaultColDef = colDef(#headerClass = "sort-header",
+                                                                           footerStyle = list(fontWeight = "bold",align = "right")),
+                columns = list(
+Bairro = colDef(name = "Bairro",footer='Geral', style = list(fontFamily = "monospace"
+                                                            # whiteSpace = "pre",fontSize = "1.5rem"
+                  )),
+Área_km2 = colDef(name = "Área km2", footer=format(areaB,big.mark = ".",decimal.mark=","), 
+                  align = "right", cell = function(value) {
+                    width <- paste0(value / max(shp_Bairros$Área_km2) * 100, "%")
+                    value <- format(value,big.mark = ".",decimal.mark=",")
+                  }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
+Pessoas = colDef( align = "left", footer=format(pessoB,big.mark = ".",decimal.mark=","), 
+                  cell = function(value) {
+                    width <- paste0(value / max(shp_Bairros$Pessoas) * 100, "%")
+                    value <- format(value,big.mark = ".",decimal.mark=",")
+                    value <- format(value, width = 7, justify = "right")
+                    bar_chart(value, width = width,background = "#e1e1e1")
+                  }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
+Domicílios = colDef( align = "left",footer=format(domiB,big.mark = ".",decimal.mark=","), 
+                     cell = function(value) {
+                    width <- paste0(value / max(shp_Bairros$Domicílios) * 100, "%")
+                    value <- format(value,big.mark = ".",decimal.mark=",")
+                    value <- format(value, width = 7, justify = "right")
+                    bar_chart(value, width = width, fill = "#fc5185", background = "#e1e1e1")
+                  }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
+Densidade = colDef( align = "left",footer=format(densB,big.mark = ".",decimal.mark=","), 
+                    cell = function(value) {
+                    width <- paste0(value / max(shp_Bairros$Densidade) * 100, "%")
+                    value <- format(value,big.mark = ".",decimal.mark=",")
+                    value <- format(value, width = 7, justify = "right")
+                    bar_chart(value, width = width, fill = "#245", background = "#e1e1e1")
+                  }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
+Média_moradores = colDef(name = "Média morad.",footer=format(medB,big.mark = ".",decimal.mark=","), 
+                         
+                         align = "right", 
+                        style = list(fontFamily = "monospace", whiteSpace = "pre"))
+                )
+      )
+      
+      
+    })
+  },once=T)
+  
+  observeEvent(req(input$current_tab=='Bairros'), {
+
+    leafletProxy('map_bairro') |>
+      addPolygons(data=shp_Bairros,
+                  weight=.6,
+                  fillColor=~pal_ba(shp_Bairros$Pessoas),
+                  color = '#452',
+                  opacity = 1,
+                  group = 'id_final',
+                  popup =  popupTable(bairro_pop_,zcol = c("Bairro", "Pessoas",
+                                                           "Domicílios","Densidade",
+                                                           "Área_km2"),
+                                      feature.id = FALSE,
+                                      row.numbers = FALSE),
+                  dashArray = "0",
+                  fillOpacity =1 ,
+                  highlightOptions=highlightOptions(
+                    color = "#CC0000", weight = 3, bringToFront = F)
+      ) |>
+      addLegend(data = shp_Bairros ,"bottomright", pal = pal_ba, values = ~Pessoas,
+                title = "População",
+                opacity = 1
+      )
+    
+  },once=T)
+  # 
+  { # aux
+    pal_ba <- colorNumeric(
+      palette = "YlGnBu",
+      domain = shp_Bairros$Pessoas
+    )
+    
+    pal_dens_ba<- colorNumeric(
+      palette = "YlOrBr",
+      domain = shp_Bairros$Densidade
+    )
+    
+    bairro_pop_ <- st_drop_geometry(shp_Bairros) |>
+      mutate(Pessoas = format(Pessoas, big.mark = ".", decimal.mark = ","),
+             Domicílios = format(Domicílios, big.mark = ".", decimal.mark = ","),
+             Densidade = format(Densidade, big.mark = ".", decimal.mark = ","),
+             Área_km2 = format(Área_km2, big.mark = ".", decimal.mark = ","),
+             
+      )
+    
+    # sca_ba <- colourScale(shp_Bairros$Densidade, breaks=6,
+    #                       style="quantile",dec=1,revCol=F)
+    # 
+    # colorpal_dens_ba <- colorBin("YlOrBr", shp_Bairros$Densidade, bins = sca_ba$breaks)
+    # 
+    # 
+    
+    
+  } # Aux mapa
+  
+  observeEvent(req(input$tabs_ba),{ 
+
+    
+    leafletProxy("map_bairro" )  |> 
+      clearGroup(c('id_final')) |> 
+      clearControls() #|> 
+      # removeMeasure() |> 
+      # addMeasure(
+      #   position = "topright",
+      #   primaryLengthUnit = "meters",
+      #   primaryAreaUnit = "sqmeters",
+      #   secondaryLengthUnit = "kilometers",
+      #   activeColor = "#3D535D",
+      #   completedColor = "#7D4479",
+      #   localization = "pt_BR",
+      #   captureZIndex = 10000
+      # )
+    
+    if(input$tabs_ba == 'População' )
+    {
+ 
+      
+      leafletProxy('map_bairro') |>
+        addPolygons(data=shp_Bairros,
+                    weight=.6,
+                    fillColor=~pal_ba(shp_Bairros$Pessoas),
+                    color = '#452',
+                    opacity = 1,
+                    group = 'id_final',
+                    popup =  popupTable(bairro_pop_,zcol = c("Bairro", "Pessoas",
+                                                             "Domicílios","Densidade",
+                                                             "Área_km2"),
+                                        feature.id = FALSE,
+                                        row.numbers = FALSE),
+                    dashArray = "0",
+                    fillOpacity =1 ,
+                    highlightOptions=highlightOptions(
+                      color = "#CC0000", weight = 3, bringToFront = F)
+        ) |>
+        addLegend(data = shp_Bairros,"bottomright", pal = pal_ba, values = ~Pessoas,
+                  title = "População",
+                  opacity = 1
+        )
+    }
+    
+    
+    if(input$tabs_ba == 'Densidade' )
+    {
+  
+      leafletProxy('map_bairro') |>
+        addPolygons(data=shp_Bairros ,
+                    weight=.6,
+                   # fillColor=~colorpal_dens_ba(shp_Bairros$Densidade),
+                   fillColor=~pal_dens_ba(shp_Bairros$Densidade),
+                    color = '#452',
+                    opacity = 1,
+                    group = 'id_final',
+                    popup =  popupTable(bairro_pop_,zcol = c("Bairro", "Pessoas",
+                                                             "Domicílios","Densidade",
+                                                             "Área_km2"),
+                                        feature.id = FALSE,
+                                        row.numbers = FALSE),
+                    dashArray = "0",
+                    fillOpacity =1 ,
+                    highlightOptions=highlightOptions(
+                      color = "#CC0000", weight = 3, bringToFront = F)
+        ) |>
+        addLegend(data = shp_Bairros,position ="bottomright", pal = pal_dens_ba,
+                  values = ~Densidade,
+                  labFormat = my_labelFormat(
+                    big.mark='.',
+                    digits=0),
+                  title = "Densidade populacional",
+                  opacity = 1
+        )
+      
+      
+    }
+    
+  },ignoreInit = T) # 
+}
+
+
+# download ------------------------------------------------------------------------------------
+
+output$down_zeis <- downloadHandler(
+  filename = 'População_Zeis_1_2022.geojson',
+  content = function(file) {
+    sf::write_sf(zeis_1_pop, file)
+  }
+)#
+
+output$down_assent <- downloadHandler(
+  filename = 'População_assent_2022.geojson',
+  content = function(file) {
+    sf::write_sf(assent_pop, file)
+  }
+)#
+output$down_bairro <- downloadHandler(
+  filename = 'População_bairro_2022.geojson',
+  content = function(file) {
+    sf::write_sf(shp_Bairros, file)
+  }
+)#
+
+output$down_zeis_xlsx <- downloadHandler(
+  filename = 'População_Zeis_1_2022.xlsx',
+  content = function(file) {
+    write_xlsx(zeis_1_pop, file)
+  }
+)#
+
+output$down_assent_xlsx <- downloadHandler(
+  filename = 'População_assent_2022.xlsx',
+  content = function(file) {
+    write_xlsx(assent_pop, file)
+  }
+)#
+output$down_bairro_xlsx <- downloadHandler(
+  filename = 'População_bairro_2022.xlsx',
+  content = function(file) {
+   write_xlsx(shp_Bairros, file)
+  }
+)#
+
+
+}

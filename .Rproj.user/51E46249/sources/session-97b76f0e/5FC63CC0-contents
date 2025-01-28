@@ -1,0 +1,225 @@
+library(readr)
+library(Rcpp)
+library(SAScii)
+library(PNADcIBGE)
+library(survey)
+library(convey)
+library(tidyverse)
+
+# Definição do Caminho
+setwd("C:/Romulo/Iplanfor/Pnadc/Pnadc_Visita_5")
+
+
+  # 
+  #
+  # # Lista de Variaveis selecionadas
+  lista2=c("Ano","Trimestre","UF","Capital","RM_RIDE","V2001","V1030","V1031",
+           "V1032","V2007","V2009","V2010","V3001","V3002","V4009","V4071","VD4001",
+           "VD4002","VD2002","VD4019","VD4020","VD5005","VD5001","VD5002","VD5003",
+           "VD5004","VD5006","VD4007","VD4008","VD4009","VD4012","VD2003",
+           "VD5012","VD4003","VD4004A","VD4004","VD4005","VD4013","VD4014","V4039",
+           "V4063A","V4064A","V4010","V4013","VD3004","VD5009","VD5011",
+           "VD5008","VD4011",'VD4031','VD4035',  'VD4036','VD4037','VD4017','VD4016',
+           'V4039','V4039C','VD4010'  )
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  ### Para antes de 2019 1ªvisita
+  ### 1ª VISITA
+  setwd("C:/Romulo/Iplanfor/Pnadc/Primeira Visita")
+  
+  # IBGE -> anual/microdados/visita/Visita_1/Dados
+  #
+  
+  pnadcV1_19 <-  read_pnadc(microdata="PNADC_2019_visita1.txt",
+                            input_txt="input_PNADC_2019_visita1_20220224.txt",
+                            vars=lista2) %>%
+    pnadc_labeller( "dicionario_PNADC_microdados_2019_visita1_20220224.xls")%>%
+    select(-c(V1032001:V1032200))
+  
+  pnadcV1_18 <-  read_pnadc(microdata="PNADC_2018_visita1.txt",
+                            input_txt="input_PNADC_2018_visita1_20220224.txt",
+                            vars=lista2) %>%
+    pnadc_labeller( "dicionario_PNADC_microdados_2018_visita1_20220224.xls") %>%
+    select(-c(V1032001:V1032200))
+  
+  pnadcV1_17 <-  read_pnadc(microdata="PNADC_2017_visita1.txt",
+                            input_txt="input_PNADC_2017_visita1_20220224.txt",
+                            vars=lista2)%>%
+    pnadc_labeller( "dicionario_PNADC_microdados_2017_visita1_20220224.xls") %>%
+    select(-c(V1032001:V1032200))
+  
+  pnadcV1_16 <-  read_pnadc(microdata="PNADC_2016_visita1.txt",
+                            input_txt="input_PNADC_2016_visita1_20220224.txt",
+                            vars=lista2)%>%
+    pnadc_labeller( "dicionario_PNADC_microdados_2016_visita1_20220224.xls") %>%
+    select(-c(V1032001:V1032200))
+  
+  pnadcV1_15 <-  read_pnadc(microdata="PNADC_2015_visita1.txt",
+                            input_txt="input_PNADC_2015_visita1_20220224.txt",
+                            vars=lista2)%>%
+    pnadc_labeller( "dicionario_PNADC_microdados_2015_visita1_20220224.xls") %>%
+    select(-c(V1032001:V1032200)) %>%
+    mutate(
+      V2007 = fct_recode(V2007,
+                         Homem= "Masculino",
+                         Mulher="Feminino"))
+    
+    
+    
+  
+  # juntar e deletar outras
+  pnadcV1_15_19 <- bind_rows(pnadcV1_15,pnadcV1_16,pnadcV1_17,pnadcV1_18,pnadcV1_19)
+  
+  rm(pnadcV1_19,pnadcV1_18,pnadcV1_17,pnadcV1_16,pnadcV1_15)
+  #
+  ## Continua
+  
+  pnadcV1_14<-  read_pnadc(microdata="PNADC_2014_visita1.txt",
+                           input_txt="input_PNADC_2012_a_2014_visita1_20220224.txt",
+                           vars=lista2)%>%
+    pnadc_labeller( "dicionario_PNADC_microdados_2012_a_2014_visita1_20220224.xls") %>%
+    dplyr::select(-c(V1032001:V1032200))
+  
+  pnadcV1_13<-  read_pnadc(microdata="PNADC_2013_visita1.txt",
+                           input_txt="input_PNADC_2012_a_2014_visita1_20220224.txt",
+                           vars=lista2)%>%
+    pnadc_labeller( "dicionario_PNADC_microdados_2012_a_2014_visita1_20220224.xls") %>%
+    dplyr::select(-c(V1032001:V1032200))
+  
+  pnadcV1_12<-  read_pnadc(microdata="PNADC_2012_visita1.txt",
+                           input_txt="input_PNADC_2012_a_2014_visita1_20220224.txt",
+                           vars=lista2)%>%
+    pnadc_labeller( "dicionario_PNADC_microdados_2012_a_2014_visita1_20220224.xls") %>%
+    dplyr::select(-c(V1032001:V1032200))
+  
+  pnadcV1_12_14 <- rbind(pnadcV1_14,pnadcV1_13,pnadcV1_12)
+  rm(pnadcV1_14,pnadcV1_13,pnadcV1_12)
+  
+  #pnadcV1_12_14 <- pnadcV1_12_14 %>% filter(Capital=="Município de Fortaleza (CE)")
+  pnadc12_14 <- pnadcV1_12_14 %>% mutate(
+    V2007 = fct_recode(V2007,
+                       Homem= "Masculino",
+                       Mulher="Feminino"))#,
+  #   idade5 = case_when(
+  #     V2009 %in% 0:4 ~ "0-4",
+  #     V2009 %in% 5:9 ~ "5-9",
+  #     V2009 %in% 10:14 ~ "10-14",
+  #     V2009 %in% 15:19 ~ "15-19",
+  #     V2009 %in% 20:24 ~ "20-24",
+  #     V2009 %in% 25:29 ~ "25-29",
+  #     V2009 %in% 30:34 ~ "30-34",
+  #     V2009 %in% 35:39 ~ "35-39",
+  #     V2009 %in% 40:44 ~ "40-44",
+  #     V2009 %in% 45:49 ~ "45-49",
+  #     V2009 %in% 50:54 ~ "50-54",
+  #     V2009 %in% 55:59 ~ "55-59",
+  #     V2009 %in% 60:64 ~ "60-64",
+  #     V2009 %in% 65:69 ~ "65-69",
+  #     V2009 %in% 70:74 ~ "70-74",
+  #     V2009 %in% 75:79 ~ "75-79",
+  #     V2009 >= 80 ~ "80+"),
+  #   idade10 = case_when(
+  #     V2009 %in% 0:9 ~ "0-9",
+  #     V2009 %in% 10:19 ~ "10-19",
+  #     V2009 %in% 20:29 ~ "20-29",
+  #     V2009 %in% 30:39 ~ "30-39",
+  #     V2009 %in% 40:49 ~ "40-49",
+  #     V2009 %in% 50:59 ~ "50-59",
+  #     V2009 %in% 60:69 ~ "60-69",
+  #     V2009 %in% 70:79 ~ "70-79",
+  #     V2009 >= 80 ~ "80+"),
+  #   idadeEco = case_when(
+  #     V2009 %in% 14:19 ~ "14-19",
+  #     V2009 %in% 20:29 ~ "20-29",
+  #     V2009 %in% 30:39 ~ "30-39",
+  #     V2009 %in% 40:49 ~ "40-49",
+  #     V2009 %in% 50:59 ~ "50-59",
+  #     V2009 %in% 60:69 ~ "60-69",
+  #     V2009 >= 70 ~ "70+",
+  #     TRUE ~ "Fora da faixa"),
+  #   idadeEco2 = case_when(
+  #     V2009 %in% 14:19 ~ "14-19",
+  #     V2009 %in% 20:29 ~ "20-29",
+  #     V2009 %in% 30:39 ~ "30-39",
+  #     V2009 %in% 40:49 ~ "40-49",
+  #     V2009 %in% 50:59 ~ "50-59",
+  #     V2009 %in% 60:65 ~ "60-65",
+  #     V2009 >= 66 ~ "66+",
+  #     TRUE ~ "Fora da faixa")
+  # )
+  
+  rm(pnadcV1_12_14)
+  pnadc_12_19 <- bind_rows(pnadc12_14,pnadcV1_15_19)
+  rm(pnadc12_14,pnadcV1_15_19)
+  
+  
+  ### Para 2020 5ª Visita
+  # Leitura
+  ## IBGE -> anual/microdados/visita/Visita_5/Dados
+  
+  
+  setwd("C:/Romulo/Iplanfor/Pnadc/Pnadc_Visita_5")
+  pnadcV5_20 <-  read_pnadc(microdata="PNADC_2020_visita5.txt",
+                            input_txt="input_PNADC_2020_visita5_20220224.txt",
+                            vars=lista2)
+  pnadcV5_20 <- pnadc_labeller(pnadcV5_20, "dicionario_PNADC_microdados_2020_visita5_20220224.xls")
+  pnadcV5_20 <- dplyr::select(pnadcV5_20,-c(V1032001:V1032200))
+  
+  pnadcV5_21 <-  read_pnadc(microdata="PNADC_2021_visita5.txt",
+                            input_txt="input_PNADC_2021_visita5.txt",
+                            vars=lista2)
+  pnadcV5_21 <- pnadc_labeller(pnadcV5_21, "dicionario_PNADC_microdados_2021_visita5.xls")
+  pnadcV5_21 <- dplyr::select(pnadcV5_21,-c(V1032001:V1032200))
+  
+  
+  pnadcV5_22 <-  read_pnadc(microdata="PNADC_2022_visita5.txt",
+                            input_txt="input_PNADC_2022_visita5.txt",
+                            vars=lista2)
+  pnadcV5_22 <- pnadc_labeller(pnadcV5_22, "dicionario_PNADC_microdados_2022_visita5.xls")
+  pnadcV5_22 <- dplyr::select(pnadcV5_22,-c(V1032001:V1032200))
+  
+  
+  
+
+  
+  pnadc_12_20 <- bind_rows(pnadc_12_19,pnadcV5_20)
+  rm(pnadc_12_19,pnadcV5_20)
+  
+  
+  pnadc_12_21 <- bind_rows(pnadc_12_20,pnadcV5_21)
+  rm(pnadc_12_20,pnadcV5_21)
+
+  pnadc_12_22 <- bind_rows( pnadc_12_21, pnadcV5_22)
+  
+  saveRDS(pnadc_12_22,'pnadc_12_22BR.rds')
+  
+  rm(pnadc_12_21,pnadcV5_22)
+  #FIM
+  
+  ### Atualização com 2023 usando a 1ª visita
+  
+  pnadcV1_23 <-  read_pnadc(microdata="PNADC_2023_visita1.txt",
+                            input_txt="input_PNADC_2023_visita1_20240419.txt",
+                            vars=lista2) %>%
+    pnadc_labeller( "dicionario_PNADC_microdados_2023_visita1_20240419.xls")%>%
+    select(-c(V1032001:V1032200))
+  
+  pnadc<- readRDS('pnadc_12_22BR.rds')
+    
+  pnadc_12_23 <- bind_rows( pnadc, pnadcV1_23)
+ 
+  saveRDS(pnadc_12_23,'pnadc_12_23BR.rds')
+  
+  rm(pnadc_12_23_f)
+  

@@ -1,0 +1,3948 @@
+
+library(shinydashboard)
+library(tidyverse)
+library(shinyWidgets)
+library(DT)
+library(shinycssloaders)
+library(plotly)
+library(lemon)
+#devtools::install_github('paulofelipe/D3plusR')
+library(D3plusR)
+library(echarts4r)
+library(sf)
+library(bs4Dash)
+library(mapmisc)
+library(wordcloud2)
+library(tm)
+
+library(leaflet.extras)
+#remotes::install_github("JohnCoene/echarts4r.assets")
+library(echarts4r.assets)
+#####  TRATAMENTO
+{
+# #Pacotes
+# 
+# library(readr)
+# library(Rcpp)
+# library(SAScii)
+# library(PNADcIBGE) 
+# library(survey)
+# library(convey)
+# library(tidyverse)
+# 
+# # Definição do Caminho
+# setwd("C:/Romulo/Iplanfor/Pnadc/Pnadc_Visita_5")
+# 
+# 
+# # Lista de Variaveis selecionadas
+# lista2=c("Ano","Trimestre","UF","Capital","RM_RIDE","V2001","V1030","V1031",   
+#          "V1032","V2007","V2009","V2010","V3001","V3002","V4009","V4071","VD4001",
+#          "VD4002","VD2002","VD4019","VD4020","VD5005","VD5001","VD5002","VD5003",
+#          "VD5004","VD5005","VD5006","VD4007","VD4008","VD4009","VD4012","VD2003",
+#          "VD5012","VD4003","VD4004A","VD4004","VD4005","VD4013","VD4014","V4039","V4063A","V4064A","V4010")
+# 
+# 
+# 
+# 
+# ### Para antes de 2019 1ªvisita
+# ### 1ª VISITA
+# # setwd("C:/Romulo/Iplanfor/Pnadc/Primeira Visita")
+# 
+# # 
+# pnadcV1_19 <-  read_pnadc(microdata="PNADC_2019_visita1.txt",
+#                           input_txt="input_PNADC_2019_visita1_20220224.txt",
+#                           vars=lista2) %>%
+#                pnadc_labeller( "dicionario_PNADC_microdados_2019_visita1_20220224.xls")%>% 
+#                select(-c(V1032001:V1032200))
+# 
+# pnadcV1_18 <-  read_pnadc(microdata="PNADC_2018_visita1.txt",
+#                           input_txt="input_PNADC_2018_visita1_20220224.txt",
+#                           vars=lista2) %>%
+#                pnadc_labeller( "dicionario_PNADC_microdados_2018_visita1_20220224.xls") %>% 
+#                 select(-c(V1032001:V1032200))
+# 
+# pnadcV1_17 <-  read_pnadc(microdata="PNADC_2017_visita1.txt",
+#                           input_txt="input_PNADC_2017_visita1_20220224.txt",
+#                           vars=lista2)%>%
+#                pnadc_labeller( "dicionario_PNADC_microdados_2017_visita1_20220224.xls") %>% 
+#                 select(-c(V1032001:V1032200))
+# 
+# pnadcV1_16 <-  read_pnadc(microdata="PNADC_2016_visita1.txt",
+#                           input_txt="input_PNADC_2016_visita1_20220224.txt",
+#                           vars=lista2)%>%
+#                 pnadc_labeller( "dicionario_PNADC_microdados_2016_visita1_20220224.xls") %>% 
+#                 select(-c(V1032001:V1032200))
+# 
+# pnadcV1_15 <-  read_pnadc(microdata="PNADC_2015_visita1.txt",
+#                           input_txt="input_PNADC_2015_visita1_20220224.txt",
+#                           vars=lista2)%>%
+#                pnadc_labeller( "dicionario_PNADC_microdados_2015_visita1_20220224.xls") %>% 
+#                select(-c(V1032001:V1032200))
+# ## juntar e deletar outras
+# pnadcV1_15_19 <- bind_rows(pnadcV1_15,pnadcV1_16,pnadcV1_17,pnadcV1_18,pnadcV1_19)
+# 
+# rm(pnadcV1_19,pnadcV1_18,pnadcV1_17,pnadcV1_16,pnadcV1_15)
+
+## Continua
+# 
+# pnadcV1_14<-  read_pnadc(microdata="PNADC_2014_visita1.txt",
+#                           input_txt="input_PNADC_2012_a_2014_visita1_20220224.txt",
+#                           vars=lista2)%>%
+#               pnadc_labeller( "dicionario_PNADC_microdados_2012_a_2014_visita1_20220224.xls") %>% 
+#               select(-c(V1032001:V1032200))
+# 
+# pnadcV1_13<-  read_pnadc(microdata="PNADC_2013_visita1.txt",
+#                          input_txt="input_PNADC_2012_a_2014_visita1_20220224.txt",
+#                          vars=lista2)%>%
+#               pnadc_labeller( "dicionario_PNADC_microdados_2012_a_2014_visita1_20220224.xls") %>% 
+#               select(-c(V1032001:V1032200))
+# 
+# pnadcV1_12<-  read_pnadc(microdata="PNADC_2012_visita1.txt",
+#                          input_txt="input_PNADC_2012_a_2014_visita1_20220224.txt",
+#                          vars=lista2)%>%
+#               pnadc_labeller( "dicionario_PNADC_microdados_2012_a_2014_visita1_20220224.xls") %>% 
+#               select(-c(V1032001:V1032200))
+# 
+# pnadcV1_12_14 <- rbind(pnadcV1_14,pnadcV1_13,pnadcV1_17,pnadcV1_12)
+# rm(pnadcV1_14,pnadcV1_13,pnadcV1_17,pnadcV1_12)
+
+#saveRDS(pnadcV1_15_19,'pnadcV1_15_19.rds')
+
+# pnadcV1_15_19 <- readRDS("pnadcV1_15_19.rds")
+# ### Para 2020 5ª Visita
+# # Leitura
+# 
+# setwd("C:/Romulo/Iplanfor/Pnadc/Pnadc_Visita_5")
+# pnadcV5_20 <-  read_pnadc(microdata="PNADC_2020_visita5.txt",
+#                           input_txt="input_PNADC_2020_visita5_20220224.txt",
+#                           vars=lista2)
+# pnadcV5_20 <- pnadc_labeller(pnadcV5_20, "dicionario_PNADC_microdados_2020_visita5_20220224.xls")
+# pnadcV5_20 <- select(pnadcV5_20,-c(V1032001:V1032200)) 
+
+#saveRDS(pnadcV5_20,'pnadcV5_20.rds')
+
+# pnadcV5_20 <- readRDS("pnadcV5_20.rds")
+# pnadc_15_20 <- bind_rows(pnadcV5_20,pnadcV1_15_19)%>%
+  #   mutate(
+  #     V2007 = fct_recode(V2007,
+  #                        Homem= "Masculino",
+  #                        Mulher="Feminino"),
+  #     idade = case_when(
+  #     V2009 %in% 14:29 ~ "14-29",
+  #     V2009 %in% 30:49 ~ "30-49",
+  #     V2009 %in% 50:59 ~ "50-59",
+  #     V2009 > 60 ~ "60+"
+  #   ))
+# saveRDS(pnadc_15_20,'pnadc_15_20.rds')
+#rm(pnadcV5_20,pnadcV1_15_19)
+# 
+# pnadc_15_20 <- readRDS("pnadc_15_20.rds") %>%
+  #   mutate(
+  #     V2007 = fct_recode(V2007,
+  #                        Homem= "Masculino",
+  #                        Mulher="Feminino"),
+  #     idade = case_when(
+  #     V2009 %in% 14:29 ~ "14-29",
+  #     V2009 %in% 30:49 ~ "30-49",
+  #     V2009 %in% 50:59 ~ "50-59",
+  #     V2009 > 60 ~ "60+"
+  #   ))
+
+
+# Mercado_trabalho <- 
+#   group_by(pnadc_15_20 ,Ano)  %>%
+#   summarise(
+#     Pop_idade_trab = sum(V1032[V2009>=14],na.rm = TRUE),
+#     forc_trab = sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),
+#     ocupacao = sum(V1032[VD4002=="Pessoas ocupadas"],na.rm = TRUE),
+#     Trab_formal = sum(V1032[VD4012 == "Contribuinte" & 
+#                               VD4009 %in% c("Conta-própria",
+#                                             "Empregado no setor privado com carteira de trabalho assinada",
+#                                             "Empregado no setor público com carteira de trabalho assinada",
+#                                             "Empregador",
+#                                             "Militar e servidor estatutário",
+#                                             "Trabalhador doméstico com carteira de trabalho assinada")],na.rm = TRUE),
+#     desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE),
+#     forca_trab_potenc = sum(V1032[VD4003=="Pessoas fora da força de trabalho e na força de trabalho potencial"],na.rm = TRUE),
+#     Pop_subutilizada=sum(V1032[VD4004=='Pessoas subocupadas'|
+#                                  VD4002=="Pessoas desocupadas" |
+#                                  VD4003=="Pessoas fora da força de trabalho e na força de trabalho potencial"|
+#                             VD4004A=='Pessoas subocupadas'], na.rm = TRUE),
+#     subocupacao =sum(V1032[VD4004A=='Pessoas subocupadas'|
+#                            VD4004=='Pessoas subocupadas'],na.rm = TRUE),
+#     desalentos = sum(V1032[VD4005=='Pessoas desalentadas'],na.rm = TRUE),
+#     Trab_informal = sum(V1032[VD4012 == "Não contribuinte" |
+#                                 VD4009 %in% c("Empregado no setor privado sem carteira de trabalho assinada",
+#                                               "Empregado no setor público sem carteira de trabalho assinada",
+#                                               "Trabalhador doméstico sem carteira de trabalho assinada")],na.rm = TRUE)
+#   ) %>% 
+#   mutate(Taxa_composta_subutilizacao=(desocupacao+forca_trab_potenc+subocupacao)/(forc_trab+forca_trab_potenc),
+#          Taxa_desocupação=desocupacao/forc_trab, 
+#          Nivel_ocupacao=ocupacao/(forc_trab+forca_trab_potenc),
+#          Perc_ocup=ocupacao/sum(ocupacao))    
+
+####
+  ## Preparar tabela cnaes
+  # CNAE_Seção <- readxl::read_xls('Estrutura_Atividade_CNAE_Domiciliar_2_0.xls',skip = 2) %>% 
+  #   filter(!is.na(Seção) ) %>% 
+  #   select(1,4) %>% 
+  #   rename(Denom_Seção="Denominação")
+  # 
+  # 
+  # CNAE_Divisão  <- readxl::read_xls('Estrutura_Atividade_CNAE_Domiciliar_2_0.xls',skip = 2) %>% 
+  #   filter(!is.na(Divisão) ) %>% 
+  #   select(2,4) %>% 
+  #   rename(Denom_Divisão="Denominação")
+  # 
+  # 
+  # Atividade_CNAE <- readxl::read_xls('Estrutura_Atividade_CNAE_Domiciliar_2_0.xls',skip = 2)  %>% 
+  #   left_join(CNAE_Seção) %>%
+  #   fill(Denom_Seção , .direction = c("down")) %>% 
+  #   left_join(CNAE_Divisão) %>% 
+  #   fill(Denom_Divisão , .direction = c("down")) %>% 
+  #   filter(!is.na(Classe)) %>% 
+  #   select(-1,-2)
+  # rm(CNAE_Seção,CNAE_Divisão)
+
+}
+
+#
+## selectizeGroupServer_Ano
+selectizeGroupServer_M_E <- function (input, output, session, data, vars, inline = TRUE) 
+{
+  
+  `%inT%` <- function(x, table) {
+    if (!is.null(table) && ! "" %in% table) {
+      x %in% table
+    } else {
+      rep_len(TRUE, length(x))
+    }
+  }
+  ns <- session$ns
+  shinyWidgets:::toggleDisplayServer(session = session, id = ns("reset_all"), 
+                                     display = "none")
+  rv <- reactiveValues(data = NULL, vars = NULL)
+  observe({
+    if (is.reactive(data)) {
+      rv$data <- data()
+    }
+    else {
+      rv$data <- as.data.frame(data)
+    }
+    if (is.reactive(vars)) {
+      rv$vars <- vars()
+    }
+    else {
+      rv$vars <- vars
+    }
+    for (var in names(rv$data)) {
+      if (var %in% rv$vars) {
+        shinyWidgets:::toggleDisplayServer(session = session, id = ns(paste0("container-", 
+                                                                             var)), display = ifelse(inline, "table-cell", 
+                                                                                                     "block"))
+      }
+      else {
+        shinyWidgets:::toggleDisplayServer(session = session, id = ns(paste0("container-", 
+                                                                             var)), display = "none")
+      }
+    }
+  })
+  observe({
+    lapply(X = rv$vars, FUN = function(x) {
+      vals <- sort(unique(rv$data[[x]]))
+      updateSelectizeInput(session = session, inputId = x, 
+                           choices = vals, selected = isolate(input[[x]]), 
+                           server = TRUE)
+    })
+  })
+  observeEvent(input$reset_all, {
+    lapply(X = rv$vars, FUN = function(x) {
+      vals <- sort(unique(rv$data[[x]]))
+      updateSelectizeInput(session = session, inputId = x, 
+                           choices = vals, server = TRUE)
+    })
+  })
+  observe({
+    vars <- rv$vars
+    lapply(X = vars, FUN = function(x) {
+      ovars <- vars[vars != x]
+      observeEvent(input[[x]], {
+        data <- rv$data
+        indicator <- lapply(X = vars, FUN = function(x) {
+          data[[x]] %inT% input[[x]]
+        })
+        indicator <- Reduce(f = `&`, x = indicator)
+        data <- data[indicator, ]
+        if (all(indicator)) {
+          shinyWidgets:::toggleDisplayServer(session = session, id = ns("reset_all"), 
+                                             display = "none")
+        }
+        else {
+          shinyWidgets:::toggleDisplayServer(session = session, id = ns("reset_all"), 
+                                             display = "block")
+        }
+        for (i in ovars) {
+          if (is.null(input[[i]])) {
+            updateSelectizeInput(session = session, inputId = i, 
+                                 choices = sort(unique(data[[i]])), server = TRUE)
+          }
+        }
+        if (is.null(input[[x]])) {
+          updateSelectizeInput(session = session, inputId = x, 
+                               choices = sort(unique(data[[x]])), server = TRUE)
+        }
+      }, ignoreNULL = FALSE, ignoreInit = TRUE)
+    })
+  })
+  
+  observe({
+    updateSelectInput(inputId = "Ano", choices = unique(rv$data$Ano), selected = 2023)
+  })
+  
+  
+  return(reactive({
+    data <- rv$data
+    vars <- rv$vars
+    indicator <- lapply(X = vars, FUN = function(x) {
+      data[[x]] %inT% input[[x]]
+    })
+    indicator <- Reduce(f = `&`, x = indicator)
+    data <- data[indicator, ]
+    return(data)
+  }))
+}
+
+## Função wordcloud
+wordcloud2a <- function (data, size = 1, minSize = 0, gridSize = 0, fontFamily = "Segoe UI", 
+                         fontWeight = "bold", color = "random-dark", backgroundColor = "white", 
+                         minRotation = -pi/4, maxRotation = pi/4, shuffle = TRUE, 
+                         rotateRatio = 0.4, shape = "circle", ellipticity = 0.65, 
+                         widgetsize = NULL, figPath = NULL, hoverFunction = NULL) 
+{
+  if ("table" %in% class(data)) {
+    dataOut = data.frame(name = names(data), freq = as.vector(data))
+  }
+  else {
+    data = as.data.frame(data)
+    dataOut = data[, 1:2]
+    names(dataOut) = c("name", "freq")
+  }
+  if (!is.null(figPath)) {
+    if (!file.exists(figPath)) {
+      stop("cannot find fig in the figPath")
+    }
+    spPath = strsplit(figPath, "\\.")[[1]]
+    len = length(spPath)
+    figClass = spPath[len]
+    if (!figClass %in% c("jpeg", "jpg", "png", "bmp", "gif")) {
+      stop("file should be a jpeg, jpg, png, bmp or gif file!")
+    }
+    base64 = base64enc::base64encode(figPath)
+    base64 = paste0("data:image/", figClass, ";base64,", 
+                    base64)
+  }
+  else {
+    base64 = NULL
+  }
+  weightFactor = size * 180/max(dataOut$freq)
+  settings <- list(word = dataOut$name, freq = dataOut$freq, 
+                   fontFamily = fontFamily, fontWeight = fontWeight, color = color, 
+                   minSize = minSize, weightFactor = weightFactor, backgroundColor = backgroundColor, 
+                   gridSize = gridSize, minRotation = minRotation, maxRotation = maxRotation, 
+                   shuffle = shuffle, rotateRatio = rotateRatio, shape = shape, 
+                   ellipticity = ellipticity, figBase64 = base64, hover = htmlwidgets::JS(hoverFunction))
+  chart = htmlwidgets::createWidget("wordcloud2", settings, 
+                                    width = widgetsize[1], height = widgetsize[2], sizingPolicy = htmlwidgets::sizingPolicy(viewer.padding = 0, 
+                                                                                                                            browser.padding = 0, browser.fill = TRUE))
+  chart
+}
+
+
+## funcao glossario
+glossario<- readxl::read_excel('Glossário.xlsx',col_names=F) 
+constroi_glossario <- function(nchunks = 3) {
+  df <- split(
+    glossario,
+    rep(1:nchunks,
+        length.out = nrow(glossario),
+        each = ceiling(nrow(glossario)/nchunks)))
+  
+  width <- 12%/%nchunks
+  
+  lapply(1:nchunks, function(i){
+    div(
+      class = sprintf("col-xl-%s", width),
+      bs4Dash::box(
+        width = 12,
+        closable = FALSE,
+        maximizable = TRUE,
+        collapsible = FALSE,
+        do.call("accordion", c(
+          list(id = sprintf('accordion_glossario_%s', i)),
+          apply(df[[i]], 1, function(r) bs4Dash::accordionItem(title = r[1], r[2]))))))})
+}
+
+#setwd("C:/Romulo/Romulo/Comandos R/Testes/Testes_ar")
+pnadc_15_20 <- readRDS("PNADC_12_22_For.RDS")
+
+Atividade_CNAE <- readRDS("Atividade_CNAE2.rds")
+
+P <- readRDS("PIB2002_2021.RDS")
+Pob <- readRDS('PobrezaUS.rds')
+
+{
+# Ponto_munic <- sf::st_read("pontos_representativos_municipios.shp",
+#                stringsAsFactors = FALSE,quiet =T) %>%
+#                sf::st_transform(4326)%>% 
+#   sf::st_drop_geometry()
+# 
+# Pib <- left_join(P,Ponto_munic[,c("CD_MUN","LATITUDE","LONGITUDE")],by=c('cod'='CD_MUN')) %>% 
+#   filter(Abrangencia=='CAPITAL')
+}
+estados<- readRDS("Estados.rds")
+
+EXP_IMP<- readRDS('EXP_IMP_for_1997_2023.RDS')
+#EXP_IMP<- readRDS('EXP_IMP.rds')
+#Desp<- readRDS('Desp.rds')
+Desp<- readRDS('Desp_for_15_23.RDS')
+Ind_Rend <- readRDS('Ind_Rend.rds')
+Tipos_trab2 <- readRDS('Tipos_trab_2022.rds')
+
+#Rais
+shp_Bairros <- readRDS('shp_Bairros_Rais.rds')
+vinculos_21 <- readRDS('fort21.rds')
+Noticias <- readRDS('noticia.rds')
+{
+Tipo_T <-c("Trabalho formal","Trabalho informal")
+Ano_T <-as.character(2012:2022)
+Sexo_T <- c('Homem','Mulher')
+Raca_T <- c('Outros','Parda','Branca','Preta')
+Esc_T <- c('Fundamental incompleto','Médio incompleto',         
+           'Médio completo','Fundamental completo',     
+           'Superior incompleto','Superior completo',                       
+           'Menos de 1 ano de estudo')
+
+Idade_T <- c("20-29", "40-49", "60-65", "14-19", "30-39", "50-59", "66+") 
+
+
+}
+ ###Listas de entradas Estados
+# 
+# listaUF <- unique(pnadc_15_20$UF)
+# listaCapital <- setdiff(unique(pnadc_15_20$Capital),NA)
+  
+
+ui <- dashboardPage(
+  
+  dashboardHeader(title = "Atlas da Economia - Mod 1 ",icon = icon('users')), #,titleWidth=300 
+  
+  dashboardSidebar(
+    
+    sidebarMenu(
+      id = 'sidebar',
+      #style = "position: relative; overflow: visible;",
+       menuItem("Início", tabName = "Início"),
+       menuItem("Método", tabName = "Método"),
+       menuItem("Tópicos", tabName = "Fortaleza", startExpanded = TRUE,icon = icon('chart-line'),
+                
+                menuSubItem("PIB", tabName = "PIB"),
+                menuSubItem("Mercado de trabalho", tabName = "Tipo_ocupação"),
+                menuSubItem("Vínculos formais - Bairros", tabName = "Rais"),
+                menuSubItem("Comércio Exterior", tabName = "Comércio_Exterior"),
+                menuSubItem("Despesa Pública", tabName = "Despesa_Pública"),
+                menuSubItem("Indicadores de Renda", tabName = "Ind_Rend")
+                
+                
+        ),
+      #  menuItem("Capitais", tabName = "Capital",icon = icon('users'),
+      #          menuSubItem( tabName = "Capital",
+      #                       selectInput(
+      #                         inputId = "Id_Capital",
+      #                         label = "Local:" ,
+      #                         choices = listaCapital,
+      #                         selected = c("Município de Fortaleza (CE)","Município de Salvador (BA)","Município de Recife (PE)"),
+      #                         multiple=TRUE, selectize=TRUE)
+      #          )
+      # ),
+      # menuItem("Estados", tabName = "Estados"
+      #          , #,icon = icon("pencil-alt")),
+      #          
+      #          menuSubItem(tabName = "Estados",
+      #                      selectInput(
+      #                        inputId = "Id_UF",
+      #                        label = "Local:" ,
+      #                        choices = listaUF,
+      #                        selected = c("Ceará","Pernambuco"),
+      #                        multiple=TRUE, selectize=TRUE)
+      #          )
+      #          
+      # ),
+ 
+      menuItem("Glossário", tabName = "Glossário"),
+      menuItem("Fonte de dados", tabName = "Fonte"),
+      menuItem("Baixar dados", tabName = "Baixar")
+      
+    )),
+  
+  dashboardBody(
+    
+    tabItems(
+   ####     
+  tabItem(tabName = "Início", 
+          h3("Bem-vindo", style = "color:blue"),
+          
+          column(
+            width = 6, offset = 3,
+               # box(#title ="" ,# solidHeader = TRUE,#status = "primary",
+               #    collapsible = F,
+                  
+            hr(class = "divider"),
+                  p( "Este painel trata de temas relacionados à economia, com foco no município de Fortaleza, 
+                     capital do Ceará. Os temas explorados, de uma forma ampla, são: Produto Interno Bruto,
+                     Mercado de Trabalho, Comércio Exterior, Desigualdade de Renda, Despesa pública e Indicadores de renda. 
+                    As informações utilizadas nesta publicação foram, em sua totalidade, obtidas de fontes e bases de dados públicas 
+                     construídas e mantidas por institutos e ou órgãos oficiais brasileiros.",align="justify" )),
+          hr(class = "divider"),
+          h5("Palavras em destaque nos noticiários sobre a economia de Fortaleza - de abril a agosto de 2022"),
+          withSpinner(wordcloud2Output("cloud",height = "500px")),
+          tags$script(HTML(
+            "$(document).on('click', '#canvas', function() {",
+            'word = document.getElementById("wcSpan").innerHTML;',
+            "Shiny.onInputChange('selected_word', word);",
+            "});"
+          )),
+          
+          DT::dataTableOutput(outputId = "tabela_nuvem")
+          ),
+  tabItem(tabName = "Método", 
+         
+              
+              h3("Método"),
+              p( "Todos os dados utilizados neste estudo foram obtidos de fontes públicas oficiais brasileiras. 
+              O rol de fontes pode ser conferido na aba de Fontes. "   ),
+          p("As agregações, tais como cálculos de indicadores, realizadas nesta publicação, seguem as metodologias
+            empregadas pelos institutos / órgãos, conforme concebidos originalmente por eles. As métricas foram
+            calculadas a partir de microdados, na medida da disponibilização em fontes públicas, como no caso da
+            PNADc, seguindo a mesma interpretação para os resultados estabelecidos na nota", a("metodológica.",
+            href = "https://ftp.ibge.gov.br/Trabalho_e_Rendimento/Pesquisa_Nacional_por_Amostra_de_Domicilios_continua/Notas_metodologicas/notas_metodologicas.pdf")),
+          p("Quanto aos termos empregados, também se optou por utilizar as definições originais que os
+          institutos / órgãos definiram originalmente para as métricas e conceitos utilizados, salvo quando 
+          ocorre algum agrupamento de dados, nestes casos é deixado claro que se trata de algum agrupamento
+          e é evidenciado o método empregado (seja por soma, média, etc)."),
+          p("No mais, o horizonte de tempo deste trabalho não se encerra nesta primeira publicação, 
+          e esperamos ampliar as informações disponíveis em edições futuras, razão pela qual tem-se buscado
+          parcerias com secretarias municipais e estaduais, órgãos federais e outras entidades que possam agregar 
+          com know-how e bases de informação relevantes, enriquecendo e ampliando as análises que já aqui estão 
+          presentes e trazendo outras mais.")
+
+          
+          
+  ),
+      
+  tabItem(tabName = "PIB" ,
+
+
+          ###
+          ### Tree_map
+          ###
+          h1("Produto Interno Bruto"),
+          fluidRow(
+            column(
+              width = 6, offset = 3,
+              
+              panel(
+                selectInput(
+                  inputId =  "Anopib", 
+                  label = "Ano", 
+                  choices = 2002:2021,
+                  selected = 2021 
+                ),
+                selectizeInput(
+                  inputId =  "Abranpib", 
+                  label = "Abrangência", 
+                  choices = c(Capitais='CAPITAL',Estados='UF'),
+                   selected = c(Capitais='CAPITAL'),
+                  # options = list(
+                  #   onInitialize = I('function() { this.setValue("CAPITAL"); }')
+                  # )
+                  #selected = c(Capitais='CAPITAL')
+               
+                ),
+                selectizeInput(inputId = "LocalPIB",
+                               label = "Local",
+                               selected = '',
+                               multiple =F,
+                               choices = NULL,
+                             
+                               ),
+                
+                heading = "Filtros",status = "info"))
+            ),
+            
+            fluidRow(
+              
+              box(title = 'Composição do PIB', solidHeader = TRUE,
+                  status = "primary",
+                  collapsible = TRUE,
+                  maximizable = TRUE,
+                  # sidebar = boxSidebar(id = 'sidebar_Atividade_Cnae',
+                  #                      shinyWidgets::pickerInput( inputId = "Ano_filter",
+                  #                                                 label = 'Ano', #width="auto",  choices = 2015:2020,
+                  #                                                 multiple = FALSE, selected = 2020,  choicesOpt = list(
+                  #                                                   content = 2015:2020  ) ) ),
+                  textOutput('nome_local_pib'),
+                  withSpinner(echarts4rOutput('Pib_serie')),width =12)  ),
+          fluidRow(
+            box(title = 'PIB', solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,
+                maximizable = TRUE,
+                textOutput('Ano_pib_Fitro1'), 
+                withSpinner(echarts4rOutput('Pib_local',height =600)),width =6),
+          
+            box(title = 'PIB percapita', solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,
+                maximizable = TRUE,
+                textOutput('Ano_pib_Fitro2'),
+                withSpinner(echarts4rOutput('Pib_percapita_local',height =600)),width =6),
+          
+          
+          # box(title = 'PIB das capitais brasileiras', solidHeader = TRUE,
+          #     status = "primary",
+          #     collapsible = TRUE,
+          #     # sidebar = boxSidebar(id = 'sidebar_selec_comp',
+          #     #                      selectInput("variable", "Componente:",
+          #     #                               list(`PIB` = list("Serviços", "Indústria", "Agropecuária"),
+          #     #                                       `PIB percapita` = 'PIB_percapita'
+          #     #                                      ),
+          #     #                                  selected="PIB")
+          #     #                        ),
+          #     withSpinner(leafletOutput("mapa_pib", height =600)),width = 6),
+          #   
+          box(title = 'Posição do PIB', solidHeader = TRUE,
+              status = "primary",
+              collapsible = TRUE,
+              maximizable = TRUE,
+              withSpinner(echarts4rOutput('Pib_rank',height =500)),width =6),
+          box(title = 'Posição do PIB per capita', solidHeader = TRUE,
+              status = "primary",
+              collapsible = TRUE,
+              maximizable = TRUE,
+              withSpinner(echarts4rOutput('PibPercapita_rank',height =500)),width =6)
+      
+            )
+  ),
+        
+  tabItem(tabName = "Comércio_Exterior" ,
+          tags$style("#ano_selection{color: blue;
+                             font-size: 20px;
+                         font-style: italic;
+                         }"
+          ),
+          
+          ###
+          ### 
+          ###
+          h1("Comércio Exterior"),
+          
+          fluidRow(
+            box(title = "" , solidHeader = TRUE,
+                maximizable = TRUE,
+                textOutput('tipocomec'),
+                status = "primary",
+                sidebar = boxSidebar(
+                  id = 'tipo_Comerc',
+                  width = 25,
+                  collapsible = T,
+                  collapsed = FALSE,
+                  shinyWidgets::pickerInput( inputId = "tipo_C",
+                                             label = 'Tipo de comércio',
+                                             choices = c("Exportações","Importações"),
+                                             multiple = FALSE,
+                                             selected = "Exportações",
+                                             choicesOpt = list(content = c("Exportações","Importações")  )
+                  )
+                ),
+
+                withSpinner(echarts4rOutput('M_Comercio_clorop',height =500)),width =12)),
+          tags$h3("Exportações"),
+          fluidRow(
+          column(
+              width = 6, offset = 3,
+
+            panel(
+
+              shinyWidgets::selectizeGroupUI(
+                id = "Filtro_EXP",
+                inline=F,
+                params = list(
+                  Ano = list(inputId = "Ano", title = "Ano", placeholder = 'Todos'),
+                  País = list(inputId = "País", title = "País", placeholder = 'Todos'),
+                  Mercadorias = list(inputId = "Mercadorias", title = "Mercadoria", placeholder = 'Todos')
+                ),
+                btn_label = "Resetar filtros"),heading = "Filtros",status = "info")),
+
+          ),
+
+          fluidRow(
+
+            box(title = 'Mercadoria por país destino', solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,
+                maximizable = TRUE,
+                textOutput("ano_selection1"),
+                withSpinner(d3plusOutput('TM_comercio_ext_Merc',height =500)),width =6),
+
+            box(title = 'País destino e mercadoria', solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,
+                maximizable = TRUE,
+                    textOutput("ano_selection2"),
+                withSpinner(d3plusOutput('TM_comercio_ext_Pais',height =500)),width =6)
+            ),
+
+          tags$h3("Importações"),
+          fluidRow(
+            column(
+              width = 6, offset = 3,
+              
+              panel(
+                
+                shinyWidgets::selectizeGroupUI(
+                  id = "Filtro_IMP",
+                  inline=F,
+                  params = list(
+                    Ano = list(inputId = "Ano", title = "Ano", placeholder = 'Todos'),
+                    País = list(inputId = "País", title = "País", placeholder = 'Todos'),
+                    Mercadorias = list(inputId = "Mercadorias", title = "Mercadoria", placeholder = 'Todos')
+                  ),
+                  btn_label = "Resetar filtros"),heading = "Filtros",status = "info")),
+            
+          ),
+          
+          fluidRow(
+            box(title = 'Mercadoria por país de origem', solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,
+                maximizable = TRUE,
+                textOutput("ano_selection3"),
+                withSpinner(d3plusOutput('TM_comercio_imp_Merc',height =500)),width =6),
+            box(title = 'País de origem e mercadoria', solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,
+                maximizable = TRUE,
+                textOutput("ano_selection4"),
+                withSpinner(d3plusOutput('TM_comercio_imp_Pais',height =500)),width =6)
+          ),
+
+          tags$h3("Saldo da balança comercial"),
+
+        fluidRow(
+              column(
+                width = 6, offset = 3,
+                panel(
+                  shinyWidgets::selectizeGroupUI(
+                    id = "Filtro_Pais",
+                    inline=F,
+                    params = list(
+                      País = list(inputId = "País", title = "País", placeholder = 'Todos')),
+                            btn_label = "Resetar filtros"),
+              heading = "Filtro",status = "info")),
+
+            ),
+          fluidRow(
+            box(title = 'Balança comercial', solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,
+                maximizable = TRUE,
+                withSpinner(echarts4rOutput('Serie_Exp_Imp',height =400)),width =12)
+        #     # box(title = 'Exportações e Importações de Fortaleza', solidHeader = TRUE,
+        #     #     status = "primary",
+        #     #     collapsible = TRUE,
+        #     #     withSpinner(echarts4rOutput('M_Comercio_clorop',height =400)),width =6)
+        # 
+               )
+          
+  ),
+  
+  tabItem(tabName = "Despesa_Pública" ,
+          
+          
+          ###
+          ### 
+          ###
+          h1("Despesa Pública"),
+          fluidRow(
+            
+            column(
+              width = 6, offset = 3,
+              
+              panel(
+                
+                
+                radioButtons(inputId = "Despesa",
+                             label = "Fase da Despesa",
+                             choices = c(Empenhada = "Despesas Empenhadas",
+                                                   Liquidada = "Despesas Liquidadas",
+                                                   Paga= "Despesas Pagas"),
+                             selected = 'Despesas Pagas',
+                             inline = T
+                             
+                ),
+                
+                selectizeInput(inputId = "Instituição",
+                               label = "Município",
+                               choices = NULL,
+                               multiple =F,
+                               options = list(
+                                 placeholder = 'selecionar',
+                                 plugins = list("remove_button"),
+                                 onInitialize = I('function() { this.setValue(""); }')
+                               )),
+                
+                selectizeInput(inputId = "Subfunção",
+                               label = "Função Orçamentária",
+                               choices = NULL,
+                               multiple=T,
+                               options = list(
+                                 placeholder = 'selecionar',
+                                 plugins = list("remove_button"),
+                                 onInitialize = I('function() { this.setValue(""); }')
+                               )),
+                selectizeInput(inputId = "AnoDesp",
+                               label = "Ano",
+                               choices = NULL,
+                               multiple=F,
+                               options = list(
+                                 placeholder = 'selecionar',
+                                 plugins = list("remove_button"),
+                                 onInitialize = I('function() { this.setValue(""); }')
+                               )),heading = "Filtros",status = "info")),
+            
+            
+            
+          ),
+          fluidRow(
+            box(title = 'Despesa orçamentária por função', solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,
+                maximizable = TRUE,
+                withSpinner(echarts4rOutput('Desp_linha',height =400)),width =12),
+            
+            box(title = 'Despesa orçamentária (Capitais)', solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,
+                maximizable = TRUE,
+                textOutput('nome_AnoDesp1'), 
+                withSpinner(echarts4rOutput('Desp_capitais',height =600)),width =6),
+            box(title = 'Despesa orçamentária per capita  (Capitais)', solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,
+                maximizable = TRUE,
+                textOutput('nome_AnoDesp2'), 
+                withSpinner(echarts4rOutput('Desp_per_capita_capitais',height =600)),width =6)
+            
+            
+            
+            
+            
+            
+
+          )
+  ),
+
+
+
+      tabItem(tabName = "Tipo_ocupação" ,
+              
+            
+              ###
+              ### Tree_map
+              ###
+              h1("Principal atividade da ocupação"),
+              fluidRow(
+                
+                column(
+                  width = 6, offset = 3,
+                  #tags$h4("Filtros"),
+                  panel(
+                    
+                    shinyWidgets::pickerInput( inputId = "Ano_filter",
+                       label = 'Ano',
+                       choices = 2012:2022,
+                       multiple = FALSE,
+                       selected = 2022,
+                       choicesOpt = list(content = 2012:2022)
+                      ),
+             
+                    shinyWidgets::selectizeGroupUI(
+                  id = "Filtro_merc",
+                 inline = F ,
+                  params = list(
+                    Sexo = list(inputId = "V2007", title = "Sexo", placeholder = 'Todos'),
+                    Raca = list(inputId = "V2010", title = "Raça/cor", placeholder = 'Todos'),
+                    Escolaridade = list(inputId = "VD3004", title = "Escolaridade", placeholder = 'Todos'),
+                    Composição = list(inputId = "Composição", title = "Composição", placeholder = 'Todos')
+                  ),
+                  btn_label = "Resetar filtros" ),heading = "Filtros",status = "info")),
+                  box(title = 'Ocupações gerais no mercado de trabalho - CNAE 2.0', solidHeader = TRUE,
+                            status = "primary",
+                            collapsible = TRUE,
+                      maximizable = TRUE,
+                            # sidebar = boxSidebar(
+                            #   id = 'sidebar_Atividade_Cnae',
+                            #   width = 25,
+                              # shinyWidgets::pickerInput( inputId = "Ano_filter",
+                              #    label = 'Ano',
+                              #    choices = 2012:2021,
+                              #    multiple = FALSE,
+                              #    selected = 2021,
+                              #    choicesOpt = list(content = 2012:2021)
+                              #   )
+                            #   ),
+                      # radioButtons(inputId = "Tip_Trab",
+                      #              label = "Tipo de ocupação",
+                      #              choices = c('Trabalho formal','Trabalho informal',Geral='Total'),
+                      #              selected = 'Total',
+                      #              inline = T
+                      #              
+                      # ),
+                            withSpinner(d3plusOutput('F_cnaes')),width =12),
+                box(title = 'Ocupações formais - CNAE 2.0', solidHeader = TRUE,
+                    status = "primary",
+                    collapsible = TRUE,
+                    maximizable = TRUE,
+                    withSpinner(d3plusOutput('F_cnaes_form')),width =6),
+                box(title = 'Ocupações informais - CNAE 2.0', solidHeader = TRUE,
+                    status = "primary",
+                    collapsible = TRUE,
+                    maximizable = TRUE,
+                    withSpinner(d3plusOutput('F_cnaes_inform')),width =6),
+                box(title = 'Tipos de ocupações por sexo', solidHeader = TRUE,status = "primary",
+                    collapsible = TRUE,maximizable = TRUE,
+                    withSpinner(plotlyOutput('F_tipo_trab_Sex')),width = 12),
+                box(title = 'Ocupações por tipo de trabalho', solidHeader = TRUE,status = "primary",
+                    collapsible = TRUE,maximizable = TRUE,
+                    withSpinner(plotlyOutput('F_tipo_trab')),width = 12)
+              ),
+                            
+                     
+              ###
+              ### Tipo trabalho formal e informal
+              ### 
+              h1("Informalidade"),
+              fluidRow(
+                column(
+                  width = 6, offset = 3,
+                  #tags$h4("Filtros"),
+                  panel(
+                    
+                    shinyWidgets::selectizeGroupUI(
+                      id = "Filtro_merc_inf", 
+                      inline = F ,
+                      params = list(
+                        Sexo = list(inputId = "V2007", title = "Sexo", placeholder = 'Todos'),
+                        Raca = list(inputId = "V2010", title = "Raça/cor", placeholder = 'Todos'),
+                         Escolaridade = list(inputId = "VD3004", title = "Escolaridade", placeholder = 'Todos'),
+                         Idade = list(inputId = "idadeEco2", title = "Idade", placeholder = 'Todos'),
+                         Composição = list(inputId = "Composição", title = "Composição", placeholder = 'Todos')
+                      ),
+                      btn_label = "Resetar filtros" ),heading = "Filtros",status = "info")),
+                
+              box(title = 'Trabalho formal e informal', solidHeader = TRUE,status = "primary",
+                            collapsible = TRUE,maximizable = TRUE,
+                            withSpinner( echarts4rOutput('perc_informal')),width =6),
+
+              ###
+              ### Informalidade trabalho Sexo
+              ###                                       
+              box(title = 'Informalidade por sexo', solidHeader = TRUE,status = "primary",
+                            collapsible = TRUE,maximizable = TRUE,
+                             withSpinner(echarts4rOutput('perc_informal_sexo')),width =6),
+                    
+              ###
+              ### Informalidade trabalho raça
+              ###                                       
+                    box(title = 'Informalidade por raça/cor', solidHeader = TRUE,status = "primary",
+                          collapsible = TRUE,maximizable = TRUE,
+                    withSpinner(echarts4rOutput('perc_informal_Raca')),width =6),
+              ###
+              ### Informalidade trabalho escola
+              ###                                       
+              box(title = 'Informalidade por nível de instrução', solidHeader = TRUE,status = "primary",
+                  collapsible = TRUE,maximizable = TRUE,
+                  withSpinner(echarts4rOutput('perc_informal_Esc')),width =6),
+              ###
+              ### Informalidade trabalho Idade
+              ###                                       
+              box(title = 'Informalidade por faixa etária', solidHeader = TRUE,status = "primary",
+                  collapsible = TRUE,maximizable = TRUE,
+                  withSpinner(echarts4rOutput('perc_informal_idade')),width =12)
+              
+              
+              ),
+              ###
+              ### Desemprego
+              ### 
+              h1("Desemprego"),
+              fluidRow(
+              box(title = 'Taxa de desemprego por sexo', solidHeader = TRUE,status = "primary",
+                  collapsible = TRUE,maximizable = TRUE,
+                  withSpinner(echarts4rOutput('Taxa_desemp_fort')),width =6),
+              
+              box(title = 'Taxa de desemprego por raça/cor', 
+                  textOutput('Ano_cor_filter'), 
+                  solidHeader = TRUE,status = "primary",
+                  collapsible = TRUE,maximizable = TRUE,
+                  sidebar = boxSidebar(
+                    id = 'sidebar_desemprego_cor',
+                    width = 25,
+                  shinyWidgets::pickerInput( inputId = "Ano_cor",
+                     label = 'Ano',
+                     choices = 2012:2021,
+                     multiple = FALSE,
+                     selected = 2021,
+                     choicesOpt = list(content = 2012:2021)
+                    )
+                    ),
+                  withSpinner(echarts4rOutput('Taxa_desemp_fort_raca')),width =6),
+              
+              box(title = 'Taxa de desemprego por nível de instrução', solidHeader = TRUE,status = "primary",
+                  collapsible = TRUE,maximizable = TRUE,
+                  withSpinner(echarts4rOutput('Taxa_desemp_fort_esc')),width =12),
+              box(title = 'Taxa de desemprego por faixa etária', solidHeader = TRUE,status = "primary",
+                  collapsible = TRUE,maximizable = TRUE,
+                  withSpinner(echarts4rOutput('Taxa_desemp_fort_idade')),width =12)
+              
+              
+              
+              
+                        # box(title = 'Tipo de atividade', solidHeader = TRUE,status = "primary",
+                        #     collapsible = TRUE,
+                        #     withSpinner(plotlyOutput('F_pop_idade_trab')),width =4),
+                        # 
+                        # 
+                        #  box(title = 'Pessoas na força de trabalho', solidHeader = TRUE,status = "primary",
+                        #     collapsible = TRUE,
+                        #     withSpinner(plotlyOutput('F_forc_trab')),width =4),
+                        # box(title = 'Pessoas ocupadas', solidHeader = TRUE,status = "primary",
+                        #    collapsible = TRUE,
+                        #    withSpinner(plotlyOutput('F_ocupacao')),width = 4),
+                        # box(title = 'Ocupação informais', solidHeader = TRUE,status = "primary",
+                        #     collapsible = TRUE,
+                        #     withSpinner(plotlyOutput('F_informal')),width = 6),
+                        
+                        
+              )
+      ),
+      
+  tabItem(tabName = "Ind_Rend" ,
+          
+          
+          ###
+          h1("Pobreza"),
+          fluidRow(
+            
+            column(
+              width = 6, offset = 3,
+              
+              panel(
+                selectizeInput(inputId = "IndPob",
+                               label = "Indicador de Pobreza",
+                               choices =c("PobrezaUS1.9","PobrezaUS3.2","PobrezaUS5.5"),
+                               multiple =F,
+                               selected="PobrezaUS1.9",
+                               options = list(
+                                 placeholder = 'selecionar',
+                                 plugins = list("remove_button"),
+                                 onInitialize = I('function() { this.setValue("PobrezaUS1.9"); }')
+                               )),
+  
+             
+                
+                selectizeInput(inputId = "LocPob",
+                               label = "Capital",
+                               choices = unique(Pob$Local),
+                               multiple =F,
+                               selected="Fortaleza",
+                               options = list(
+                                 placeholder = 'selecionar',
+                                 plugins = list("remove_button"),
+                                 onInitialize = I('function() { this.setValue("Fortaleza"); }')
+                               )),
+                
+                selectizeInput(inputId = "AnoPob",
+                               label = "Ano",
+                               choices = unique(Pob$ano),
+                               multiple = F,
+                               selected = "2020",
+                               options = list(
+                                 placeholder = 'selecionar',
+                                 plugins = list("remove_button")#,
+                                # onInitialize = I('function() { this.setValue("2020"); }')
+                               )),heading = "Filtros",status = "info"))
+            
+            
+            
+          ),
+          fluidRow(
+            box(title = 'Pobreza por local', 
+                textOutput('nome_ind_pob'),
+                solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,maximizable = TRUE,
+                sidebar = boxSidebar(
+                  id = 'sidebar_pob_loc',
+                  width = 25,
+                  selectizeInput( inputId = "LocPob2",
+                                             label = "Comparar Município",
+                                             choices = sort(unique(Pob$Local)),
+                                             selected= "Natal",
+                                             multiple = T,
+                                             options = list(
+                                             placeholder = 'selecionar',
+                                            plugins = list("remove_button")
+                  )
+                )),
+                withSpinner(echarts4rOutput('serie_pobrezaLoc',height =400)),width =6),
+            
+            box(title = 'Pobreza por linha de corte', 
+                textOutput('nome_local_pob'),
+                solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,maximizable = TRUE,
+                sidebar = boxSidebar(
+                  id = 'sidebar_pob_ind',
+                  width = 25,
+                  selectizeInput( inputId = "IndPob2",
+                                             label = "Comparar Indicador",
+                                             choices = c("PobrezaUS1.9","PobrezaUS3.2","PobrezaUS5.5") ,
+                                             selected= "PobrezaUS3.2",
+                                             multiple = T,
+                                             options = list(
+                                             placeholder = 'selecionar',
+                                             plugins = list("remove_button")
+                                  )
+                  )),
+                withSpinner(echarts4rOutput('serie_pobrezaInd',height =400)),width =6),
+            
+            box(title = 'Pobreza por capitais', 
+                textOutput('nome_ano_pob'),
+                solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,maximizable = TRUE,
+                withSpinner(echarts4rOutput('Local_pobreza',height =600)),width =6),
+            box(title = 'Posição da capital entre as com melhores resultados',
+                textOutput('nome_local_pob2'),
+                solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,maximizable = TRUE,
+                withSpinner(echarts4rOutput('rank_pobreza',height =600)),width =6)
+          ),
+            
+            h1("Desigualdade de renda"),
+            fluidRow(
+
+              column(
+                width = 6, offset = 3,
+
+                panel(
+                  selectizeInput(inputId = "IndDes",
+                                 label = "Indicador de desiguladade de renda",
+                                 choices =unique(Ind_Rend$Indicador),
+                                 multiple =F,
+                                 selected="Gini (com benefícios)",
+                                 options = list(
+                                   placeholder = 'selecionar',
+                                   plugins = list("remove_button"),
+                                   onInitialize = I('function() { this.setValue("Gini (com benefícios)"); }')
+                                 )),
+
+
+
+                  selectizeInput(inputId = "LocDes",
+                                 label = "Capital",
+                                 choices = unique(Ind_Rend$Local),
+                                 multiple =F,
+                                 selected="Fortaleza",
+                                 options = list(
+                                   placeholder = 'selecionar',
+                                   plugins = list("remove_button"),
+                                   onInitialize = I('function() { this.setValue("Fortaleza"); }')
+                                 )),
+
+                  selectizeInput(inputId = "AnoDes",
+                                 label = "Ano",
+                                 choices = unique(Ind_Rend$ano),
+                                 multiple = F,
+                                 selected = "2020",
+                                 options = list(
+                                   placeholder = 'selecionar',
+                                   plugins = list("remove_button")#,
+                                   # onInitialize = I('function() { this.setValue("2020"); }')
+                                 )),heading = "Filtros",status = "info")),
+
+
+
+            ),
+          
+            fluidRow(
+
+            box(title = 'Desigualdade de renda por local',
+                textOutput('nome_ind_Des'),
+                solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,maximizable = TRUE,
+                sidebar = boxSidebar(
+                  id = 'sidebar_Des_loc',
+                  width = 25,
+                  selectizeInput( inputId = "LocDes2",
+                                  label = "Comparar Município",
+                                  choices = sort(unique(Ind_Rend$Local)),
+                                  selected= "Natal",
+                                  multiple = T,
+                                  options = list(
+                                    placeholder = 'selecionar',
+                                    plugins = list("remove_button")
+                                  )
+                  )),
+                withSpinner(echarts4rOutput('serie_GiniLoc',height =400)),width =6),
+            box(title = 'Desigualdade de renda por indicador',
+                textOutput('nome_local_Des'),
+                solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,maximizable = TRUE,
+                withSpinner(echarts4rOutput('serie_GiniInd',height =390)),width =6),
+            box(title = 'Desigualdade por capitais',
+                textOutput('nome_ano_Des'),
+                solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,maximizable = TRUE,
+                withSpinner(echarts4rOutput('Local_Gini',height =600)),width =6),
+            box(title = 'Posição da capital entre as com melhores resultados',
+                textOutput('nome_local_Des2'),
+                solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,maximizable = TRUE,
+                withSpinner(echarts4rOutput('rank_Gini',height =600)),width =6))
+          
+  ),
+      
+
+      
+  tabItem(tabName = "Rais" ,
+          
+          h1("Vínculos empregatícios formais"),
+          fluidRow(
+            
+            column(
+              width = 6, offset = 3,
+              #tags$h4("Filtros"),
+              panel(
+                # shinyWidgets::pickerInput( inputId = "Ano_filter_rais",
+                #                            label = 'Ano',
+                #                            choices = 2018:2021,
+                #                            multiple = FALSE,
+                #                            selected = 2021,
+                #                            choicesOpt = list(content = 2018:2021)
+                # ),
+                shinyWidgets::selectizeGroupUI(
+                  id = "Filtro_rais",
+                  inline = F ,
+                  params = list(
+                    Sexo = list(inputId = "Sexo", title = "Sexo", placeholder = 'Todos'),
+                    Raca = list(inputId = "Raça_Cor", title = "Raça/cor", placeholder = 'Todos'),
+                    Escolaridade = list(inputId = "Escolaridade", title = "Escolaridade", placeholder = 'Todos'),
+                    Faixa_etária = list(inputId = "Faixa_etária", title = "Faixa etária", placeholder = 'Todos'),
+                    # Estabelecimento = list(inputId = "Tamanho_Estabelecimento", title = "Tamanho do estabelecimento", placeholder = 'Todos'),
+                    bairro = list(inputId = "bairro", title = "Bairro", placeholder = 'Todos')
+                  ),
+                  btn_label = "Resetar filtros" ),
+                actionButton("add_graph", "Gerar gráfico"),heading = "Filtros",status = "info"))
+          ),
+          
+          fluidRow(
+            box(title = 'Quantidade de vínculos ativos formais',
+                #textOutput('Ano_rais'),
+                solidHeader = TRUE,
+                status = "primary",
+                collapsible = TRUE,maximizable = TRUE,
+                withSpinner(d3plusOutput('treemapRAIS',height = 600)),width =12),
+            box(title = " ", solidHeader = TRUE,status = "primary",
+                collapsible = TRUE,
+                withSpinner( leafletOutput("mapa_rais", height =500)),width = 12)
+          ),
+          
+          tags$h3("Explorar da dados"),
+            column(width = 10, offset = 1,
+                panel(
+                
+              fluidPage(
+                checkboxGroupInput("variaveis", "Seleção de variáveis:",
+                                   choices = c('bairro', "Denom_Seção", 'Denom_Classe', #, "Denom_Divisão","Denom_Grupo",
+                                               'Denom_Subclasse','CBO','Sexo','Raça_Cor','Escolaridade' ),
+                                   selected = c('Escolaridade' )),
+              
+              # Select grupo
+              selectizeGroupUI(
+                  id = "rais_filters_tab",
+                  inline = F,
+                  params = list(
+                    bairro = list(inputId = "bairro", title = "Bairro:", placeholder = 'Todos'),
+                    Denom_Seção = list(inputId = "Denom_Seção", title = "Seção:", placeholder = 'Todos'),
+                    #Denom_Divisão = list(inputId = "Denom_Divisão", title = "Divisão:"),
+                    #Denom_Grupo = list(inputId = "Denom_Grupo", title = "Grupo:"),
+                    Denom_Classe = list(inputId = "Denom_Classe", title = "Classe:", placeholder = 'Todos'),
+                    Denom_Subclasse = list(inputId = "Denom_Subclasse", title = "Subclasse:", placeholder = 'Todos'),
+                    CBO = list(inputId = "CBO", title = "CBO:", placeholder = 'Todos'),
+                    Sexo = list(inputId = "Sexo", title = "Sexo:", placeholder = 'Todos'),
+                    Raça_Cor = list(inputId = "Raça_Cor", title = "Raça/Cor:", placeholder = 'Todos'),
+                    Escolaridade = list(inputId = "Escolaridade", title = "Escolaridade:", placeholder = 'Todos'))
+                              )#Fim select grupo
+             
+                ),#fim fluidrows
+                actionButton("add_table", "Gerar tabela"),
+                heading = "Filtros",status = "info"),#Fim painel
+              
+              ), #Fim coluna
+          
+      column(width = 12,withSpinner( DT::dataTableOutput(outputId = "tabela_rais")))
+             
+  ), #Fim tabitem
+  
+  
+      tabItem(tabName = "Glossário", 
+              
+              tagList(
+                fluidRow(
+                  class = "align-center justify-content-center text-center mt-2",
+                  column(
+                    width = 8,
+                    h1("Glossário"),
+                    hr(class = "divider")
+                  )
+                ),
+                fluidRow(
+                  constroi_glossario(nchunks = 3)
+                )
+                
+              )
+      ),
+      
+      tabItem(tabName = "Fonte", 
+              box(title ="Base de dados utilizadas " , solidHeader = TRUE,status = "primary",
+                  collapsible = F,
+                  
+                
+                  h3("Mercado de Trabalho"),
+                  "Dados consolidados de primeiras visitas de 2012 a 2019 e de quintas visitas em 2020 e 2021 da PNADc, divulgação anual -
+                  Órgão/Instituto: IBGE/PNADC.",
+                    a("link",
+                      href = "https://www.ibge.gov.br/estatisticas/sociais/trabalho/9171-pesquisa-nacional-por-amostra-de-domicilios-continua-mensal.html?=&t=downloads")
+                  ,
+                  h3("PIB e PIB PER CAPITA "),
+                 "Produto Interno Bruto dos Municípios, divulgação anual - Órgão/Instituto: IBGE/SNC.",
+                    a("link",
+                      href = "https://www.ibge.gov.br/estatisticas/economicas/contas-nacionais/9088-produto-interno-bruto-dos-municipios.html?=&t=downloads")
+                  ,
+                  h3("Comércio Exterior"),
+                "Estatísticas de comércio exterior em dados abertos, divulgação anual - Órgão/Instituto: Ministério da Economia",
+                  a("link",
+                    href = "https://www.gov.br/produtividade-e-comercio-exterior/pt-br/assuntos/comercio-exterior/estatisticas/base-de-dados-bruta")
+                    ,
+                h3("Desigualdade de renda"),
+                "Síntese dos indicadores Sociais, divulgação anual - Órgão/Instituto: IBGE/SIS",
+                a("link",
+                  href = "https://www.ibge.gov.br/estatisticas/sociais/trabalho/9221-sintese-de-indicadores-sociais.html?=&t=resultados")
+                ,
+                h3("População abaixo da linha da pobreza"),
+                "Síntese dos indicadores Sociais, divulgação anual - Órgão/Instituto: IBGE/SIS",
+                a("link",
+                  href = "https://www.ibge.gov.br/estatisticas/sociais/trabalho/9221-sintese-de-indicadores-sociais.html?=&t=resultados")
+                
+      
+  
+                  ,width = 12)
+      ),
+  tabItem(tabName = "Baixar", 
+          fluidPage(
+            
+            # App title ----
+            titlePanel("Baixar dados do painel"),
+            
+            # Sidebar layout with input and output definitions ----
+            sidebarLayout(
+              
+              # Sidebar panel for inputs ----
+              sidebarPanel(
+                
+                # Input: Choose dataset ----
+                selectInput("dataset", "Escolha o tema da base:",
+                            choices = c("Atividade_CNAE",'Comércio Exterior','Despesa pública','Indicador de renda','Mercado de trabalho','PNADc' , 'PIB', 
+                                        'Pobreza')),
+                
+                # Button
+                downloadButton("downloadData", "Download")
+                
+              ),
+              
+              # Main panel for displaying outputs ----
+              mainPanel(
+                h6("Exibindo as 10 primeiras linhas", style = "color:blue"),
+                tableOutput("table")
+                
+              )
+              
+            )
+          )
+      
+      )
+    ) #tabItems
+ , sidebar = dashboardSidebar() ) #dashboardBody
+) #dashboardPage
+
+
+
+
+server <- function(input, output,session) {
+ 
+  
+  ## Filtro Rais
+  {
+    # filtroRais1 <- reactive({
+    #   vinculos_21[ano == input$Ano_filter_rais,]
+    # })
+    ## treemap e mapa
+    data_vinculos <-  shiny::callModule(
+      module = shinyWidgets::selectizeGroupServer,
+      id = "Filtro_rais",
+      data = vinculos_21 ,
+      vars = c('Sexo', 'Raça_Cor','Escolaridade','Faixa_etária','bairro' ), #
+      inline = F
+    )
+    ## Tabela
+    vars_rais <- reactive({
+      input$variaveis
+    })
+
+    res_mod <- reactive({res_mod2()[, c(input$variaveis,'Vl.Remun.Média.Nom'), drop = FALSE] %>%
+        group_by_all() %>%
+        ungroup(Vl.Remun.Média.Nom) %>%
+        summarise(Vl.Remun.Média=round(mean(Vl.Remun.Média.Nom),2),
+                  Qtd.=n(),
+                  .groups='keep')
+
+    })
+    res_mod2 <- callModule(
+      module = selectizeGroupServer,
+      id = "rais_filters_tab",
+      data = vinculos_21 ,
+      vars = vars_rais,
+      inline=F
+    )
+
+    
+  }
+  
+  
+  #TRAT dados mercado
+  
+  
+{
+  
+  # Tipos_trab2 <-  rbind(   ### Organizando dados
+  #   group_by(pnadc_15_20[pnadc_15_20$Capital %in% "Município de Fortaleza (CE)" , ],
+  #            Ano,V4013,V2007,V2010,VD3004,idadeEco2)  %>%
+  #     summarise(Qtd. = sum(V1032[  (VD4012 == "Contribuinte" & VD4009 == "Empregador")    |
+  #                                    (VD4012 == "Contribuinte" & VD4009 == "Conta-própria") |
+  #                                    VD4009 %in% c("Empregado no setor privado com carteira de trabalho assinada",
+  #                                                  "Empregado no setor público com carteira de trabalho assinada",
+  #                                                  "Trabalhador doméstico com carteira de trabalho assinada",
+  #                                                  "Militar e servidor estatutário") ],
+  #                          na.rm = TRUE),.groups="keep")  %>%
+  #     filter(Qtd.!=0) %>%
+  #     mutate(Tipo="Trabalho formal")
+  #   ,
+  #   group_by(pnadc_15_20[pnadc_15_20$Capital %in% "Município de Fortaleza (CE)", ],
+  #            Ano,V4013,V2007,V2010,VD3004,idadeEco2)  %>%
+  #     summarise(Qtd. = sum(V1032[VD4009 %in% c("Empregado no setor privado sem carteira de trabalho assinada",
+  #                                              "Trabalhador doméstico sem carteira de trabalho assinada",
+  #                                              "Trabalhador familiar auxiliar",
+  #                                              "Empregado no setor público sem carteira de trabalho assinada") |
+  #                                  (VD4012 == "Não contribuinte" & VD4009 == "Conta-própria")|
+  #                                  (VD4012 == "Não contribuinte" & VD4009 == "Empregador") ],
+  #                          na.rm = TRUE),.groups="keep") %>%
+  #     filter(Qtd.!=0) %>%
+  #     mutate(Tipo="Trabalho informal")) %>%
+  #   left_join(Atividade_CNAE,by=c("V4013"="Classe")) 
+  # saveRDS(Tipos_trab2,'Tipos_trab2.rds')
+
+  
+}
+  
+
+  ######################## FILTRO Mercado #############
+  {
+
+    # filtro1 <- reactive({
+    #   Filtro_Tipos_trab2()[Filtro_Tipos_trab2()$Ano == input$Ano_filter
+    #                          ,c('Qtd.','Ano',
+    # 'Tipo',
+    # "Denominação",
+    # 'Denom_Seção',
+    # 'Denom_Divisão')]
+    # })
+  
+    filtro1 <- reactive({
+      filter(Tipos_trab2,Ano %in% input$Ano_filter ) 
+    })
+    
+    Filtro_Tipos_trab2 <-  callModule(
+    module = shinyWidgets::selectizeGroupServer,
+    id = "Filtro_merc",
+    data = filtro1 ,
+    vars = c('V2007', 'V2010','VD3004','Composição' ),
+    inline = F
+      )
+    
+    
+    Tipos_trab_Cnae <- reactive( aggregate(Qtd.~ Ano+Tipo+Denominação+Denom_Seção+Denom_Divisão,
+                  Filtro_Tipos_trab2(),sum))
+    
+### Filtro Informalidade    
+    Filtro_Tipos_trab_INF <-  callModule(
+      module = selectizeGroupServer,
+      id = "Filtro_merc_inf",
+      data = Tipos_trab2 ,
+      vars = c('V2007', 'V2010','VD3004','idadeEco2','Composição'),
+      inline = F
+    )      
+    
+    
+  output$Ano_cor_filter <- renderText({ input$Ano_cor })
+ 
+
+  
+  }######################## Fim Filtro Mercado
+
+  
+######################## FILTRO Comercio Exterior 
+  {
+  output$ano_selection1 <-output$ano_selection2 <-  renderText({
+    # print(names(input))
+    # [1] "my-filters-reset_all"    "my-filters-manufacturer" "my-filters-trans"        "my-filters-model"        "my-filters-class"       
+    # [6] "vars
+    input[["Filtro_EXP-Ano"]]
+  })
+  
+  
+  
+  
+  output$ano_selection3 <-output$ano_selection4 <-  renderText({
+    # print(names(input))
+    # [1] "my-filters-reset_all"    "my-filters-manufacturer" "my-filters-trans"        "my-filters-model"        "my-filters-class"       
+    # [6] "vars
+    input[["Filtro_IMP-Ano"]]
+  })
+  
+  output$tipocomec <- renderText({ input$tipo_C })
+  
+  
+ 
+  
+  
+  Filtro_EXP <-  callModule(
+    module = selectizeGroupServer_M_E,
+    id = "Filtro_EXP",
+    data = EXP_IMP[EXP_IMP$Tipo=='Exportações',],
+    vars = c('Ano','País','Mercadorias'  ),
+    inline = F
+  )
+  
+  Filtro_IMP <- callModule(
+    module = selectizeGroupServer_M_E,
+    id = "Filtro_IMP",
+    data = EXP_IMP[EXP_IMP$Tipo=='Importações',],
+    vars = c('Ano','País','Mercadorias'  ),
+    inline = F
+  )
+  
+
+  Filtro_EXP_IMP_Pais <-   callModule(
+    module = shinyWidgets::selectizeGroupServer,
+    id = "Filtro_Pais",
+    data = EXP_IMP |>
+      group_by(Tipo,Ano,País) %>% 
+      mutate(Ano=as.character(Ano)) %>% 
+      summarise(Total = sum(`Valor FOB (US$)`)/1000) %>% 
+      pivot_wider(names_from = Tipo,values_from = Total ,values_fill=0) ,
+    vars = c('País'),
+    inline = F
+  )
+  
+}
+######################## Fim Filtro comercio exterior  
+  
+################# FILTRO da Despesa
+  {
+  updateSelectizeInput(
+    session = session,
+    inputId = "Despesa",
+    choices = sort(unique(Desp$Despesa)),
+    selected = "",
+    server = TRUE
+  )
+  
+  observeEvent(input$Despesa,{
+    choice_var2 <- sort(unique(Desp$Instituição[which(Desp$Despesa==input$Despesa)]))
+    
+    updateSelectizeInput(
+      session = session,
+      inputId = "Instituição",
+      choices = choice_var2
+    )
+  })
+  
+  observeEvent(input$Instituição,{
+    choice_var3 <- sort(unique(Desp$Subfunção[which(Desp$Despesa==input$Despesa &
+                                                                     Desp$Instituição %in% input$Instituição)]))
+    
+  updateSelectizeInput(
+      session = session,
+      inputId = "Subfunção",
+      choices = choice_var3
+    )
+  })
+  
+  observeEvent(input$Subfunção,{
+    choice_var4 <- sort(unique(Desp$Ano[which(Desp$Despesa==input$Despesa &
+                                                      Desp$Instituição %in% input$Instituição &
+                                                      Desp$Subfunção %in% input$Subfunção  )]))
+    
+    updateSelectizeInput(
+      session = session,
+      inputId = "AnoDesp",
+      choices = choice_var4,
+      selected = last(choice_var4)
+    )
+  })
+  
+  observeEvent(input$Despesa,{
+    updateSelectInput(inputId = "Instituição",choices =unique(Desp$Instituição), selected = 'Fortaleza')
+  },  once = T)
+  
+  observeEvent(input$Instituição, {
+    updateSelectInput(inputId = "Subfunção",choices =unique(Desp$Subfunção), selected = c("10 - Saúde","12 - Educação"))
+  }, ignoreInit = TRUE, once = T)
+ 
+   output$nome_AnoDesp1  <- output$nome_AnoDesp2 <- renderText({  input$AnoDesp  }) 
+  
+  
+  }
+#Fim filtro despesa
+
+#  Filtros Pib #
+{
+
+  observeEvent(input$Abranpib,{
+    choice_var2 <- sort(unique(P$Local[which(P$Abrangencia==input$Abranpib)]))
+
+     updateSelectizeInput(
+     session = session,
+      inputId = "LocalPIB",
+      choices = choice_var2,
+     selected= if_else(input$Abranpib=="UF",'Ceará','Fortaleza')
+    )
+  })
+  
+
+  
+  
+
+  
+  output$nome_local_pib <- renderText({ input$LocalPIB })
+  
+  output$Ano_pib_Fitro1 <-output$Ano_pib_Fitro2 <-  renderText({input$Anopib})
+  
+}     
+# Fim filtro Pib   
+  
+# Filtros Pobreza
+ 
+  output$nome_local_pob <- output$nome_local_pob2 <-  renderText({ input$LocPob })
+  
+  output$nome_ind_pob <-   renderText({ input$IndPob })
+  output$nome_ano_pob <-   renderText({ input$AnoPob })
+########## FIM Filtros Pobreza#
+
+# Filtros Desigualdade 
+  output$nome_local_Des <- output$nome_local_Des2 <-  renderText({ input$LocDes })
+  output$nome_ind_Des <-   renderText({ input$IndDes })
+  output$nome_ano_Des <-   renderText({ input$AnoDes })
+  
+  
+# Fim Filtros Desigualdade 
+  
+  
+  
+  
+  { ### Fortaleza
+  
+a <-P %>% 
+      mutate(ano=as.character(ano),
+             PIB= round(PIB/1000000000,3),
+             Industria =round(Industria/1000000000,3),
+             Serviços =round(Serviços/1000000000,3),
+             Admin_Pública= round(Admin_Pública/1000000000,3),
+             Impostos= round(Impostos/1000000000,3),
+             Agropecuária= round(Agropecuária/1000000000,3),
+             Perc_Serviços=Serviços/PIB,
+             Perc_Impostos=Impostos/PIB,
+             Perc_Agropecuária=Agropecuária/PIB,
+             Perc_Industria=Industria/PIB,
+             Perc_Admin_Pública=Admin_Pública/PIB,
+             Perc_PIB=1,
+             Perc_PIB_perC=1
+      ) 
+
+
+output$Pib_serie <-  renderEcharts4r({
+
+b <-  a %>%
+      filter(Local== input$LocalPIB &  Abrangencia==input$Abranpib)
+
+g <- function(loc,abr){  
+  
+  a %>%
+    ungroup() %>%
+    filter(Local== loc &  Abrangencia==abr) %>% 
+    e_chart(x=ano) %>%
+    e_bar(Serviços,stack = "grp",bind = Perc_Serviços) %>%
+    e_bar(Impostos,stack = "grp",bind = Perc_Impostos)  %>%
+    e_bar(Agropecuária,stack = "grp",bind = Perc_Agropecuária,itemStyle=list(
+      borderColor= '#fac858'))  %>%
+    e_bar(Admin_Pública,stack = "grp",bind = Perc_Admin_Pública)  %>%
+    e_bar(Industria,stack = "grp" ,bind = Perc_Industria) %>%
+    e_tooltip(
+      formatter = htmlwidgets::JS("
+     function(params){
+      a = '';
+      if (params.seriesName != 'PIB_percapita') {
+        a = params.name*100;
+        a = a.toFixed(2);
+        a = a + '%';
+      }
+      console.log(a);
+
+        return(params.value[0] +'<br /> ' + params.seriesName + ': ' + params.value[1] + ' bilhões' +
+                  '<br /> ' + a  )} ")) %>%
+    e_y_axis(name="Bilhões de Reais",formatter = htmlwidgets::JS("
+      function(params){
+        return( params )} ")) %>%
+    e_color(c( '#91cc75','#5470c6',  '#fac858',  '#73c0de','#FB8281','#ee6666' )) %>% #'#96BFFF'
+    e_toolbox_feature('dataView') %>%
+    e_effect_scatter(PIB,symbol_size = 6,smooth=T,color= 'red') %>%
+    e_line(PIB,smooth=T,color= '#ee6666',bind = Perc_PIB) %>%
+    e_effect_scatter(PIB_percapita,symbol_size = 6,smooth=T,color= 'purple',y_index = 1) %>%
+    e_line(PIB_percapita,smooth=T,color= '#purple',y_index = 1,bind =Perc_PIB_perC) %>%
+    e_legend(selected=list('PIB_percapita'=F))
+  }
+
+  ###browser()
+
+if ( nrow(b)==0 & input$Abranpib=='UF') {
+  g('Ceará','UF') 
+}
+  else {
+    if (nrow(b)==0  & input$Abranpib=='CAPITAL') {
+      g('Fortaleza','CAPITAL') 
+      
+    } else{
+      if(nrow(b)>1 )
+  
+      g(input$LocalPIB,input$Abranpib)
+         }
+   }
+  
+
+})
+
+
+output$Pib_local <- renderEcharts4r({
+   
+  a[a$ano==input$Anopib & a$Abrangencia==input$Abranpib ,] %>% 
+    ungroup() %>% 
+    e_chart(x=Local ) %>% 
+    e_bar(PIB,barGap= -1, realtimeSort = TRUE,itemStyle=list(
+      borderColor= 'purple',
+      color= 'transparent'),bind = Perc_PIB) %>% 
+    e_bar(Serviços,stack = "grp",bind = Perc_Impostos) %>%
+    e_bar(Impostos,stack = "grp",bind = Perc_Impostos ) %>%
+    e_bar(Agropecuária,stack = "grp",bind = Perc_Agropecuária ) %>%
+    e_bar(Admin_Pública,stack = "grp",bind = Perc_Admin_Pública ) %>%
+    e_bar(Industria,stack = "grp" ,bind = Perc_Industria) %>%
+    e_legend(show = T,bottom=0,selected= list(
+      'PIB'=T)) %>%
+    e_flip_coords() %>%
+    #e_y_axis(inverse =T) %>% 
+    e_tooltip(
+    # formatter = htmlwidgets::JS("
+    #   function(params){
+    #   a=params.name*100
+    #     return(params.value[1] +'<br /> ' + params.seriesName + ': ' + params.value[0] + ' bilhões' +
+    #               '<br /> ' + a.toFixed(2) + '%'    )} ")
+    ) %>%
+    e_x_axis(name="R$ Bilhões",formatter = htmlwidgets::JS("
+      function(params){
+        return( params + '')} ")) %>% 
+    e_grid(left = "20%",right="15%") %>% 
+    e_color(c( '#91cc75','#5470c6',  '#fac858',  '#73c0de','#ee6666','#8378EA',
+               '#96BFFF')) %>% 
+    e_mark_point(
+      data= list(
+        yAxis= input$LocalPIB,
+        xAxis =a[a$ano==input$Anopib & a$Local==input$LocalPIB & a$Abrangencia==input$Abranpib ,'PIB'] %>% as.numeric(),
+        value=paste0(a[a$ano==input$Anopib & a$Local==input$LocalPIB & a$Abrangencia==input$Abranpib,'Rank_PIB'] %>% as.numeric(),'ª'),
+        symbolRotate = - 90 ),
+      itemStyle= list(color='#ed8177'))
+})
+
+output$Pib_percapita_local <- renderEcharts4r({
+  
+  a[a$ano==input$Anopib & a$Abrangencia==input$Abranpib , ] %>% 
+    ungroup() %>% 
+    e_chart(x=Local ) %>% 
+    e_bar(PIB_percapita, realtimeSort = TRUE) %>%
+    e_legend(show = T,bottom=0,selected= list(
+      'PIB'=T)) %>%
+    e_mark_line(data = list(
+      type = "average",
+      name = "Média",
+      symbol= "none"), lineStyle=list(color  = "#91cc75" )) %>% 
+    e_flip_coords() %>%
+    e_tooltip() %>%
+    e_x_axis(name="R$",formatter = htmlwidgets::JS("
+      function(params){
+        return( params + '')} ")) %>% 
+    e_grid(left = "20%",right="15%") %>% 
+    e_color(c( '#96BFFF','#91cc75','#5470c6',  '#fac858',  '#73c0de','#ee6666','#8378EA' ))%>% 
+    e_mark_point(
+      data= list(
+        yAxis= input$LocalPIB,
+        xAxis =a[a$ano==input$Anopib & a$Local==input$LocalPIB & a$Abrangencia==input$Abranpib,'PIB_percapita'] %>% as.numeric(),
+        value=paste0(a[a$ano==input$Anopib & a$Local==input$LocalPIB & a$Abrangencia==input$Abranpib ,'Rank_PIB_percapita'] %>% as.numeric(),'ª'),
+        symbolRotate = - 90 ),
+      itemStyle= list(color='#ed8177'))
+ 
+    
+})
+
+{
+  # output$mapa_pib_percapita <- renderLeaflet({
+  #   
+  #   a <- P[P$ano==2019 & P$Abrangencia==P$Abranpib ,] %>% 
+  #     mutate(PIB=round(PIB/1000000000,2)) 
+  #   sca <- colourScale(a$PIB, breaks=7, 
+  #                      style="quantile", revCol=TRUE,dec=1)
+  #   pal <- colorBin("inferno", a$PIB, bins = sca$breaks,reverse = T)
+  #   
+  #   leaflet(a )%>% 
+  #     addProviderTiles(providers$CartoDB.Positron,group="CartoDB.Positron") %>%
+  #     addProviderTiles(providers$Stamen.Toner, group = "Toner by Stamen")%>%
+  #     addLayersControl(
+  #       baseGroups = c("CartoDB.Positron","Toner by Stamen"),
+  #       overlayGroups = c("Marcadores de escola","Densidade"))%>%
+  #     addScaleBar( position ="bottomright",
+  #                  options =scaleBarOptions(imperial = F)) %>% 
+  #     addFullscreenControl(pseudoFullscreen = T)  %>% 
+  #     addPolygons(data = estados,
+  #                 weight=1,
+  #                 opacity = 0.5,
+  #                 popup = ~name_state ,
+  #                 dashArray = "1",
+  #                 fillOpacity = 0.01,
+  #                 group="UF") %>% 
+  #     addCircleMarkers(
+  #       lng = ~LONGITUDE,
+  #       lat = ~LATITUDE,
+  #       weight = 10,
+  #       popup = ~paste(Local, "<br> " ,PIB, " Bilhões de R$"),
+  #       radius =8,
+  #       stroke = F, fillOpacity = 1,
+  #       color = ~pal(PIB),
+  #     ) %>% 
+  #     addLegend(title  = "PIB (R$ Bilhões)",pal = pal  , values = ~PIB , position = "bottomleft")   
+  # })
+}
+
+
+output$Pib_rank <-  renderEcharts4r({
+ 
+   P %>% 
+    ungroup() %>% 
+    mutate(ano=as.character(ano),
+    ) %>% 
+    filter(Local==input$LocalPIB &  Abrangencia== input$Abranpib) %>% 
+    e_chart(x=ano) %>% 
+    e_line(Rank_Serviços) %>% 
+    e_line(Rank_Admin_Pública) %>% 
+    e_line(Rank_Agropecuária) %>% 
+    e_line(Rank_Indústria) %>% 
+    e_line(Rank_PIB) %>% 
+    e_effect_scatter(Rank_PIB,symbol_size = 6,smooth=T,color= 'red') %>%  
+    e_color(c( '#91cc75','#5470c6',  '#fac858',  '#73c0de','#ee6666','#8378EA',
+               '#96BFFF')) %>%
+    e_y_axis(inverse = TRUE,
+             formatter = htmlwidgets::JS("
+      function(params){
+        return( params + 'ª')} "),
+             min=1) %>% 
+    e_toolbox_feature('dataView') %>% 
+    e_labels(color='black',formatter = htmlwidgets::JS("
+      function(params){
+        return( params.value[1]+ 'ª')} ")) %>% 
+    e_toolbox_feature('restore') 
+})
+
+output$PibPercapita_rank <-  renderEcharts4r({
+
+  P %>% 
+    group_by(ano,Abrangencia)%>% 
+    mutate(ano=as.character(ano),
+           PerC_Serviços=Serviços/Populacao ,
+           PerC_Impostos=Impostos/Populacao ,
+           PerC_Agropecuária=Agropecuária/Populacao ,
+           PerC_Industria=Industria/Populacao ,
+           PerC_Admin_Pública=Admin_Pública/Populacao,
+           
+           Rank_Serviços_percapita=rank(-PerC_Serviços,ties.method='min'),
+           Rank_Impostos_percapita=rank(-PerC_Impostos,ties.method='min'),
+           Rank_Indústria_percapita=rank(-PerC_Industria,ties.method='min'),
+           Rank_Agropecuária_percapita=rank(-PerC_Agropecuária,ties.method='min'),
+           Rank_Admin_Pública_percapita=rank(-PerC_Admin_Pública,ties.method='min')
+                 ) %>% 
+    ungroup() %>% 
+    filter(Local==input$LocalPIB &  Abrangencia== input$Abranpib ) %>% 
+    e_chart(x=ano) %>% 
+    e_line(Rank_Serviços_percapita) %>% 
+    e_line(Rank_Indústria_percapita) %>% 
+    e_line(Rank_Agropecuária_percapita) %>% 
+    e_line(Rank_Admin_Pública_percapita) %>% 
+    e_line(Rank_PIB_percapita) %>% 
+    e_effect_scatter(Rank_PIB_percapita,symbol_size = 6,smooth=T,color= 'red') %>%  
+    e_color(c( '#91cc75','#5470c6',  '#fac858',  '#73c0de','#ee6666','#8378EA',
+               '#96BFFF')) %>%
+    e_y_axis(inverse = TRUE,
+             formatter = htmlwidgets::JS("
+      function(params){
+        return( params + 'ª')} "),
+             min=1           ) %>% 
+    e_toolbox_feature('dataView') %>% 
+    e_labels(color='black',formatter = htmlwidgets::JS("
+      function(params){
+        return( params.value[1]+ 'ª')} ")) %>% 
+    e_toolbox_feature('restore') %>% 
+    e_grid(top='15%')
+})
+{
+  
+ # output$mapa_pib <- renderLeaflet({
+# 
+#   a <- P[P$ano==2019 & P$Abrangencia==input$Abranpib,] %>% 
+#     mutate(PIB=round(PIB/1000000000,2)) 
+#   sca <- colourScale(a$PIB, breaks=7, 
+#                      style="quantile", revCol=TRUE,dec=1)
+#   pal <- colorBin("inferno", a$PIB, bins = sca$breaks,reverse = T)
+#   
+#   leaflet(a )%>% 
+#     addProviderTiles(providers$CartoDB.Positron,group="CartoDB.Positron") %>%
+#     addProviderTiles(providers$Stamen.Toner, group = "Toner by Stamen")%>%
+#     addLayersControl(
+#       baseGroups = c("CartoDB.Positron","Toner by Stamen"),
+#       overlayGroups = c("Marcadores de escola","Densidade"))%>%
+#     addScaleBar( position ="bottomright",
+#                  options =scaleBarOptions(imperial = F)) %>% 
+#     addFullscreenControl(pseudoFullscreen = T)  %>% 
+#     addPolygons(data = estados,
+#                 weight=1,
+#                 opacity = 0.5,
+#                 popup = ~name_state ,
+#                 dashArray = "1",
+#                 fillOpacity = 0.01,
+#                 group="UF") %>% 
+#     addCircleMarkers(
+#       lng = ~LONGITUDE,
+#       lat = ~LATITUDE,
+#       weight = 10,
+#       popup = ~paste(Local, "<br> " ,PIB, " Bilhões de R$"),
+#       radius =8,
+#       stroke = F, fillOpacity = 1,
+#       color = ~pal(PIB),
+#     ) %>% 
+#     addLegend(title  = "PIB (R$ Bilhões)",pal = pal  , values = ~PIB , position = "bottomleft")   
+# }) 
+}
+
+
+
+output$F_cnaes <- renderD3plus({
+
+  
+  Tipos_trab_Cnae_G <-aggregate(Qtd.~ Ano+Denominação+Denom_Seção+Denom_Divisão,
+                Tipos_trab_Cnae(),sum) 
+
+
+  #Tipos_trab_Cnae()$Ano  ==input$Ano_filter &
+
+  d3plus(
+    data = if(nrow(Tipos_trab_Cnae_G)==0) {
+      data.frame(Qtd.= NaN)
+    } else {
+      Tipos_trab_Cnae_G 
+    },
+    type = "tree_map",
+    id = c("Denom_Seção", "Denom_Divisão","Denominação"),
+    locale = "pt_BR",
+    width = "100%",
+    currency = "",
+    number_text = c("Mil", "Milhão", "Milhões", "Bilhão", "Bilhões"),
+    height = 500) %>%
+    d3plusSize("Qtd.") %>%
+    d3plusUi(list( list(method = "depth", type = "drop",
+                        value = list(list('1ª Seção' = 0), list('2ª Divisão' = 1),list('3ª Denominação' = 2))))) %>%
+
+    d3plusColor("Denom_Seção") %>%
+    d3plusDepth(0) %>%
+    d3plusLabels(value = TRUE, valign = "top") %>%
+    d3plusTitle(value = input$Ano_filter, font = list(size = 22, weight = 900),
+                total = list(value = list(prefix = "Total: "),
+                             font = list(size = 16, weight = 900))) %>%
+    d3plusFooter(value = "Fonte: Pnadc/Ibge",
+                 font = list(align = "left"))
+
+
+    })
+
+output$F_cnaes_form <- renderD3plus({
+
+  
+
+  
+    d3plus(
+    data = if(nrow(Tipos_trab_Cnae()[Tipos_trab_Cnae()$Tipo=="Trabalho formal",])==0) {
+      data.frame(Qtd.= NaN)
+    } else {
+      Tipos_trab_Cnae()[Tipos_trab_Cnae()$Tipo=="Trabalho formal",]
+    },
+    type = "tree_map",
+    id = c("Denom_Seção", "Denom_Divisão","Denominação"),
+    locale = "pt_BR",
+    width = "100%",
+    currency = "",
+    number_text = c("Mil", "Milhão", "Milhões", "Bilhão", "Bilhões"),
+    height = 500) %>%
+    d3plusSize("Qtd.") %>%
+    d3plusUi(list( list(method = "depth", type = "drop",
+                        value = list(list('1ª Seção' = 0), list('2ª Divisão' = 1),list('3ª Denominação' = 2))))) %>%
+    
+    d3plusColor("Denom_Seção") %>%
+    d3plusDepth(0) %>%
+    d3plusLabels(value = TRUE, valign = "top") %>%
+    d3plusTitle(value = input$Ano_filter, font = list(size = 22, weight = 900),
+                total = list(value = list(prefix = "Total: "),
+                             font = list(size = 16, weight = 900))) %>%
+    d3plusFooter(value = "Fonte: Pnadc/Ibge",
+                 font = list(align = "left"))
+  
+  
+})
+
+output$F_cnaes_inform <- renderD3plus({
+  req(Filtro_Tipos_trab2())
+  
+
+  
+  d3plus(
+    data = if(nrow(Tipos_trab_Cnae()[Tipos_trab_Cnae()$Tipo=="Trabalho informal",])==0) {
+      data.frame(Qtd.= NaN)
+    } else {
+      Tipos_trab_Cnae()[Tipos_trab_Cnae()$Tipo=="Trabalho informal",]
+    },
+    type = "tree_map",
+    id = c("Denom_Seção", "Denom_Divisão","Denominação"),
+    locale = "pt_BR",
+    width = "100%",
+    currency = "",
+    number_text = c("Mil", "Milhão", "Milhões", "Bilhão", "Bilhões"),
+    height = 500) %>%
+    d3plusSize("Qtd.") %>%
+    d3plusUi(list( list(method = "depth", type = "drop",
+                        value = list(list('1ª Seção' = 0), list('2ª Divisão' = 1),list('3ª Denominação' = 2))))) %>%
+    
+    d3plusColor("Denom_Seção") %>%
+    d3plusDepth(0) %>%
+    d3plusLabels(value = TRUE, valign = "top") %>%
+    d3plusTitle(value = input$Ano_filter, font = list(size = 22, weight = 900),
+                total = list(value = list(prefix = "Total: "),
+                             font = list(size = 16, weight = 900))) %>%
+    d3plusFooter(value = "Fonte: Pnadc/Ibge",
+                 font = list(align = "left"))
+  
+  
+})
+
+# # # 
+output$perc_informal <-   renderEcharts4r({
+
+
+
+        e_charts(data= pivot_wider(
+          aggregate(Qtd.~ Ano+Tipo,Filtro_Tipos_trab_INF(),sum) %>%
+            right_join(expand.grid(Tipo=Tipo_T,Ano=Ano_T ),
+                       by=c("Ano"="Ano","Tipo"="Tipo"))  %>%
+            mutate(Qtd.=ifelse(is.na(Qtd.), 0, Qtd.)),names_from=Tipo,values_from = Qtd.,values_fill = 0)%>%
+            group_by(Ano) %>%
+            mutate(`Trabalho formal`=round(`Trabalho formal`,0),
+                   `Trabalho informal`=round(`Trabalho informal`,0),
+              Total=`Trabalho formal`+`Trabalho informal`,.groups="keep")  %>%
+            ungroup() %>%
+            arrange(Ano),
+                 x=Ano) %>%
+        e_bar(`Trabalho formal`,stack="grp") %>%
+        e_bar(`Trabalho informal`,stack="grp") %>%
+        e_toolbox() %>%
+        e_toolbox_feature('dataZoom') %>%
+        e_toolbox_feature('dataView') %>%
+        e_toolbox_feature('saveAsImage') %>%
+        e_toolbox_feature('restore') %>%
+        e_tooltip() %>%
+        e_effect_scatter(Total,symbol_size = 6,smooth=T,color= 'red')%>%
+        e_legend(show=T,orient = 'horizontal', bottom = 0) %>%
+        e_line(Total,smooth=T,color= '#ee6666')
+
+
+       })
+# # 
+output$perc_informal_sexo <-   renderEcharts4r({
+
+
+      e_charts(data =  pivot_wider( aggregate(Qtd.~ Ano+Tipo+V2007,Filtro_Tipos_trab_INF(),sum) %>%
+                                right_join(expand.grid(Tipo=Tipo_T,Ano=Ano_T,V2007=Sexo_T),
+                                           by=c("Ano"="Ano","Tipo"="Tipo","V2007"="V2007"))  %>%
+                                mutate(Qtd.=ifelse(is.na(Qtd.), 0, Qtd.)),names_from=Tipo,values_from = Qtd.,values_fill = 0)%>%
+                 group_by(Ano,V2007) %>%
+                 summarise(Informalidade=`Trabalho informal`/(`Trabalho formal`+`Trabalho informal`),.groups="keep") %>%
+                 ungroup() %>%
+                 mutate(V2007=fct_reorder(V2007,Informalidade)) %>% 
+                 group_by(V2007),
+               x=Ano) %>%
+        e_line(Informalidade,smooth=T,
+               emphasis=list( focus= 'series' )) %>%
+       e_y_axis(formatter = e_axis_formatter("percent", digits = 0)) %>%
+        e_toolbox() %>%
+        e_toolbox_feature(feature='magicType', type=list('line', 'bar')) %>%
+        e_toolbox_feature('dataZoom') %>%
+        e_toolbox_feature('dataView') %>%
+        e_toolbox_feature('saveAsImage') %>%
+        e_toolbox_feature('restore') %>%
+        e_legend(show=T,orient = 'horizontal', bottom = 0,emphasis= list( focus= 'series')) %>%
+        e_tooltip(trigger= 'item',
+                  axisPointer=list(
+                    type= 'shadow'
+                  ),formatter = e_tooltip_item_formatter(
+                    style = c( "percent"))) %>%
+        e_data(data=
+                 pivot_wider(
+                       aggregate(Qtd.~ Ano+Tipo,Filtro_Tipos_trab_INF(),sum) %>%
+                         right_join(expand.grid(Tipo=Tipo_T,Ano=Ano_T ),
+                                    by=c("Ano"="Ano","Tipo"="Tipo"))  %>%
+                         mutate(Qtd.=ifelse(is.na(Qtd.), 0, Qtd.)),names_from=Tipo,values_from = Qtd.,values_fill = 0)%>%
+                       group_by(Ano) %>%
+                       summarise(Geral=`Trabalho informal`/(`Trabalho formal`+`Trabalho informal`),.groups="keep")  %>%
+                       ungroup()
+                 ,x= Ano    ) %>%
+        e_effect_scatter(Geral,symbol_size = 6,smooth=T,color= 'red')%>%
+    e_line(Geral,smooth=T,color= '#ee6666')
+
+    })
+# #  
+output$perc_informal_Raca <-   renderEcharts4r({
+  
+
+  e_charts(data=
+             pivot_wider( aggregate(Qtd.~ Ano+Tipo+V2010,Filtro_Tipos_trab_INF(),sum) %>%
+                            right_join(expand.grid(Tipo=Tipo_T,Ano=Ano_T,V2010=Raca_T),
+                                       by=c("Ano"="Ano","Tipo"="Tipo","V2010"="V2010"))  %>%
+                            mutate(Qtd.=ifelse(is.na(Qtd.), 0, Qtd.)),names_from=Tipo,values_from = Qtd.,values_fill = 0)%>%
+             group_by(Ano,V2010) %>%
+             summarise(Informalidade=`Trabalho informal`/(`Trabalho formal`+`Trabalho informal`),.groups="keep") %>%
+             ungroup() %>%
+             filter(V2010 %in% if(is.null(input[["Filtro_merc_inf-V2010"]])) Raca_T else input[["Filtro_merc_inf-V2010"]])   %>%
+             mutate(V2010=fct_reorder(V2010,Informalidade)) %>%
+             group_by(V2010)
+           , x=Ano) %>%
+    e_toolbox() %>%
+    e_toolbox_feature('dataZoom') %>%
+    e_toolbox_feature('dataView') %>%
+    e_toolbox_feature('saveAsImage') %>%
+    e_toolbox_feature('restore') %>%
+    e_tooltip(trigger= 'axis',formatter = e_tooltip_pointer_formatter("percent"),
+              axisPointer=list(       type= 'shadow'      ))%>%
+    e_line(Informalidade
+           #,barGap= 0
+               ,smooth=F,areaStyle=list(opacity= 0.1),bind = V2010,
+                endLabel=list( show=T,           formatter= htmlwidgets::JS("
+          function (params) {
+           return params.name }")),
+                labelLayout=list(   moveOverlap= 'shiftY'    ),
+                emphasis=list(focus= 'series' )
+    ) %>%
+    e_y_axis(formatter = e_axis_formatter("percent", digits = 0)) %>%
+    e_data(data= pivot_wider(
+      aggregate(Qtd.~ Ano+Tipo,Filtro_Tipos_trab_INF(),sum) %>%
+        right_join(expand.grid(Tipo=Tipo_T,Ano=Ano_T ),
+                   by=c("Ano"="Ano","Tipo"="Tipo"))  %>%
+        mutate(Qtd.=ifelse(is.na(Qtd.), 0, Qtd.)),names_from=Tipo,values_from = Qtd.,values_fill = 0)%>%
+        group_by(Ano) %>%
+        summarise(Geral=`Trabalho informal`/(`Trabalho formal`+`Trabalho informal`),.groups="keep")  %>%
+        ungroup() %>%
+        mutate(Raca="Geral"),x= Ano   ) %>%
+    e_line(Geral,   symbolSize= 10,symbol= "circle",bind = Raca,color= '#ee6666',opacity= 0.1,
+                endLabel=list(  show=T,
+                  formatter= htmlwidgets::JS("
+          function (params) {
+           return params.name }")),
+                labelLayout=list(  moveOverlap= 'shiftY'),
+                emphasis=list( focus= 'series' )    ) %>%
+    e_color(c('#5470c6', '#91cc75', '#fac858',  '#73c0de','#ee6666')) %>% 
+    e_grid(right = "20%") %>% 
+    e_legend(show=T,orient = 'horizontal',selected=list('Geral'=F,'Outros'=F), bottom = 0,emphasis= list( focus= 'series')) 
+  
+  
+  
+})
+# # 
+output$perc_informal_Esc <- renderEcharts4r({
+
+
+  e_charts(data=
+             pivot_wider( aggregate(Qtd.~ Ano+Tipo+VD3004,Filtro_Tipos_trab_INF(),sum) %>%
+                            right_join(expand.grid(Tipo=Tipo_T,Ano=Ano_T,VD3004=Esc_T),
+                                       by=c("Ano"="Ano","Tipo"="Tipo","VD3004"="VD3004"))  %>%
+                            mutate(Qtd.=ifelse(is.na(Qtd.), 0, Qtd.)),names_from=Tipo,values_from = Qtd.,values_fill = 0)%>%
+             group_by(Ano,VD3004) %>%
+             summarise(Informalidade=`Trabalho informal`/(`Trabalho formal`+`Trabalho informal`),.groups="keep") %>%
+             ungroup() %>%
+             mutate(VD3004=fct_reorder(VD3004,Informalidade)) %>%
+             filter(VD3004 %in% if(is.null(input[["Filtro_merc_inf-VD3004"]])) Esc_T else input[["Filtro_merc_inf-VD3004"]])   %>% 
+             group_by(VD3004) 
+             , x=Ano) %>%
+    e_toolbox() %>%
+    e_toolbox_feature('dataZoom') %>%
+    e_toolbox_feature('dataView') %>%
+    e_toolbox_feature('saveAsImage') %>%
+    e_toolbox_feature('restore') %>%
+    e_tooltip(trigger= 'axis',formatter = e_tooltip_pointer_formatter("percent"),
+              axisPointer=list(      type= 'shadow'        ))%>%
+    e_line(Informalidade
+           ,smooth=F,areaStyle=list(opacity= 0.1),bind = VD3004,
+           endLabel=list(  show=T,  formatter= htmlwidgets::JS("
+          function (params) {
+           return params.name }")),
+           labelLayout=list(moveOverlap= 'shiftY'       ),
+           emphasis=list(      focus= 'series' )) %>%
+    e_y_axis(formatter = e_axis_formatter("percent", digits = 0)) %>%
+    e_data(data= pivot_wider(
+      aggregate(Qtd.~ Ano+Tipo,Filtro_Tipos_trab_INF(),sum) %>%
+        right_join(expand.grid(Tipo=Tipo_T,Ano=Ano_T ),
+                   by=c("Ano"="Ano","Tipo"="Tipo"))  %>%
+        mutate(Qtd.=ifelse(is.na(Qtd.), 0, Qtd.)),names_from=Tipo,values_from = Qtd.,values_fill = 0)%>%
+        group_by(Ano) %>%
+        summarise(Geral=`Trabalho informal`/(`Trabalho formal`+`Trabalho informal`),.groups="keep")  %>%
+        ungroup() %>%
+        mutate(Raca="Geral"),x= Ano   ) %>%
+    e_line(Geral,
+           symbolSize= 10,symbol= "circle",bind = Raca,color= '#ee6666',opacity= 0.1,
+           endLabel=list(
+             show=T,
+             formatter= htmlwidgets::JS("
+          function (params) {
+           return params.name }")),
+           labelLayout=list(
+             moveOverlap= 'shiftY'),
+           emphasis=list(
+             focus= 'series' )
+    ) %>%
+    e_color(c('#5470c6', '#91cc75', '#fac858',  '#73c0de','#ee6666')) %>% 
+    e_grid(right = "30%") %>% 
+    e_legend(show=F,orient = 'horizontal',selected=list('Geral'=T), bottom = 0,emphasis= list( focus= 'series')) 
+  
+ })
+# # # 
+
+output$perc_informal_idade <-   renderEcharts4r({
+
+
+
+
+e_charts(data =
+           pivot_wider( aggregate(Qtd.~ Ano+Tipo+idadeEco2,Filtro_Tipos_trab_INF(),sum) %>%
+                          right_join(expand.grid(Tipo=Tipo_T,Ano=Ano_T,
+                                                 idadeEco2=Idade_T),
+                                     by=c("Ano"="Ano","Tipo"="Tipo","idadeEco2"="idadeEco2"))  %>%
+                          mutate(Qtd.=ifelse(is.na(Qtd.), 0, Qtd.)),names_from=Tipo,values_from = Qtd.,values_fill = 0)%>%
+           group_by(Ano,idadeEco2) %>%
+           summarise(Informalidade=`Trabalho informal`/(`Trabalho formal`+`Trabalho informal`),.groups="keep") %>%
+           ungroup() %>%
+           group_by(idadeEco2),
+         x=Ano) %>%
+  e_bar(Informalidade,barGap= 0) %>%
+  e_y_axis(formatter = e_axis_formatter("percent", digits = 0),
+           min=0.3) %>%
+  e_toolbox() %>%
+  e_toolbox_feature('dataZoom') %>%
+  e_toolbox_feature('dataView') %>%
+  e_toolbox_feature('saveAsImage') %>%
+  e_toolbox_feature('restore') %>%
+  e_legend(show=T,orient = 'horizontal', bottom = 0) %>%
+  e_tooltip(trigger= 'item',
+            axisPointer=list(
+              type= 'shadow'
+            ),formatter = e_tooltip_item_formatter(
+              style = c( "percent"))) #%>%
+  # e_data(data=G(),x= Ano   ) %>%
+  # e_line(Geral,symbolSize= 10,symbol= "circle",smooth=T,color= '#ee6666') %>%
+  # e_labels(show=F,rotate=90,
+  #          position = 'top',
+  #          distance= 40,
+  #          align='right',
+  #          verticalAlign='middle',
+  #          color= 'black',
+  #          formatter = htmlwidgets::JS("
+  #     function(params){
+  #     a= params.value[1]*100
+  #      return( a.toFixed(1) + '%' )} "),
+  #          emphasis= list( focus= 'series'))
+})
+
+{
+  # output$qtd_ocup_esc <- renderEcharts4r({
+  #   
+  #   e_charts(data=aggregate(Qtd.~ V2007+VD5003,Tipos_trab2[Tipos_trab2$Ano =='2020',],sum)  %>% 
+  #              group_by(V2007) %>% 
+  #              mutate(Qtd.=round(Qtd.)),
+  #            x=VD5003) %>%
+  #     e_bar(Qtd.) %>% 
+  #     e_grid(left = "45%") %>% 
+  #     e_flip_coords() %>% 
+  #     e_toolbox() %>%
+  #     e_toolbox_feature(feature='magicType', type=list( 'bar','stack')) %>%
+  #     e_toolbox_feature('dataZoom') %>%
+  #     e_toolbox_feature('dataView') %>%
+  #     e_toolbox_feature('saveAsImage') %>%
+  #     e_toolbox_feature('restore') %>% 
+  #     e_x_axis(formatter = htmlwidgets::JS("
+  #       function(params){
+  #         return( params/1000 + 'Mil')} ")) %>%
+  #     e_tooltip(trigger="axis",axisPointer=list(type="shadow"))%>% 
+  #     e_legend(show=T,orient = 'horizontal', bottom = 0)
+  # })
+  
+}
+
+output$Taxa_desemp_fort <-   renderEcharts4r({   
+
+  
+   group_by(pnadc_15_20,
+             Ano,V2007) %>%
+      summarise( Tx_desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+                   sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) %>% 
+    ungroup(Ano) %>% 
+    e_charts(x=Ano) %>% 
+    e_line(Tx_desocupacao,smooth=T) %>% 
+    e_toolbox() %>%
+    e_toolbox_feature(feature='magicType', type=list('line', 'bar')) %>%
+    e_toolbox_feature('dataZoom') %>%
+    e_toolbox_feature('dataView') %>%
+    e_toolbox_feature('saveAsImage') %>%
+    e_toolbox_feature('restore') %>% 
+    e_legend(show=T,orient = 'horizontal', bottom = 0) %>% 
+    e_tooltip(trigger= 'item',
+              axisPointer=list(
+                type= 'shadow'
+              ),formatter = e_tooltip_item_formatter(
+                style = c( "percent"),
+                digits = 2)) %>% 
+    e_y_axis(formatter = e_axis_formatter("percent", digits = 0)) %>% 
+    e_data(data=group_by(pnadc_15_20,
+                         Ano) %>%
+             summarise( Geral = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+                          sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) %>% 
+             ungroup(Ano),x= Ano   ) %>% 
+    e_effect_scatter(Geral,symbol_size = 6,smooth=T,color= 'red') %>% 
+    e_line(Geral,smooth=T,color= '#ee6666')%>% 
+    e_dims()
+  
+  
+  }) 
+
+output$Taxa_desemp_fort_raca <-   renderEcharts4r({  
+
+ 
+  
+ d <-  pnadc_15_20[ pnadc_15_20$Ano==input$Ano_cor  ,] %>% 
+    mutate(
+      V2010=as.character(V2010),
+      V2010 = case_when(
+        V2010  %in% c("Indígena", "Amarela","Ignorado")  ~ "Outros", #
+        TRUE   ~ V2010
+      ))  
+  
+ d  %>% 
+   group_by(V2010,V2007) %>%
+    summarise( Tx_desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+                 sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) %>% 
+    group_by(V2007=fct_reorder(V2007,-Tx_desocupacao)) %>% 
+    e_charts(x=V2010) %>% 
+    e_bar(Tx_desocupacao,barGap= 0) %>% 
+    e_toolbox() %>%
+    e_toolbox_feature(feature='magicType', type=list('line', 'bar')) %>%
+    e_toolbox_feature('dataZoom') %>%
+    e_toolbox_feature('dataView') %>%
+    e_toolbox_feature('saveAsImage') %>%
+    e_toolbox_feature('restore') %>% 
+    e_legend(show=T,orient = 'horizontal', bottom = 0) %>% 
+    e_tooltip(trigger="axis",axisPointer=list(type="shadow"),
+              formatter = e_tooltip_pointer_formatter("percent")) %>% 
+    e_y_axis(formatter = e_axis_formatter("percent", digits = 0),max=0.3) %>% 
+    e_data(data= d %>%
+             group_by(V2010) %>% 
+             summarise( Geral = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+                          sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) %>% 
+             ungroup(V2010),x= V2010   ) %>% 
+    e_bar(Geral)%>% 
+    e_color(c('#5470c6', '#91cc75','#ee6666', '#fac858',  '#73c0de')) %>% 
+    e_labels(show =F, emphasis= list( focus= 'series')) 
+  
+}) 
+
+output$Taxa_desemp_fort_esc <-   renderEcharts4r({  
+  
+
+  pnadc_15_20 %>% 
+    mutate(
+      VD3004 = as.character(VD3004),
+      VD3004 = case_when( 
+        VD3004 == "Médio completo ou equivalente" ~ "Médio completo",
+        VD3004 == "Fundamental incompleto ou equivalente" ~ "Fundamental incompleto",
+        VD3004 == "Médio incompleto ou equivalente" ~ "Médio incompleto",
+        VD3004 == "Superior incompleto ou equivalente" ~ "Superior incompleto",
+        VD3004 == "Fundamental completo ou equivalente" ~ "Fundamental completo",
+        VD3004 == "Sem instrução e menos de 1 ano de estudo" ~ "Menos de 1 ano de estudo",
+        TRUE ~ VD3004
+      )) %>% 
+    group_by(Ano,VD3004) %>%
+    summarise( Tx_desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+                 sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) %>%
+    drop_na() %>% 
+    group_by(fct_reorder(VD3004,-Tx_desocupacao)) %>% 
+    e_charts(x=Ano) %>% 
+    e_bar(Tx_desocupacao) %>% 
+    e_toolbox() %>%
+    e_toolbox_feature(feature='magicType', type=list('line', 'bar')) %>%
+    e_toolbox_feature('dataZoom') %>%
+    e_toolbox_feature('dataView') %>%
+    e_toolbox_feature('saveAsImage') %>%
+    e_toolbox_feature('restore') %>% 
+    e_legend(show=T,orient = 'horizontal', bottom = 0) %>% 
+    e_tooltip(trigger= 'item',
+              axisPointer=list(
+                type= 'shadow'
+              ),formatter = e_tooltip_item_formatter(
+                style = c( "percent"))) %>% 
+    e_y_axis(formatter = e_axis_formatter("percent", digits = 0)) %>% 
+    e_data(data=group_by(pnadc_15_20[pnadc_15_20$Capital %in% "Município de Fortaleza (CE)"  ,],
+                         Ano) %>%
+             summarise( Geral = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+                          sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) %>% 
+             ungroup(Ano),x= Ano   ) %>% 
+    e_effect_scatter(Geral,symbol_size = 6,smooth=T,color= 'red')%>% 
+    e_line(Geral,smooth=T,color= '#ee6666') %>% 
+    e_color(c('#5470c6', '#91cc75', '#fac858',  '#73c0de','#ee6666','#8378EA',
+              '#96BFFF')) %>% 
+    e_grid( height = "60%") %>% 
+    e_labels(show =F, emphasis= list( focus= 'series'))
+  
+  
+}) 
+
+output$Taxa_desemp_fort_idade <-   renderEcharts4r({
+  
+  req(input$sidebar == "Tipo_ocupação")
+  pnadc_15_20 %>% 
+    mutate(idadeEco2=case_when(
+      idadeEco2 %in% c('40-49', '50-59', '60-65', '66+') ~ '40+',
+      TRUE ~ idadeEco2
+    )) %>% 
+    group_by(Ano,idadeEco2) %>%
+    summarise( Tx_desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+                 sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) %>% 
+    drop_na() %>% 
+    ungroup(Ano) %>% 
+    e_charts(x=Ano) %>% 
+    e_bar(Tx_desocupacao,barGap=0) %>% 
+    e_toolbox() %>%
+    e_toolbox_feature(feature='magicType', type=list('line', 'bar')) %>%
+    e_toolbox_feature('dataZoom') %>%
+    e_toolbox_feature('dataView') %>%
+    e_toolbox_feature('saveAsImage') %>%
+    e_toolbox_feature('restore') %>% 
+    e_legend(show=T,orient = 'horizontal', bottom = 0) %>% 
+    e_tooltip(trigger= 'item',
+              axisPointer=list(
+                type= 'shadow'
+              ),formatter = e_tooltip_item_formatter(
+                style = c( "percent"))) %>% 
+    e_y_axis(formatter = e_axis_formatter("percent", digits = 0),
+             min=0.06) %>% 
+    e_data(data=group_by(pnadc_15_20,Ano) %>%
+             summarise( Geral = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+                          sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) %>% 
+             ungroup(Ano),x= Ano   ) %>% 
+    e_effect_scatter(Geral,symbol_size = 6,smooth=T,color= 'red') %>% 
+    e_line(Geral,smooth=T,color= '#ee6666') %>% 
+    e_labels(show=F,rotate=90,
+             position = 'top',
+             distance= 40,
+             align='right',
+             verticalAlign='middle',
+             color= 'black',
+             
+             formatter = htmlwidgets::JS("
+      function(params){
+      a= params.value[1]*100
+       return( a.toFixed(1) + '%' )} "),
+             emphasis= list( focus= 'series')) 
+  
+}) 
+
+
+output$F_tipo_trab <- renderPlotly({
+
+
+  plotly::ggplotly(
+    group_by(Filtro_Tipos_trab2(),
+             Ano,Denom_Seção,Tipo) %>%
+      summarise(Qtd. = sum(Qtd. ),.groups="keep") %>%
+      ggplot(aes(x=ifelse(Tipo=='Trabalho formal',Qtd.,-Qtd.) ,y=Denom_Seção,fill=Tipo
+                 ,text=paste0("Ano: ","<b>",Ano,"</b>","<br>",
+                              Tipo, "<br>",
+                              Denom_Seção  ,"<br>",
+                              "Valor: ","<b>",format(round(Qtd.,0), big.mark = ".",
+                                                     decimal.mark=","),"</b>")))+
+
+      geom_bar(stat ='identity')+
+      scale_x_symmetric(labels = abs)+
+      xlab("")+
+      ylab("")
+    ,tooltip=c("text"))%>%
+    layout(legend =  list(orientation = 'h',title=""))
+
+
+})
+# 
+output$F_tipo_trab_Sex <- renderPlotly({
+
+
+plotly::ggplotly(
+  group_by(Filtro_Tipos_trab2(),
+           Ano,Denom_Seção,V2007,Tipo) %>%
+    summarise(Qtd. = sum(Qtd. ),.groups="keep") %>%
+
+    ggplot(aes(x=Qtd.,y= fct_reorder(Denom_Seção,Qtd.),fill=V2007
+               ,text=paste0("Ano: ","<b>",Ano,"</b>","<br>",
+                            V2007, "<br>",
+                            Denom_Seção  ,"<br>",
+                            "Valor: ","<b>",format(round(Qtd.,0), big.mark = ".",
+                                                   decimal.mark=","),"</b>")))+
+
+    geom_col(position = 'dodge'  )+
+    xlab("")+
+    ylab("")+
+    facet_wrap(vars(Tipo))
+  ,tooltip=c("text"))%>%
+  layout(legend =  list(orientation = 'h',title=""))
+
+
+})
+
+##Globo
+{
+# output$M_comercio_ext <- renderEcharts4r({
+#   
+#   
+# 
+# a <- EXP_IMP |> 
+#   filter(Município=="Fortaleza - CE" & Ano== 2021 & Tipo=="Exportações"  ) %>% 
+#   group_by(Ano,País,start_lon,start_lat,end_lon,end_lat) %>% 
+#   summarise(Total_País = sum(`Valor FOB (US$)`),.groups='keep') %>% 
+#   ungroup()
+# 
+# sca <- mapmisc::colourScale(a$Total_País, breaks=6, 
+#                             style="quantile", revCol=TRUE,dec=1)
+# 
+# 
+# e_charts(a) |> 
+#   e_globe(
+#   ) |> 
+#   e_lines_3d(
+#     start_lon, 
+#     start_lat, 
+#     end_lon, 
+#     end_lat,
+#     value= `Total_País`,
+#     name = "Exportação",
+#     effect = list(show = TRUE,
+#                   trailWidth= 1,
+#                   trailOpacity= 0.5,
+#                   trailLength= 0.2,
+#                   constantSpeed= 5),
+#     blendMode= 'lighter',
+#     lineStyle= list(
+#       width= 1,
+#       opacity= 0.1
+#       # ,
+#       # color= 'rgb(50, 100, 140)'
+#     )
+#   ) |> 
+#   e_legend(F) %>%
+#   e_data(a,end_lon) %>%
+#   e_globe(
+#     postEffect= list(
+#       enable= T  ),
+#     environment = ea_asset("starfield"),
+#     base_texture = ea_asset("world topo"), 
+#     height_texture = ea_asset("world topo"),
+#     
+#     light= list(
+#       ambient= list(intensity= 0.4),
+#       main= list(  intensity= 5)
+#     ),
+#     globeOuterRadius = 50,
+#     viewControl=list (
+#       autoRotate= F)
+#     
+#   ) %>%
+#   e_scatter_3d(end_lat, Total_País,coord_system = "globe") %>% 
+#   e_visual_map(type='piecewise',
+#                pieces= list(
+#                  list(min= sca$breaks[1],max=sca$breaks[2]),
+#                  list(min= sca$breaks[2],max=sca$breaks[3]),
+#                  list(min= sca$breaks[3],max=sca$breaks[4]),
+#                  list(min= sca$breaks[4],max=sca$breaks[5]),
+#                  list(min= sca$breaks[5],max=sca$breaks[6])
+#                  
+#                )
+#                ,inRange =list(  color= c("#313695", "#ffffbf", "#fee090", "#fdae61",
+#                                          "#f46d43", "#d73027", "#a50026")
+#                                 
+#                )
+#   ) %>% 
+#   e_tooltip(triggerOn= "click")
+# 
+# })
+
+  }
+
+output$TM_comercio_ext_Pais <- renderD3plus({
+  
+  
+  d3plus(
+    data = Filtro_EXP() ,
+    type = "tree_map",
+    id = c("País", "Mercadorias"),
+    # currency_var = c("Trabalho informal",
+    #                  "Trabalho formal"),
+    locale = "pt_BR",
+    width = "100%",
+    currency = "USD",
+    number_text = c("Mil", "Milhão", "Milhões", "Bilhão", "Bilhões"),
+    height = 500) %>%
+    d3plusSize('Valor FOB (US$)') %>%
+    d3plusColor("País") %>% 
+    d3plusUi(value = list(
+      # list(method = "color",
+      #      value = list(list(Profundidade = "País"), list(Value = "Trade.Value..US.."))),
+      list(method = "depth", type = "sum",
+           value = list( list(País = 0), list(Mercadorias = 1))))) %>%
+    d3plusDepth(0) %>% 
+    d3plusLabels(value = TRUE, valign = "top") %>% 
+    d3plusTitle(value = '', font = list(size = 22, weight = 900),
+                total = list(value = list(prefix = "Total: "),
+                             font = list(size = 16, weight = 900)))
+
+})
+
+output$TM_comercio_ext_Merc <- renderD3plus({
+  
+  
+  
+  
+  d3plus(
+    data = Filtro_EXP()  ,
+    type = "tree_map",
+    id = c( "Mercadorias","País"),
+    locale = "pt_BR",
+    width = "100%",
+    currency = "USD",
+    number_text = c("Mil", "Milhão", "Milhões", "Bilhão", "Bilhões"),
+    height = 500) %>%
+    d3plusSize('Valor FOB (US$)') %>%
+    d3plusColor("Mercadorias") %>% 
+    d3plusUi(value = list(
+      list(method = "depth", type = "sum",
+           value = list( list(Mercadorias = 0), list(País= 1))))) %>%
+    d3plusDepth(0) %>% 
+    d3plusLabels(value = TRUE, valign = "top") %>% 
+    d3plusTitle(value = "", font = list(size = 22, weight = 900),
+                total = list(value = list(prefix = "Total: "),
+                             font = list(size = 16, weight = 900)))
+
+})
+
+
+output$TM_comercio_imp_Pais <- renderD3plus({
+ 
+
+  d3plus(
+    data = Filtro_IMP() ,
+    type = "tree_map",
+    id = c("País", "Mercadorias"),
+    # currency_var = c("Trabalho informal",
+    #                  "Trabalho formal"),
+    locale = "pt_BR",
+    width = "100%",
+    currency = "USD",
+    number_text = c("Mil", "Milhão", "Milhões", "Bilhão", "Bilhões"),
+    height = 500) %>%
+    d3plusSize('Valor FOB (US$)') %>%
+    d3plusColor("País") %>% 
+    d3plusUi(value = list(
+      # list(method = "color",
+      #      value = list(list(Profundidade = "País"), list(Value = "Trade.Value..US.."))),
+      list(method = "depth", type = "sum",
+           value = list( list(País = 0), list(Mercadorias = 1))))) %>%
+    d3plusDepth(0) %>% 
+    d3plusLabels(value = TRUE, valign = "top") %>% 
+    d3plusTitle(value = "", font = list(size = 22, weight = 900),
+                total = list(value = list(prefix = "Total: "),
+                             font = list(size = 16, weight = 900)))
+  
+})
+
+output$TM_comercio_imp_Merc <- renderD3plus({
+
+  a <- Filtro_IMP() 
+  d3plus(
+    data = a ,type = "tree_map",
+    id = c( "Mercadorias","País"),
+    locale = "pt_BR",
+    width = "100%",
+    currency = "USD",
+    number_text = c("Mil", "Milhão", "Milhões", "Bilhão", "Bilhões"),
+    height = 500) %>%
+    d3plusSize('Valor FOB (US$)') %>%
+    d3plusColor("Mercadorias") %>% 
+    d3plusUi(value = list(
+      list(method = "depth", type = "sum",
+           value = list( list(Mercadorias = 0), list(País= 1))))) %>%
+    d3plusDepth(0) %>% 
+    d3plusLabels(value = TRUE, valign = "top") %>% 
+    d3plusTitle(value = "", font = list(size = 22, weight = 900),
+                total = list(value = list(prefix = "Total: "),
+                             font = list(size = 16, weight = 900)))
+  
+})
+
+
+output$Serie_Exp_Imp<- renderEcharts4r({
+
+  Filtro_EXP_IMP_Pais() |>
+    group_by(Ano) %>% 
+    summarise(Exportações = sum(Exportações),
+              Importações = sum(Importações)) %>%
+    mutate(Saldo=Exportações-Importações) %>% 
+    e_charts(x=Ano) |> 
+    e_bar(Exportações) %>% 
+    e_bar(Importações) %>% 
+    e_line(Saldo,index = 1) %>% 
+    e_tooltip(trigger = c( "axis"),axisPointer=list(type="shadow")) %>% 
+    e_y_axis(name='Mil R$') %>% 
+    e_grid(left='15%')
+})
+
+anos <- as.character(1997:2023)
+text <- lapply(anos, function(ano) list(text = ano))
+
+output$M_Comercio_clorop<- renderEcharts4r({
+  
+  
+  EXP_IMP |> 
+    mutate(Ano=as.character(Ano)) %>% 
+    filter(  Tipo==input$tipo_C  ) %>%
+    group_by(Ano) %>% 
+    e_charts(x=country_name,timeline = T) %>% 
+    e_map(`Valor FOB (US$)`,map="world",roam=T,selectedMode=F) |> 
+    e_visual_map(`Valor FOB (US$)`) %>% 
+    e_tooltip() %>% 
+    e_timeline_opts(currentIndex= 26)%>% 
+    e_timeline_serie(
+      title =  text )
+  
+})
+
+
+output$Desp_linha<- renderEcharts4r({
+  
+  Desp[Desp$Despesa==input$Despesa & Desp$Subfunção %in% input$Subfunção &
+         Desp$Instituição==input$Instituição,] %>% 
+  mutate(Ano=as.character(Ano)) %>% 
+  arrange(Ano) %>% 
+  group_by(Subfunção) %>% 
+  e_charts(x=Ano) |> 
+  e_line(Valor,smooth=T) %>%  
+  e_tooltip(trigger = c( "axis"),axisPointer=list(type="shadow")) %>% 
+  e_y_axis(name='R$') %>% 
+  e_grid(left='15%')
+   })
+
+output$Desp_capitais<- renderEcharts4r({
+  if ( nrow(
+    Desp[ Desp$`Despesa`==input$Despesa & Desp$Ano==input$AnoDesp 
+          & Desp$`Subfunção` %in%  input$Subfunção, ] )==0 ) {
+    return()
+  }
+  else {
+  
+  D <- Desp[ Desp$`Despesa`==input$Despesa & Desp$Ano==input$AnoDesp  
+             & Desp$`Subfunção` %in%  input$Subfunção, ] %>% 
+    group_by(Instituição,Ano) %>% 
+    mutate(Ano=as.character(Ano),
+           Total=sum(Valor)) %>%
+    arrange(Total,.by_group = F) %>%
+    group_by(Subfunção) 
+  
+  Dagr <- aggregate(Total~Instituição,data=D,FUN=mean) %>% 
+    mutate( Rank_Total=rank(-Total,ties.method='min'))  
+  
+  D %>% 
+    e_charts(x=Instituição) |> 
+    e_bar(Valor, stack='f') %>%  
+    e_tooltip(trigger = c( "axis"),axisPointer=list(type="shadow"),locale = 'pt-br') %>% 
+    e_grid(left='15%') %>% 
+    e_flip_coords() %>% 
+    e_y_axis(name='R$') %>% 
+    e_mark_point(
+      data= list(
+        yAxis= input$Instituição,
+        xAxis = Dagr[Dagr$Instituição==input$Instituição ,'Total'] %>% as.numeric(),
+        value=paste0(Dagr[ Dagr$Instituição==input$Instituição ,'Rank_Total'] %>% as.numeric(),'ª'),
+        symbolRotate = - 90 ),
+      itemStyle= list(color='#ed8177'))
+  }
+
+})
+
+output$Desp_per_capita_capitais<- renderEcharts4r({
+  
+  
+  
+  if ( nrow(
+    Desp[ Desp$`Despesa`==input$Despesa & Desp$Ano==input$AnoDesp 
+         & Desp$`Subfunção` %in%  input$Subfunção, ] )==0 ) {
+   return()
+  }
+  else {
+    D <- Desp[ Desp$`Despesa`==input$Despesa & Desp$Ano==input$AnoDesp 
+               & Desp$`Subfunção` %in%  input$Subfunção, ] %>% 
+      group_by(Instituição,Ano) %>% 
+      mutate(Ano=as.character(Ano),
+             Total=sum(Desp_per_capita)) %>%
+      arrange(Total,.by_group = F) %>%
+      group_by(Subfunção) 
+    
+    Dagr <- aggregate(Total~Instituição,data=D,FUN=mean) %>% 
+      mutate( Rank_Total=rank(-Total,ties.method='min'))  
+    
+    D %>% 
+      e_charts(x=Instituição) |> 
+      e_bar(Desp_per_capita, stack='f') %>%  
+      e_tooltip(trigger = c( "axis"),axisPointer=list(type="shadow"),locale = 'pt_br.utf-8') %>% 
+      e_grid(left='15%') %>% 
+      e_flip_coords() %>% 
+      e_y_axis(name='R$') %>% 
+      e_mark_point(
+        data= list(
+          yAxis= input$Instituição,
+          xAxis = Dagr[Dagr$Instituição==input$Instituição ,'Total'] %>% as.numeric(),
+          value=paste0(Dagr[ Dagr$Instituição==input$Instituição ,'Rank_Total'] %>% as.numeric(),'ª'),
+          symbolRotate = - 90 ),
+        itemStyle= list(color='#ed8177'))
+  }
+  
+  
+  
+   
+  
+  
+  # Desp[ Desp$`Despesa`=="Despesas Empenhadas" & Desp$Ano==2020 
+  #       & Desp$`Subfunção` %in%  input$Subfunção, ] %>% 
+  #   mutate(Ano=as.character(Ano)) %>% 
+  #   group_by(Subfunção) %>% 
+  #   e_charts(x=Instituição) |> 
+  #   e_bar(Desp_per_capita, stack='f') %>%  
+  #   e_tooltip(trigger = c( "axis"),axisPointer=list(type="shadow")) %>% 
+  #   e_grid(left='15%') %>% 
+  #   e_flip_coords() %>% 
+  #   e_y_axis(name='R$',inverse=T)
+  
+})
+
+### Format tootip para linha corte pobreza
+{
+e_tooltip_pointer_formatterM <-function (style = c("decimal", "percent", "currency"), digits = 0, 
+                                         locale = 'br', currency = "USD") 
+{
+  if (is.null(locale)) {
+    locale <- .get_locale()
+  }
+  style <- match.arg(style)
+  opts <- list(style = style, minimumFractionDigits = digits, 
+               maximumFractionDigits = digits, currency = currency)
+  tip <- htmlwidgets::JS(sprintf("function(params, ticket, callback) {\n
+                                 var fmt = new Intl.NumberFormat('%s', %s);\n
+                                 var res = params[0].value[0];\n
+                                 for (i = 0; i < params.length; i++) {\n
+                                 res += '<br />' +\n 
+                                  params[i].marker + ' ' +\n
+                                 'Linha mensal referente: ' + 'R$ '+Math.round(params[i].name)  +  '<br />'+
+                                 params[i].marker + ' ' +\n
+                                 params[i].seriesName + ': ' +\n
+                                 fmt.format(parseFloat(params[i].value[1]));\n
+                                 }\n        return res;\n    }", 
+                                 locale, jsonlite::toJSON(opts, auto_unbox = TRUE)))
+  tip <- structure(tip, class = c("JS_EVAL", "pointer_formatter"))
+  return(tip)
+}
+
+}
+
+output$serie_pobrezaLoc<- renderEcharts4r({
+Pob[Pob$Local %in% c(input$LocPob,input$LocPob2) & Pob$Indicador==input$IndPob,] %>% 
+  arrange(as.numeric(ano)) %>%
+  mutate(Valor= Valor/100) %>% 
+  group_by(Local) %>% 
+  e_chart(ano) %>% 
+  e_line(Valor,bind = Linha_corte,
+         endLabel=list(
+           show=T,
+           formatter= htmlwidgets::JS("
+     function (params) {
+      return params.seriesName }")),
+         labelLayout=list(
+           moveOverlap= 'shiftY'
+         ),
+         emphasis=list(
+           focus= 'series'
+         )  ) %>% 
+  e_grid(right = "15%")   %>% 
+  e_tooltip(trigger="axis",axisPointer=list(type="shadow"),
+            formatter = e_tooltip_pointer_formatterM("percent",2)) %>% 
+  e_y_axis(formatter = e_axis_formatter("percent", digits = 0)) %>% 
+  e_legend(show=F)
+
+})
+
+output$serie_pobrezaInd<- renderEcharts4r({
+  Pob[Pob$Local %in% input$LocPob & Pob$Indicador %in% c(input$IndPob,input$IndPob2),] %>% 
+    arrange(as.numeric(ano)) %>%
+    mutate(Valor= Valor/100) %>% 
+    group_by(Indicador) %>% 
+    e_chart(ano) %>% 
+    e_line(Valor,bind = Linha_corte,
+           endLabel=list(
+             show=T,
+             formatter= htmlwidgets::JS("
+     function (params) {
+      return params.seriesName }")),
+           labelLayout=list(
+             moveOverlap= 'shiftY'
+           ),
+           emphasis=list(
+             focus= 'series'
+           )  ) %>% 
+    e_grid(right = "15%")   %>% 
+    e_tooltip(trigger="axis",axisPointer=list(type="shadow"),
+              formatter = e_tooltip_pointer_formatterM("percent",2)) %>% 
+    e_y_axis(formatter = e_axis_formatter("percent", digits = 0)) %>% 
+    e_legend(show=F) 
+    
+
+  
+})
+
+
+#Filtro dados pobreza
+
+
+output$Local_pobreza<- renderEcharts4r({
+  
+e_tooltip_pointer_formatterbar <-function (style = c("decimal", "percent", "currency"), digits = 0, 
+                                           locale = 'br', currency = "USD") {
+  if (is.null(locale)) {
+    locale <- .get_locale()
+  }
+  style <- match.arg(style)
+  opts <- list(style = style, minimumFractionDigits = digits, 
+               maximumFractionDigits = digits, currency = currency)
+  tip <- htmlwidgets::JS(sprintf("function(params, ticket, callback) {\n
+                                 var fmt = new Intl.NumberFormat('%s', %s);\n
+                                 var res = params[0].value[1];\n
+                                 for (i = 0; i < params.length; i++) {\n
+                                 res += '<br />' +\n 
+                                  params[i].marker + ' ' +\n
+                                 'Linha mensal referente: ' + 'R$ '+Math.round(params[i].name)  +  '<br />'+
+                                 params[i].marker + ' ' +\n
+                                 params[i].seriesName + ': ' +\n
+                                 fmt.format(parseFloat(params[i].value[0]));\n
+                                 }\n        return res;\n    }", 
+                                 locale, jsonlite::toJSON(opts, auto_unbox = TRUE)))
+  tip <- structure(tip, class = c("JS_EVAL", "pointer_formatter"))
+  return(tip)
+}
+
+Pb <- Pob[Pob$ano ==  input$AnoPob & Pob$Indicador == input$IndPob,] %>% 
+      mutate(Valor= Valor/100,
+         Rank=rank(Valor,ties.method='min'))  %>% 
+     arrange(-Valor) %>% 
+     group_by(Indicador)
+  
+  Pb %>% 
+  e_charts(x=Local) |> 
+  e_bar(Valor, stack='f',bind=Linha_corte) %>%  
+  e_tooltip(trigger="axis",axisPointer=list(type="shadow"),
+            formatter = e_tooltip_pointer_formatterbar("percent",2)) %>% 
+  e_grid(left='15%') %>% 
+  e_y_axis( formatter = e_axis_formatter("percent", digits = 0)) %>% 
+  e_mark_point(
+    data= list(
+      yAxis= input$LocPob,
+      xAxis = Pb[Pb$Local==input$LocPob  ,'Valor'] %>% as.numeric(),
+      value=paste0(Pb[Pb$Local==input$LocPob ,'Rank'] %>% as.numeric(),'ª'),
+      symbolRotate = - 90 ),
+    itemStyle= list(color='#ed8177')) %>% 
+  e_flip_coords()  
+})
+
+output$rank_pobreza<- renderEcharts4r({
+ 
+  Pb <- Pob[ Pob$Indicador ==input$IndPob ,] %>% 
+    group_by(ano) %>% 
+    mutate(Rank=rank(Valor,ties.method='min'))  %>% 
+    arrange(ano,Valor) %>% 
+  group_by(Indicador)
+ 
+  Pb[Pb$Local==input$LocPob,] %>% 
+  e_chart(x=ano) %>% 
+  e_line(Rank) %>% 
+  e_y_axis(inverse = TRUE,
+           formatter = htmlwidgets::JS("
+      function(params){
+        return( params + 'ª')} "),
+           min=1) %>% 
+  e_toolbox_feature('dataView') %>% 
+  e_labels(color='black',formatter = htmlwidgets::JS("
+      function(params){
+        return( params.value[1]+ 'ª')} ")) %>% 
+  e_toolbox_feature('restore')
+  
+})
+
+output$serie_GiniLoc<- renderEcharts4r({
+Ind_Rend[Ind_Rend$Local %in% c(input$LocDes,input$LocDes2) & 
+           Ind_Rend$Indicador== input$IndDes ,] %>% 
+  arrange(as.numeric(ano)) %>%
+  group_by(Local) %>% 
+  e_chart(ano) %>% 
+  e_line(Valor,bind = Valor,
+         endLabel=list(
+           show=T,
+           formatter= htmlwidgets::JS("function (params) {return params.seriesName }")),
+         labelLayout=list(
+           moveOverlap= 'shiftY'),
+         emphasis=list(
+           focus= 'series')  ) %>% 
+  e_grid(right = "15%")   %>% 
+  e_tooltip(trigger="axis",axisPointer=list(type="shadow"),
+            formatter = e_tooltip_pointer_formatter("decimal",4)) %>% 
+  e_y_axis(formatter = e_axis_formatter("decimal", digits = 2),min=min(
+    Ind_Rend[Ind_Rend$Local %in% c(input$LocDes ,input$LocDes2 ) & 
+               Ind_Rend$Indicador== input$IndDes ,'Valor'])*0.95) %>% 
+  e_legend(show=F)
+
+})
+
+output$serie_GiniInd<- renderEcharts4r({
+ 
+  if (str_sub(input$IndDes,end=-18) == 'Gini' ) {
+    IndDes2 <-  setdiff(c("Gini (com benefícios)","Gini (sem benefícios)"),input$IndDes)
+  }
+  else {
+    if (str_sub(input$IndDes,end=-18) == 'Palma' ) {
+      IndDes2 <-   setdiff(c("Palma (com benefícios)","Palma (sem benefícios)"),input$IndDes)
+      
+    } 
+  }  
+  
+  
+  
+Ind_Rend[Ind_Rend$Local %in% input$LocDes & Ind_Rend$Indicador %in% c(input$IndDes,IndDes2),] %>% 
+  arrange(as.numeric(ano)) %>%
+  group_by(Indicador) %>% 
+  e_chart(ano) %>% 
+  e_line(Valor,
+         endLabel=list(
+           show=T,
+           formatter= htmlwidgets::JS("
+     function (params) {
+      return params.seriesName }")),
+         labelLayout=list(
+           moveOverlap= 'shiftY'
+         ),
+         emphasis=list(
+           focus= 'series'
+         )  ) %>% 
+  e_grid(right = "15%")   %>% 
+  e_tooltip(trigger="axis",axisPointer=list(type="shadow"),
+            formatter = e_tooltip_pointer_formatter("decimal",2)) %>% 
+  e_y_axis(formatter = e_axis_formatter("decimal", digits = 2),
+           min=min(
+             Ind_Rend[Ind_Rend$Local == input$LocDes & 
+                        Ind_Rend$Indicador %in% c(input$IndDes,IndDes2),'Valor'])*0.95) %>% 
+  e_legend(show=F) 
+
+})
+
+output$Local_Gini<- renderEcharts4r({
+
+e_tooltip_pointer_formatterbar <-function (style = c("decimal", "percent", "currency"), digits = 0, 
+                                           locale = 'br', currency = "USD") {
+  if (is.null(locale)) {
+    locale <- .get_locale()
+  }
+  style <- match.arg(style)
+  opts <- list(style = style, minimumFractionDigits = digits, 
+               maximumFractionDigits = digits, currency = currency)
+  tip <- htmlwidgets::JS(sprintf("function(params, ticket, callback) {\n
+                                 var fmt = new Intl.NumberFormat('%s', %s);\n
+                                 var res = params[0].value[1];\n
+                                 for (i = 0; i < params.length; i++) {\n
+                                 res += '<br />' +\n 
+                                 params[i].marker + ' ' +\n
+                                 params[i].seriesName + ': ' +\n
+                                 fmt.format(parseFloat(params[i].value[0]));\n
+                                 }\n        return res;\n    }", 
+                                 locale, jsonlite::toJSON(opts, auto_unbox = TRUE)))
+  tip <- structure(tip, class = c("JS_EVAL", "pointer_formatter"))
+  return(tip)
+}
+
+Des <- Ind_Rend[Ind_Rend$ano ==  input$AnoDes & Ind_Rend$Indicador == input$IndDes  ,] %>% 
+  mutate(Rank=rank(Valor,ties.method='min'))  %>% 
+  arrange(-Valor) %>% 
+  group_by(Indicador)
+
+Des %>% 
+  e_charts(x=Local) |> 
+  e_bar(Valor, stack='f') %>%  
+  e_tooltip(trigger="axis",axisPointer=list(type="shadow"),
+            formatter = e_tooltip_pointer_formatterbar("decimal",4)) %>% 
+  e_grid(left='15%') %>% 
+  e_y_axis( formatter = e_axis_formatter("decimal", digits = 0)) %>% 
+  e_mark_point(
+    data= list(
+      yAxis= input$LocDes,
+      xAxis = Des[Des$Local==input$LocDes  ,'Valor'] %>% as.numeric(),
+      value=paste0(Des[Des$Local==input$LocDes ,'Rank'] %>% as.numeric(),'ª'),
+      symbolRotate = - 90 ),
+    itemStyle= list(color='#ed8177')) %>% 
+  e_flip_coords()  
+})
+
+output$rank_Gini<- renderEcharts4r({
+
+  Des <- Ind_Rend[ Ind_Rend$Indicador == input$IndDes ,] %>% 
+    group_by(ano) %>% 
+    mutate(Rank=rank(Valor,ties.method='min'))  %>% 
+    arrange(ano,Valor) %>% 
+    group_by(Indicador)
+  
+  Des[Des$Local==input$LocDes ,] %>% 
+    e_chart(x=ano) %>% 
+    e_line(Rank) %>% 
+    e_y_axis(inverse = TRUE,
+             formatter = htmlwidgets::JS("
+      function(params){
+        return( params + 'ª')} "),
+             min=1) %>% 
+    e_toolbox_feature('dataView') %>% 
+    e_labels(color='black',formatter = htmlwidgets::JS("
+      function(params){
+        return( params.value[1]+ 'ª')} ")) %>% 
+       e_toolbox_feature('restore')
+})
+
+
+
+
+  } # Fortaleza
+  #RAIS
+  {
+    
+    # gerar uma vez ao iniciar  
+    observeEvent( data_vinculos(),{
+      
+      agrup_rais <-  data_vinculos() %>%
+        group_by(Denom_Seção,Denom_Divisão,Denominação,CBO) %>%
+        summarise(Qtd.=n(),.groups = 'keep') %>% 
+        ungroup() %>% 
+        mutate_if(is.character,~replace(.,is.na(.),'Não definido'))
+      
+      output$treemapRAIS<- renderD3plus({  
+        
+        d3plus(
+          data = agrup_rais ,
+          type = "tree_map",
+          id = c("Denom_Seção", "Denom_Divisão","Denominação","CBO"),
+          locale = "pt_BR",
+          width = "110%",
+          currency = "",
+          number_text = c("Mil", "Milhão", "Milhões", "Bilhão", "Bilhões"),
+          height = 500) %>%
+          d3plusSize("Qtd.") %>%
+          d3plusUi(list( list(method = "depth", type = "drop",
+                              value = list(list('1ª Seção' = 0), list('2ª Divisão' = 1),
+                                           list('3ª Denominação' = 2) )))) %>% # ,list('4ª CBO' = 3)
+          
+          d3plusColor("Denom_Seção") %>%
+          d3plusDepth(1) %>%
+          d3plusLabels(value = TRUE, valign = "top") %>%
+          d3plusTitle(value = 'Ano 2021', font = list(size = 22, weight = 900),
+                      total = list(value = list(prefix = "Total: "),
+                                   font = list(size = 16, weight = 900))) %>%
+          d3plusFooter(value = "Fonte: RAIS/MTE",
+                       font = list(align = "left"))
+      })
+    },once=T)   
+    
+    # gerar quando clicar 
+    observeEvent(input$add_graph,{
+      agrup_rais <-  data_vinculos() %>%
+        group_by(Denom_Seção,Denom_Divisão,Denominação,CBO) %>%
+        summarise(Qtd.=n(),.groups = 'keep') %>% 
+        ungroup() %>% 
+        mutate_if(is.character,~replace(.,is.na(.),'Não definido')) 
+      
+      plot_rais <- d3plus(
+        data =agrup_rais ,
+        type = "tree_map",
+        id = c("Denom_Seção", "Denom_Divisão","Denominação","CBO"),
+        locale = "pt_BR",
+        width = "110%",
+        currency = "",
+        number_text = c("Mil", "Milhão", "Milhões", "Bilhão", "Bilhões"),
+        height = 500,
+        clean_previous = T) %>%
+        d3plusSize("Qtd.") %>%
+        d3plusUi(list( list(method = "depth", type = "drop",
+                            value = list(list('1ª Seção' = 0), list('2ª Divisão' = 1),
+                                         list('3ª Denominação' = 2) )))) %>% # ,list('4ª CBO' = 3)
+        
+        d3plusColor("Denom_Seção") %>%
+        d3plusDepth(1) %>%
+        d3plusLabels(value = TRUE, valign = "top") %>%
+        d3plusTitle(value = input$Ano_filter_rais, font = list(size = 22, weight = 900),
+                    total = list(value = list(prefix = "Total: "),
+                                 font = list(size = 16, weight = 900))) %>%
+        d3plusFooter(value = "Fonte: RAIS/MTE",
+                     font = list(align = "left"))
+      
+      
+      output$treemapRAIS<- renderD3plus({   
+        
+        plot_rais
+        
+      })
+    })
+    
+    # Mapa
+    #Base mapa rais
+    output$mapa_rais <- renderLeaflet({
+      leaflet(vinculos_21_shp())%>%
+        setMapWidgetStyle(list(background= "white")) %>%
+        # setView(-38.52782, -3.785804,zoom=11) %>% 
+        fitBounds(-38.6379,-3.894603, -38.40133, -3.691722) %>% 
+        addTiles(group = "Elementos do mapa") %>%
+        #addTiles() %>% 
+        addLayersControl(
+          overlayGroups = c("Bairros",'Remun. média',"Elementos do mapa")) %>%
+        hideGroup("Elementos do mapa") %>%
+        hideGroup('Remun. média') %>%
+        addScaleBar( position ="bottomright",
+                     options =scaleBarOptions(imperial = F)) %>%
+        addFullscreenControl(pseudoFullscreen = T) 
+    })
+    # 
+    #
+    data_vinc_agrup <- reactive(data_vinculos() %>%
+                                  group_by(Bairros.Fortaleza) %>%
+                                  summarise(Qtd.Vinculos=n(),
+                                            Remun_media=mean(Vl.Remun.Média.Nom)) )
+    
+    #Juntar com dados
+    vinculos_21_shp <- reactive(left_join(shp_Bairros,data_vinc_agrup(),by=c('cod_bairro'='Bairros.Fortaleza')) %>%
+                                  mutate(Remun_media=if_else(!is.na(cod_bairro),round(Remun_media,2), NULL ),
+                                         Qtd.Vinculos=if_else(!is.na(cod_bairro),Qtd.Vinculos, NULL )))
+    
+    # # Mapa paleta bairros rais 
+    colorpal <- reactive ({ colorNumeric(
+      palette = "inferno",#YlGnBu
+      domain = vinculos_21_shp()$Remun_media,
+      reverse = T,na.color="#D9D9D6")
+    })
+    
+    PopBairro <- reactive ({  sprintf(
+      "<strong>%s</strong></br>Remun. média: %s </br>Qtd.: %s",
+      vinculos_21_shp()$bairro,vinculos_21_shp()$Remun_media,vinculos_21_shp()$Qtd.Vinculos)  %>%
+        lapply(htmltools::HTML)
+    })
+    
+    PopCent <- reactive ({ sprintf(
+      "<strong>%s</strong></br> %s ",
+      vinculos_21_shp()[!is.na(vinculos_21_shp()$bairro_rais),]$bairro,
+      paste0("R$ ", round(vinculos_21_shp()[!is.na(vinculos_21_shp()$bairro_rais),]$Remun_media,0)) ) %>%
+        lapply(htmltools::HTML)
+    })
+    
+    
+    ## Polygons
+    observe({
+      req(input$sidebar == "Rais")
+      pal <- colorpal()
+      
+      leafletProxy("mapa_rais" ) %>%
+        clearGroup("Bairros") %>%
+        addPolygons(data =vinculos_21_shp(),weight=1,
+                    opacity = 0.5,
+                    fillColor = ~pal(Remun_media),
+                    popup =PopBairro(),
+                    dashArray = "1",
+                    fillOpacity = 0.5,
+                    group = "Bairros",
+                    highlight=highlightOptions(
+                      weight = 5,
+                      color = "#666",
+                      dashArray = "",
+                      fillOpacity = 0.5,
+                      bringToFront = TRUE)) 
+      
+    })
+    
+   
+    #labels
+    observe({
+      req(input$sidebar == "Rais")
+      leafletProxy("mapa_rais" ) %>%
+        clearGroup("Remun. média") %>%
+        addLabelOnlyMarkers(data =vinculos_21_shp()[!is.na(vinculos_21_shp()$bairro_rais),],
+                            group="Remun. média",
+                            lng = ~x, lat = ~y, label = PopCent()  ,  #~round(Remun_media_B,0),
+                            labelOptions = labelOptions(noHide = T,  textOnly = T,
+                                                        direction = "right",
+                                                        style = list(
+                                                          "color" = "black",
+                                                          'background-color'= 'rgba(255,255,255, 0)',
+                                                          'padding'= '0px 0px 0px 0px' ))) %>% 
+        addCircleMarkers(data = vinculos_21_shp()[!is.na(vinculos_21_shp()$bairro_rais),],lng = ~x, lat = ~y,
+                         radius = 2,
+                         color = '#800500',
+                         stroke = FALSE, fillOpacity = 1,group="Remun. média" )
+      
+    })
+    #legenda
+    observe({
+      
+      req(input$sidebar == "Rais")
+      pal <- colorpal()
+      leafletProxy("mapa_rais",data =vinculos_21_shp() ) %>%
+        clearControls() %>% 
+        addLegend("bottomright", pal = pal, values = ~Remun_media,
+                  title = "Remuneração média",
+                  labFormat = labelFormat(prefix = "R$",big.mark = ' '),
+                  opacity = 1  ) 
+    })
+    
+    ## Tabela Rais
+
+
+ #Tabela no click   
+observeEvent(input$add_table,{
+  
+  dados_rais_filtrado <-  res_mod()%>% 
+    arrange(-Vl.Remun.Média)
+      
+      table_filter <- DT::datatable(
+        dados_rais_filtrado,extensions ='Buttons', options = list(
+          buttons =list(list(
+            extend = 'collection',
+            buttons = c('csv', 'excel'),
+            text = 'Download'
+          )),
+          #buttons = c('csv', 'excel'),
+          lengthMenu = c(10,30),
+          pageLength = 30,
+          autoWidth = TRUE,
+          dom= 'Blrtip'
+        )) %>%  formatStyle('Vl.Remun.Média',
+                            background = styleColorBar(c(0,res_mod()$Vl.Remun.Média), 'steelblue'),
+                            backgroundSize = '100% 80%',
+                            backgroundRepeat = 'no-repeat',
+                            backgroundPosition = 'center',
+                            fontWeight = 'bold'
+        ) %>% formatStyle('Qtd.',
+                          background = styleColorBar(c(0,res_mod()$Qtd.), '#F9812A'),
+                          backgroundSize = '100% 80%',
+                          backgroundRepeat = 'no-repeat',
+                          backgroundPosition = 'center',
+                          fontWeight = 'bold'
+        )
+      
+      
+      output$tabela_rais <- DT::renderDataTable(server=FALSE,{
+        
+        table_filter
+      })
+    })
+
+observeEvent(req(input$sidebar == "Rais"),{    
+
+  
+table_filter <- DT::datatable(
+  res_mod()%>% 
+    arrange(-Vl.Remun.Média),extensions ='Buttons', options = list(
+    buttons =list(list(
+      extend = 'collection',
+      buttons = c('csv', 'excel'),
+      text = 'Download'
+    )),
+    #buttons = c('csv', 'excel'),
+    lengthMenu = c(10,30),
+    pageLength = 30,
+    autoWidth = TRUE,
+    dom= 'Blrtip'
+  )) %>%  formatStyle('Vl.Remun.Média',
+                      background = styleColorBar(c(0,res_mod()$Vl.Remun.Média), 'steelblue'),
+                      backgroundSize = '100% 80%',
+                      backgroundRepeat = 'no-repeat',
+                      backgroundPosition = 'center',
+                      fontWeight = 'bold'
+  ) %>% formatStyle('Qtd.',
+                    background = styleColorBar(c(0,res_mod()$Qtd.), '#F9812A'),
+                    backgroundSize = '100% 80%',
+                    backgroundRepeat = 'no-repeat',
+                    backgroundPosition = 'center',
+                    fontWeight = 'bold'
+  )
+output$tabela_rais <- DT::renderDataTable(server=FALSE,{
+  
+  table_filter
+})
+
+},once=T)
+    
+  } 
+  
+  
+  # Nuvem noticias
+  {
+
+    data_source <- reactive({
+      return(Noticias[,'Título',drop=T])
+    })
+
+
+    create_wordcloud <- function(xxx, num_words = 150, background = "white") {
+
+      # If text is provided, convert it to a dataframe of word frequencies
+      if (is.character(xxx)) {
+        corpus <- tm::Corpus(VectorSource(xxx))
+        corpus <- tm::tm_map(corpus, tolower)
+        corpus <- tm::tm_map(corpus, removePunctuation)
+        corpus <- tm::tm_map(corpus, removeNumbers)
+        corpus <- tm::tm_map(corpus, removeWords, c('diz'))
+        corpus <- tm::tm_map(corpus, removeWords, stopwords(tolower('Portuguese')))
+        tdm <- as.matrix(TermDocumentMatrix(corpus))
+        xxx <- sort(rowSums(tdm), decreasing = TRUE)
+        xxx <- data.frame(word = names(xxx), freq = as.numeric(xxx))
+      }
+
+      
+      # Grab the top n most common words
+      xxx <- head(xxx, n = num_words)
+      if (nrow(xxx) == 0) {
+        return(NULL)
+      }
+
+      wordcloud2a(xxx, backgroundColor = background)
+    }
+
+
+    output$cloud <- renderWordcloud2({
+      create_wordcloud(data_source(),
+                       num_words = 150,
+                       background = 'white'   )
+    })
+
+    
+    output$values <- renderPrint({
+      gsub(":.*","",input$selected_word)
+    })
+
+
+
+
+    data_palavras <-reactive({
+
+      if(length(input$selected_word)==0)
+        Noticias
+
+      else
+        Noticias %>%
+        dplyr::filter(str_detect(Título,paste0('\\b', gsub(":.*","", input$selected_word),'\\b'  )))
+
+    })
+
+
+
+
+
+    output$tabela_nuvem <- DT::renderDataTable(server=FALSE,{
+
+      DT::datatable(
+        data_palavras()[,c('Fonte','Notícia')],escape = FALSE, options = list(
+          pageLength = 10,
+          autoWidth = TRUE,
+          dom= 'Blrtip'
+        ))
+    })
+
+
+   }
+
+
+  ##BAIXAR
+  {
+    # Reactive value for selected dataset ----
+    datasetInput <- reactive({
+      switch(input$dataset,
+             "Atividade_CNAE" = Atividade_CNAE,
+             "PIB" = P,
+             "Pobreza" = Pob,
+             "PNADc"= pnadc_15_20,
+             "Comércio Exterior"=EXP_IMP,
+             "Despesa pública"=Desp,
+             "Mercado de trabalho"=Tipos_trab2,
+             'Indicador de renda'=Ind_Rend
+             )
+    })
+    
+    # Table of selected dataset ----
+    output$table <- renderTable({
+      head(datasetInput())
+    })
+    
+    # Downloadable csv of selected dataset ----
+    output$downloadData <- downloadHandler(
+      filename = function() {
+        paste(input$dataset, ".xlsx", sep = "")
+      },
+      content = function(file) {
+        writexl::write_xlsx(datasetInput(), file)
+      }
+    )#
+    
+  }
+  {
+    
+  
+  # { ### Capitais
+  # output$G_pop_idade_trab <- renderPlotly({
+  #   ggplotly(
+  #    group_by(pnadc_15_20[pnadc_15_20$Capital %in% input$Id_Capital,],
+  #                                  Ano,Capital)  %>%
+  #       summarise(Pop_idade_trab = sum(V1032[V2009>=14],na.rm = TRUE),.groups ='keep' ) %>% 
+  #       ggplot(aes(x=Ano,y=Pop_idade_trab,group=Capital,text=paste0("Ano: ","<b>",Ano,"</b>","<br>",
+  #                                                          Capital, "<br>",
+  #                                                          "Valor: ","<b>",format(round(Pop_idade_trab,0), big.mark = ".",
+  #                                                                                 decimal.mark=","),"</b>")))+
+  #                                                       
+  #       geom_line(aes(col=Capital))+
+  #       geom_point(aes(col=Capital))+
+  #       xlab("")+
+  #       ylab("")
+  #     ,tooltip=c("text"))   %>%
+  #     layout(legend =  list(orientation = 'h',title="",position="top"))
+  # 
+  # })
+  # output$G_forc_trab <- renderPlotly({
+  #   ggplotly(
+  #     group_by(pnadc_15_20[pnadc_15_20$Capital %in% input$Id_Capital,],
+  #                                  Ano,Capital)  %>%
+  #       summarise(forc_trab = sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) %>% 
+  #       ggplot(aes(x=Ano,y=forc_trab,group=Capital,text=paste0("Ano: ","<b>",Ano,"</b>","<br>",
+  #                                                                   Capital, "<br>",
+  #                                                                   "Valor: ","<b>",format(round(forc_trab,0), big.mark = ".",
+  #                                                                                          decimal.mark=","),"</b>")))+
+  #       
+  #       geom_line(aes(col=Capital))+
+  #       geom_point(aes(col=Capital))+
+  #       xlab("")+
+  #       ylab("")
+  #     ,tooltip=c("text"))   %>%
+  #     layout(legend =  list(orientation = 'h',title="",position="top"))
+  #   
+  # })
+  # output$G_ocupacao <- renderPlotly({
+  #   ggplotly(
+  #      group_by(pnadc_15_20[pnadc_15_20$Capital %in% input$Id_Capital,],
+  #                                  Ano,Capital)  %>%
+  #       summarise(ocupacao = sum(V1032[VD4002=="Pessoas ocupadas"],na.rm = TRUE),.groups ='keep' ) %>% 
+  #       ggplot(aes(x=Ano,y=ocupacao,group=Capital,text=paste0("Ano: ","<b>",Ano,"</b>","<br>",
+  #                                                              Capital, "<br>",
+  #                                                              "Valor: ","<b>",format(round(ocupacao,0), big.mark = ".",
+  #                                                                                     decimal.mark=","),"</b>")))+
+  #       
+  #       geom_line(aes(col=Capital))+
+  #       geom_point(aes(col=Capital))+
+  #       xlab("")+
+  #       ylab("")
+  #     ,tooltip=c("text"))   %>%
+  #     layout(legend =  list(orientation = 'h',title="",position="top"))
+  #   
+  # })
+  # output$G_ocupacao_comp <- renderPlotly({
+  #   ggplotly(
+  #    group_by(pnadc_15_20[pnadc_15_20$Capital %in% listaCapital & pnadc_15_20$Ano =="2020" ,],
+  #                                  Ano,Capital)  %>%
+  #       summarise(ocupacao = sum(V1032[VD4002=="Pessoas ocupadas"],na.rm = TRUE),.groups ='keep' ) %>% 
+  #       ggplot(aes(x=fct_reorder(str_sub(Capital,14),ocupacao),y=ocupacao,fill= Capital
+  #                                                             ,text=paste0("Ano: ","<b>",Ano,"</b>","<br>",
+  #                                                             Capital, "<br>",
+  #                                                             "Valor: ","<b>",format(round(ocupacao,0), big.mark = ".",
+  #                                                                                    decimal.mark=","),"</b>")))+
+  #       
+  #        geom_bar(stat = "identity")+
+  #       coord_flip()+
+  #       xlab("")+
+  #       ylab("")
+  #     ,tooltip=c("text"))   %>%
+  #     layout(showlegend = FALSE)
+  #   
+  # })
+  # output$G_desocupacao_comp <- renderPlotly({
+  #   ggplotly(
+  #     group_by(pnadc_15_20[pnadc_15_20$Capital %in% listaCapital & pnadc_15_20$Ano =="2020" ,],
+  #              Ano,Capital)  %>%
+  #       summarise( desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE),.groups ='keep' ) %>% 
+  #       ggplot(aes(x=fct_reorder(str_sub(Capital,14),desocupacao),y=desocupacao,fill= Capital
+  #                  ,text=paste0("Ano: ","<b>",Ano,"</b>","<br>",
+  #                               Capital, "<br>",
+  #                               "Valor: ","<b>",format(round(desocupacao,0), big.mark = ".",
+  #                                                      decimal.mark=","),"</b>")))+
+  #       
+  #       geom_bar(stat = "identity")+
+  #       coord_flip()+
+  #       xlab("")+
+  #       ylab("")
+  #     ,tooltip=c("text"))   %>%
+  #     layout(showlegend = FALSE)
+  #   
+  # })
+  # output$G_Taxa_desocupacao_comp <- renderPlotly({
+  #   ggplotly(
+  #     group_by(pnadc_15_20[pnadc_15_20$Capital %in% listaCapital & pnadc_15_20$Ano =="2020" ,],
+  #              Ano,Capital) %>%
+  #       summarise( Tx_desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+  #                    sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) %>% 
+  #       ggplot(aes(x=fct_reorder(str_sub(Capital,14),Tx_desocupacao),y=Tx_desocupacao,fill= Capital
+  #                  ,text=paste0("Ano: ","<b>",Ano,"</b>","<br>",
+  #                               Capital, "<br>",
+  #                               "Valor: ","<b>",format(round(Tx_desocupacao,2), big.mark = ".",
+  #                                                      decimal.mark=","),"</b>")))+
+  #       
+  #       geom_bar(stat = "identity")+
+  #       coord_flip()+
+  #       xlab("")+
+  #       ylab("")
+  #     ,tooltip=c("text"))   %>%
+  #     layout(showlegend = FALSE)
+  #   
+  # })
+  # output$G_abaixo_idade <- renderPlotly({
+  #   ggplotly(
+  #     Mercado_trabalho <- group_by(pnadc_15_20[pnadc_15_20$Capital %in% input$Id_Capital,],
+  #                                  Ano,Capital)  %>%
+  #       summarise(Pop_abaixo_idade_trab = sum(V1032[V2009<14],na.rm = TRUE),.groups ='keep' ) %>% 
+  #       ggplot(aes(x=Ano,y=Pop_abaixo_idade_trab,group=Capital,text=paste0("Ano: ","<b>",Ano,"</b>","<br>",
+  #                                                                   Capital, "<br>",
+  #                                                                   "Valor: ","<b>",format(round(Pop_abaixo_idade_trab,0), big.mark = ".",
+  #                                                                                          decimal.mark=","),"</b>")))+
+  #       
+  #       geom_line(aes(col=Capital))+
+  #       geom_point(aes(col=Capital))+
+  #       xlab("")+
+  #       ylab("")
+  #     ,tooltip=c("text"))   %>%
+  #     layout(legend =  list(orientation = 'h',title="",position="top"))
+  #   
+  # })
+  # output$G_fora_da_forca <- renderPlotly({
+  #   ggplotly(
+  #     group_by(pnadc_15_20[pnadc_15_20$Capital %in% input$Id_Capital,],
+  #                                  Ano,Capital)  %>%
+  #       summarise(forca_trab_potenc = sum(V1032[VD4003=="Pessoas fora da força de trabalho e na força de trabalho potencial"],
+  #                                         na.rm = TRUE),.groups ='keep' ) %>% 
+  #       ggplot(aes(x=Ano,y=forca_trab_potenc,group=Capital,text=paste0("Ano: ","<b>",Ano,"</b>","<br>",
+  #                                                                          Capital, "<br>",
+  #                                                                          "Valor: ","<b>",
+  #                                                                          format(round(forca_trab_potenc,0), big.mark = ".",
+  #                                                                                                 decimal.mark=","),"</b>")))+
+  #       
+  #       geom_line(aes(col=Capital))+
+  #       geom_point(aes(col=Capital))+
+  #       xlab("")+
+  #       ylab("")
+  #     ,tooltip=c("text"))   %>%
+  #     layout(legend =  list(orientation = 'h',title="",position="top"))
+  #   
+  # })
+  # output$G_desocucao <- renderPlotly({
+  #   ggplotly(
+  #     group_by(pnadc_15_20[pnadc_15_20$Capital %in% input$Id_Capital,],
+  #                                  Ano,Capital)  %>%
+  #       summarise( desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE),.groups ='keep' ) %>% 
+  #       ggplot(aes(x=Ano,y=desocupacao,group=Capital,text=paste0("Ano: ","<b>",Ano,"</b>","<br>",
+  #                                                                      Capital, "<br>",
+  #                                                                      "Valor: ","<b>",
+  #                                                                      format(round(desocupacao,0), big.mark = ".",
+  #                                                                             decimal.mark=","),"</b>")))+
+  #       
+  #       geom_line(aes(col=Capital))+
+  #       geom_point(aes(col=Capital))+
+  #       xlab("")+
+  #       ylab("")
+  #     ,tooltip=c("text"))   %>%
+  #     layout(legend =  list(orientation = 'h',title="",position="top"))
+  #   
+  # })
+  # output$G_Taxa_desocupacao <- renderPlotly({
+  #   ggplotly(
+  #    group_by(pnadc_15_20[pnadc_15_20$Capital %in% input$Id_Capital,],
+  #                                  Ano,Capital)  %>%
+  #       summarise( Tx_desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+  #                                   sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) %>% 
+  #       ggplot(aes(x=Ano,y=Tx_desocupacao,group=Capital,text=paste0("Ano: ","<b>",Ano,"</b>","<br>",
+  #                                                                Capital, "<br>",
+  #                                                                "Valor: ","<b>",
+  #                                                                format(round(Tx_desocupacao,2), big.mark = ".",
+  #                                                                       decimal.mark=","),"</b>")))+
+  #       
+  #       geom_line(aes(col=Capital))+
+  #       geom_point(aes(col=Capital))+
+  #       xlab("")+
+  #       ylab("")
+  #     ,tooltip=c("text"))   %>%
+  #     layout(legend =  list(orientation = 'h',title="",position="top"))
+  #   
+  # })
+  # output$G_Nivel_ocupacao <- renderPlotly({
+  #   ggplotly(
+  #    group_by(pnadc_15_20[pnadc_15_20$Capital %in% input$Id_Capital,],
+  #                                  Ano,Capital)  %>%
+  #       summarise(Nivel_ocupacao= sum(V1032[VD4002=="Pessoas ocupadas"],na.rm = TRUE)/
+  #                    (sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE) +
+  #                      sum(V1032[VD4003=="Pessoas fora da força de trabalho e na força de trabalho potencial"],na.rm = TRUE))
+  #                    ,.groups ='keep' ) %>% 
+  #       ggplot(aes(x=Ano,y=Nivel_ocupacao,group=Capital,text=paste0("Ano: ","<b>",Ano,"</b>","<br>",
+  #                                                                   Capital, "<br>",
+  #                                                                   "Valor: ","<b>",
+  #                                                                   format(round(Nivel_ocupacao,2), big.mark = ".",
+  #                                                                          decimal.mark=","),"</b>")))+
+  #       
+  #       geom_line(aes(col=Capital))+
+  #       geom_point(aes(col=Capital))+
+  #       xlab("")+
+  #       ylab("")
+  #     ,tooltip=c("text"))   %>%
+  #     layout(legend =  list(orientation = 'h',title="",position="top"))
+  #   
+  # })
+  # output$G_Taxa_composta_subutilizacao <- renderPlotly({
+  #   ggplotly(
+  #      group_by(pnadc_15_20[pnadc_15_20$Capital %in% input$Id_Capital,],
+  #                                  Ano,Capital)  %>%
+  #       summarise(
+  #         desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE),
+  #         forc_trab = sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),
+  #         forca_trab_potenc = sum(V1032[VD4003=="Pessoas fora da força de trabalho e na força de trabalho potencial"],na.rm = TRUE),
+  #         subocupacao =sum(V1032[VD4004A=='Pessoas subocupadas'],na.rm = TRUE)   
+  #         ,.groups ='keep' ) %>% 
+  #       mutate(Taxa_composta_subutilizacao=(desocupacao+forca_trab_potenc+subocupacao)/(forc_trab+forca_trab_potenc)) %>% 
+  #       ggplot(aes(x=Ano,y=Taxa_composta_subutilizacao,group=Capital,text=paste0("Ano: ","<b>",Ano,"</b>","<br>",
+  #                                                                   Capital, "<br>",
+  #                                                                   "Valor: ","<b>",
+  #                                                                   format(round(Taxa_composta_subutilizacao,2), big.mark = ".",
+  #                                                                          decimal.mark=","),"</b>")))+
+  #       
+  #       geom_line(aes(col=Capital))+
+  #       geom_point(aes(col=Capital))+
+  #       xlab("")+
+  #       ylab("")
+  #     ,tooltip=c("text"))   %>%
+  #     layout(legend =  list(orientation = 'h',title="",position="top"))
+  #   
+  # })
+  # output$G_pop_merc_trab <- renderPlotly({
+  # 
+  # 
+  #   if(length(input$Id_Capital)==1 )
+  # 
+  #     ggplotly(
+  #       group_by(pnadc_15_20[pnadc_15_20$Capital %in% input$Id_Capital,],
+  #                Ano) %>%
+  #         summarise(
+  #           Ocupados = sum(V1032[VD4002=="Pessoas ocupadas"],na.rm = TRUE),
+  #           Desocupados = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE),
+  #           Fora_da_forca_trab = sum(V1032[VD4001=="Pessoas fora da força de trabalho"],na.rm = TRUE),
+  #           Abaixo_da_idade_de_Trabalhar =sum(V1032[V2009 < 14],na.rm = TRUE),.groups ='keep')  %>%
+  #         pivot_longer(cols = 2:5,names_to = "Indicador",values_to="valor") %>% 
+  #         ggplot(aes(x=Ano,y=valor,fill= Indicador
+  #                    ,text=paste0("Ano: ","<b>",Ano,"</b>","<br>",
+  #                                 Indicador, "<br>",
+  #                                 "Valor: ","<b>",format(round(valor,0), big.mark = ".",
+  #                                                        decimal.mark=","),"</b>")))+
+  #         
+  #         geom_bar(stat = "identity")+
+  #         xlab("")+
+  #         ylab(""),tooltip=c("text")
+  #     )%>%
+  #     layout(legend =  list(orientation = 'h',title=""))
+  # 
+  #   else
+  #     
+  #   ggplotly(
+  #     group_by(pnadc_15_20[pnadc_15_20$Capital %in% input$Id_Capital,],
+  #              Ano,Capital) %>%
+  #       summarise(
+  #         Ocupados = sum(V1032[VD4002=="Pessoas ocupadas"],na.rm = TRUE),
+  #         Desocupados = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE),
+  #         Fora_da_forca_trab = sum(V1032[VD4001=="Pessoas fora da força de trabalho"],na.rm = TRUE),
+  #         Abaixo_da_idade_de_Trabalhar =sum(V1032[V2009 < 14],na.rm = TRUE),.groups ='keep')  %>%
+  #       pivot_longer(cols = 3:6,names_to = "Indicador",values_to="valor") %>% 
+  #       ggplot(aes(x=Ano,y=valor,fill= Indicador
+  #                  ,text=paste0("Ano: ","<b>",Ano,"</b>","<br>",
+  #                               Indicador, "<br>",
+  #                               "Valor: ","<b>",format(round(valor,0), big.mark = ".",
+  #                                                      decimal.mark=","),"</b>")))+
+  #       
+  #       geom_bar(stat = "identity")+
+  #       xlab("")+
+  #       ylab("")+
+  #       facet_wrap(vars(Capital)),tooltip=c("text") )%>%
+  #     layout(legend =  list(orientation = 'h',title=""))
+  # })
+  # output$Tab_merc= DT::renderDataTable({
+  #   datatable(
+  #     Mercado_trabalho <- 
+  #       group_by(pnadc_15_20,Ano,Capital,V2007)  %>%
+  #       summarise(
+  #        # Pop_idade_trab = round(sum(V1032[V2009>=14],na.rm = TRUE),0),
+  #         Ocupados = round(sum(V1032[VD4002=="Pessoas ocupadas"],na.rm = TRUE),0),
+  #         Desocupados = round(sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE),0),
+  #         Forc_trab = round(sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),0),
+  #         #forca_trab_potenc = round(sum(V1032[VD4003=="Pessoas fora da força de trabalho e na força de trabalho potencial"],na.rm = TRUE),0),
+  #         Subocupaçao =round(sum(V1032[VD4004A=='Pessoas subocupadas'],na.rm = TRUE),0),
+  #         Desalentos = round(sum(V1032[VD4005=='Pessoas desalentadas'],na.rm = TRUE),0),
+  #         #Pop_subutilizada=sum(V1032[VD4004A=='Pessoas subocupadas'|
+  #         #                             VD4002=="Pessoas desocupadas" |
+  #         #                            VD4003=="Pessoas fora da força de trabalho e na força de trabalho potencial"],
+  #          #                    na.rm = TRUE),
+  #         Trab_formal = round(sum(V1032[VD4012 == "Contribuinte" & 
+  #                                   VD4009 %in% c("Conta-própria",
+  #                                                 "Empregado no setor privado com carteira de trabalho assinada",
+  #                                                 "Empregado no setor público com carteira de trabalho assinada",
+  #                                                 "Empregador",
+  #                                                 "Militar e servidor estatutário",
+  #                                                 "Trabalhador doméstico com carteira de trabalho assinada")],na.rm = TRUE),0),
+  #         Trab_informal = round(sum(V1032[VD4009 %in% c("Empregado no setor privado sem carteira de trabalho assinada",
+  #                                                       "Trabalhador doméstico sem carteira de trabalho assinada",
+  #                                                       "Trabalhador familiar auxiliar",
+  #                                                       "Empregado no setor público sem carteira de trabalho assinada") |
+  #                                           (VD4012 == "Não contribuinte" & VD4009 == "Conta-própria")|
+  #                                           (VD4012 == "Não contribuinte" & VD4009 == "Empregador") ],na.rm = TRUE),0)
+  #         ,.groups ='keep') %>% 
+  #       mutate(
+  #         #Taxa_composta_subutilizacao=(desocupacao+forca_trab_potenc+subocupacao)/(forc_trab+forca_trab_potenc),
+  #              Tx_desocupação = round(Desocupados/Forc_trab,4), 
+  #              Perc_trab_informal =round(Trab_informal/Ocupados,4)
+  #         #Nivel_ocupacao=ocupacao/(forc_trab+forca_trab_potenc),
+  #       ),
+  #             rownames = FALSE,extensions ='Buttons',filter = 'top',
+  #             options = list(
+  #               searching = TRUE,
+  #               #scrollY =400,
+  #               scrollCollapse= T,
+  #               paging =  T,
+  #               buttons = c('copy', 'csv', 'excel'),
+  #               dom = 'Bfrtip'))
+  # 
+  # 
+  # })
+  # } # Capitais
+  
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+}
+
+
+
+
+shinyApp(ui, server)
+
+
+
+
+
+
+
+

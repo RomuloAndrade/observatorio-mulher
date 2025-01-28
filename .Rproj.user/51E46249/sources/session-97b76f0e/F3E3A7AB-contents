@@ -1,0 +1,146 @@
+library(readr)
+library(Rcpp)
+library(SAScii)
+library(PNADcIBGE)
+library(survey)
+library(convey)
+library(tidyverse)
+
+# Definição do Caminho
+setwd("C:/Romulo/Iplanfor/Pnadc/Pnadc_Visita_5")
+
+pnadc<- readRDS('pnadc_12_22BR.rds')
+
+sort(names(pnadc))
+sort(names(pnadc_15_20))
+
+comum <- intersect(names(pnadc), names(pnadc_15_20))
+excesso <- setdiff(names(pnadc),names(pnadc_15_20))
+falta <-  setdiff(names(pnadc_15_20),names(pnadc))
+
+
+pnadc12_22 <- pnadc |> 
+  dplyr::select(!excesso)
+
+setdiff(comum,names(pnadc_15_20))
+
+unique(pnadc_15_20$idade)
+
+
+pnadc12_22_idade <- 
+mutate(pnadc12_22,
+  idade5 = case_when(
+    V2009 %in% 0:4 ~ "0-4",
+    V2009 %in% 5:9 ~ "5-9",
+    V2009 %in% 10:14 ~ "10-14",
+    V2009 %in% 15:19 ~ "15-19",
+    V2009 %in% 20:24 ~ "20-24",
+    V2009 %in% 25:29 ~ "25-29",
+    V2009 %in% 30:34 ~ "30-34",
+    V2009 %in% 35:39 ~ "35-39",
+    V2009 %in% 40:44 ~ "40-44",
+    V2009 %in% 45:49 ~ "45-49",
+    V2009 %in% 50:54 ~ "50-54",
+    V2009 %in% 55:59 ~ "55-59",
+    V2009 %in% 60:64 ~ "60-64",
+    V2009 %in% 65:69 ~ "65-69",
+    V2009 %in% 70:74 ~ "70-74",
+    V2009 %in% 75:79 ~ "75-79",
+    V2009 >= 80 ~ "80+"),
+  idade10 = case_when(
+    V2009 %in% 0:9 ~ "0-9",
+    V2009 %in% 10:19 ~ "10-19",
+    V2009 %in% 20:29 ~ "20-29",
+    V2009 %in% 30:39 ~ "30-39",
+    V2009 %in% 40:49 ~ "40-49",
+    V2009 %in% 50:59 ~ "50-59",
+    V2009 %in% 60:69 ~ "60-69",
+    V2009 %in% 70:79 ~ "70-79",
+    V2009 >= 80 ~ "80+"),
+  idadeEco = case_when(
+    V2009 %in% 14:19 ~ "14-19",
+    V2009 %in% 20:29 ~ "20-29",
+    V2009 %in% 30:39 ~ "30-39",
+    V2009 %in% 40:49 ~ "40-49",
+    V2009 %in% 50:59 ~ "50-59",
+    V2009 %in% 60:69 ~ "60-69",
+    V2009 >= 70 ~ "70+",
+    TRUE ~ "Fora da faixa"),
+  idadeEco2 = case_when(
+    V2009 %in% 14:19 ~ "14-19",
+    V2009 %in% 20:29 ~ "20-29",
+    V2009 %in% 30:39 ~ "30-39",
+    V2009 %in% 40:49 ~ "40-49",
+    V2009 %in% 50:59 ~ "50-59",
+    V2009 %in% 60:65 ~ "60-65",
+    V2009 >= 66 ~ "66+",
+    TRUE ~ "Fora da faixa")
+)
+
+pnadc12_22_idade <- pnadc12_22_idade |>
+  filter(Capital=='Município de Fortaleza (CE)')
+
+saveRDS(pnadc12_22_idade,'PNADC_12_22_For.RDS')
+
+
+
+
+
+
+pnadc_15_20 <- pnadc_12_22 |> 
+mutate(
+  VD3004 = as.character(VD3004),
+  VD3004 = case_when( 
+    VD3004 == "Médio completo ou equivalente" ~ "Médio completo",
+    VD3004 == "Fundamental incompleto ou equivalente" ~ "Fundamental incompleto",
+    VD3004 == "Médio incompleto ou equivalente" ~ "Médio incompleto",
+    VD3004 == "Superior incompleto ou equivalente" ~ "Superior incompleto",
+    VD3004 == "Fundamental completo ou equivalente" ~ "Fundamental completo",
+    VD3004 == "Sem instrução e menos de 1 ano de estudo" ~ "Menos de 1 ano de estudo",
+    TRUE ~ VD3004),
+  V2010 = as.character(V2010),
+  V2010 = case_when(
+    V2010  %in% c("Indígena", "Amarela","Ignorado")  ~ "Outros", #
+    TRUE   ~ V2010
+))
+
+
+#saveRDS(pnadc_15_20,'PNADC_12_22_For.RDS')
+
+unique(pnadc_15_20$V2010)
+
+
+#MERCADO TRABALHO
+
+
+setwd("C:/Romulo/Romulo/Comandos R/Testes/Testes_ar")
+pnadc_12_22 <- readRDS("PNADC_12_22_For.RDS")
+
+Tipos_trab2 <-  rbind(   ### Organizando dados
+  group_by(pnadc_15_20[pnadc_15_20$Capital %in% "Município de Fortaleza (CE)" , ],
+           Ano,V4013,V2007,V2010,VD3004,idadeEco2)  %>%
+    summarise(Qtd. = sum(V1032[  (VD4012 == "Contribuinte" & VD4009 == "Empregador")    |
+                                   (VD4012 == "Contribuinte" & VD4009 == "Conta-própria") |
+                                   VD4009 %in% c("Empregado no setor privado com carteira de trabalho assinada",
+                                                 "Empregado no setor público com carteira de trabalho assinada",
+                                                 "Trabalhador doméstico com carteira de trabalho assinada",
+                                                 "Militar e servidor estatutário") ],
+                         na.rm = TRUE),.groups="keep")  %>%
+    filter(Qtd.!=0) %>%
+    mutate(Tipo="Trabalho formal")
+  ,
+  group_by(pnadc_15_20[pnadc_15_20$Capital %in% "Município de Fortaleza (CE)", ],
+           Ano,V4013,V2007,V2010,VD3004,idadeEco2)  %>%
+    summarise(Qtd. = sum(V1032[VD4009 %in% c("Empregado no setor privado sem carteira de trabalho assinada",
+                                             "Trabalhador doméstico sem carteira de trabalho assinada",
+                                             "Trabalhador familiar auxiliar",
+                                             "Empregado no setor público sem carteira de trabalho assinada") |
+                                 (VD4012 == "Não contribuinte" & VD4009 == "Conta-própria")|
+                                 (VD4012 == "Não contribuinte" & VD4009 == "Empregador") ],
+                         na.rm = TRUE),.groups="keep") %>%
+    filter(Qtd.!=0) %>%
+    mutate(Tipo="Trabalho informal")) %>%
+  left_join(Atividade_CNAE,by=c("V4013"="Classe"))
+saveRDS(Tipos_trab2,'Tipos_trab_2022.rds')
+
+
