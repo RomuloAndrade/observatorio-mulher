@@ -1,6 +1,5 @@
 
 # Load library --------------------------------------------------------------------------------
-# Oi Romulo
 box::use(
   shiny[...],
   bs4Dash[...],
@@ -225,7 +224,7 @@ ui <- dashboardPage(
     
     title = dashboardBrand(
      
-      title = "Mulher",
+      title = "Prévia Mulher",
       color ='secondary',# "primary",
       # href = "https://observatoriodefortaleza.fortaleza.ce.gov.br/",
       image = 'Brasão_de_Fortaleza.svg',
@@ -360,6 +359,14 @@ ui <- dashboardPage(
 
     
 ### Vizualizações --------------------------------------------------------------
+#### Abertura  --------------------------------------------------------  
+tabItem(
+  tabName = "Abertura",
+  h1('Abertura'),
+
+ column(offset  = 2, width = 12,
+    img(src = 'imagem_obs.png'))
+  ),  
 
 #### Demografia --------------------------------------------------------------
 tabItem(
@@ -465,88 +472,121 @@ tabItem(
 #### Violencia --------------------------------------------------------------  
 tabItem(
   tabName = "Violência",
-  h1("sdg"),
+  h1("Em construção"),
   hr() ),
      
 #### Mercado de trabalho  --------------------------------------------------------  
 tabItem(
   tabName = "Mercado",
   hr(),
-  fluidRow(
-  column(width = 2,
-        
-  shinyWidgets::pickerInput( inputId = "Ano_filter",
-                             label = 'Ano',
-                             choices = 2012:2022,
-                             multiple = FALSE,
-                             selected = 2022,
-                             choicesOpt = list(content = 2012:2022)
-                          )
-  ),
+fluidRow(
   column(width = 6,
   select_group_ui(
     id = "Filtro_merc",
     inline = TRUE ,
     btn_reset_label = "Resetar filtros",
     params = list(
-      list(inputId = "V2007", label = "Sexo", placeholder = 'Todos' ,  updateOn = "close",selected = 'Mulher'),
+     #list(inputId = "V2007", label = "Sexo", placeholder = 'Todos' ,  updateOn = "close",selected = 'Mulher'),
       list(inputId = "V2010", label = "Raça/cor", placeholder = 'Todos',  updateOn = "close"),
       list(inputId = "VD3004", label = "Escolaridade", placeholder = 'Todos',  updateOn = "close"),
-      list(inputId = "Composição", label = "Composição", placeholder = 'Todos',  updateOn = "close")
+      list(inputId = "idadeEco2", label = "Idade", placeholder = 'Todos',  updateOn = "close")
                   ) 
                 ),
   ),
-  
-  br(),
-  
+
   box(
     title = 'Tipo de ocupação',
     id = "mybox",
     status = "danger",
-    # background = 'white',
     solidHeader = F,
     width = 8,
-    # gradient = TRUE,
-    # collapsible = TRUE,
-    # closable = TRUE,
-    radioButtons(
-      "select_tipo_merc", NULL ,
-      c( "Formal e informal", "Geral"),
-      selected = "Formal e informal",
-      inline = F
+    fluidRow(column(width = 3,
+                    
+                    shinyWidgets::pickerInput( inputId = "Ano_filter",
+                                               label = 'Ano',
+                                               choices = 2012:2022,
+                                               multiple = FALSE,
+                                               selected = 2022,
+                                               choicesOpt = list(content = 2012:2022)
+                    )
     ),
+    radioButtons(label= 'Sexo',
+                 inputId= "select_tipo_merc" ,
+                 c( "Geral", "Por mulher e homem"),
+                 selected = "Por mulher e homem",
+                 inline = F
+    )),
     
     
     conditionalPanel(condition  = "input.select_tipo_merc == 'Geral' ",
-                     layout_columns( 
-                       #withSpinner(d3plusOutput('F_cnaes'))
-                       htmlOutput("pedro", container = tags$li, class = "custom-li-output")
+                     layout_columns(
+                       withSpinner(d3plusOutput('F_cnaes'))
+                       #htmlOutput("pedro", container = tags$li, class = "custom-li-output")
                        
-                       )        
+                     )
     ),
-    conditionalPanel(condition  = "input.select_tipo_merc =='Formal e informal' ",
-                     layout_columns( 
-                       # withSpinner(d3plusOutput('F_cnaes_form')),
-                       # withSpinner(d3plusOutput('F_cnaes_inform'))
-                       )
-    )),
-  echarts4rOutput('perc_informal',width = "32%"),
-  echarts4rOutput('perc_informal_sexo',width = "32%"),
+    conditionalPanel(condition  = "input.select_tipo_merc =='Por mulher e homem' ",
+                     layout_columns(
+                       withSpinner(d3plusOutput('F_cnaes_form')),
+                       withSpinner(d3plusOutput('F_cnaes_inform'))
+                     )
+    )
+  ),
+
+  column(width = 4,htmlOutput('pedro')),
+  # valueBoxOutput("vbox_mulher_ocup", width = 2),
+  # valueBoxOutput("vbox_mulher_inf", width = 2),
+  # valueBoxOutput("vbox_mulher_desemp", width = 2),
+
+
+
+    box(
+    title = 'Ocupação ',
+    status = "danger",
+    solidHeader = F,
+    echarts4rOutput('ocupação_sexo'),
+    width = 4
+  ),
+
+  box(
+    title = 'Informalidade',
+    status = "danger",
+    solidHeader = F,
+    echarts4rOutput('perc_informal_sexo'),
+    width = 4
+    
+  ),
   
+  box(
+    title = 'Desemprego',
+    status = "danger",
+    solidHeader = F,
+    echarts4rOutput('Taxa_desemp_fort'),
+    width = 4
   )
+  
+  
+)
+  
+
+  
+  # echarts4rOutput('perc_informal',width = "32%"),
+  # 
+  # 
+  # 
   
   ),     
 
 #### Educação  --------------------------------------------------------  
 tabItem(
   tabName = "Educação",
-  h1("sdg"),
+  h1("Em construção"),
   hr() ),  
 
 #### Saúde  --------------------------------------------------------  
 tabItem(
   tabName = "Saúde",
-  h1("sdg"),
+  h1("Em construção"),
   hr() ),  
 
 ### Glossário ---------------------------------------------------------------
@@ -638,9 +678,8 @@ tabItem(
       tabName = "sobre",
       fluidPage(
         h1("Sobre o painel"),
-        p("Atualização de dados demográficos das Zonas Especiais de Interesse Social, 
-        Assentamentos Precários e bairros de Fortaleza com base nas informações dos setores censitários
-          do Ibge de 2022."),
+        p("Este painel trata de uma versão preliminar sobre a disponibilização de informações e indicadores que auxiliem na construção e governança de políticas públicas mais inclusivas e comprometidas com a redução das desigualdades de gênero através de visualizações interativas de dados. 
+          O Observatório da Mulher é um panorama contextual sobre a mulher de Fortaleza."),
   
         h2("Autor"),
         p(
@@ -655,13 +694,22 @@ tabItem(
         h2("Contribuições"),
  
         p(
-          "Felipe Neto",
+          "Pedro Florêncio",
           a(
-            href = "mailto:felipefranklinneto@gmail.com",
-            "felipefranklinneto@gmail.com"
+            href = "mailto:pedroflorenciocontato@gmail.com",
+            "pedroflorenciocontato@gmail.com"
           ),
           br(),
           tags$i("Núcleo de Difusão de Conhecimento - IPPLAN")
+        ),
+        p(
+          "Maria Gabrielle",
+          a(
+            href = "mailto:gabrielle.santana@ipplan.fortaleza.ce.gov.br",
+            "gabrielle.santana@ipplan.fortaleza.ce.gov.br"
+          ),
+          br(),
+          tags$i("Pesquisadora do Observatório de Fortaleza")
         ),
         p(
           "Larissa Tabita",
@@ -739,7 +787,7 @@ footer = dashboardFooter(
   )
 ),
  
-  title = "Censo nos Bairros"
+  title = "Dash Mulher"
 )
 
 

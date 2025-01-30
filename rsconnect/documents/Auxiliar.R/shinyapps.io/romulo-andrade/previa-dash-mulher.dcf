@@ -1,0 +1,13 @@
+name: previa-dash-mulher
+title: previa-dash-mulher
+username: romulo-andrade
+account: romulo-andrade
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 13848808
+bundleId: 9719451
+url: https://romulo-andrade.shinyapps.io/previa-dash-mulher/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData|Auxiliar_cor.R|bairros.xlsx|graficos_piramid.R|mapa.R|README.md

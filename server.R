@@ -4,7 +4,6 @@
 box::use(
   shiny[...],
   bs4Dash[...],
-  tidyr[pivot_longer],
   forcats[fct_reorder],
   echarts4r[e_theme_register,
             renderEcharts4r,
@@ -35,9 +34,10 @@ box::use(
     #sf_use_s2,
     #st_read,
     ],
-  tidyr[pivot_wider],
-  dplyr[left_join,
-        right_join,
+  tidyr[pivot_wider,pivot_longer],
+  dplyr[#left_join,
+        #right_join,
+        bind_rows,
           arrange,
           ungroup,
           mutate,
@@ -103,7 +103,7 @@ df_faixa <- readRDS('Dados/df_faixa.rds')
 df_cor_ <- readRDS('Dados/df_cor_.rds')
 df_sexo <- readRDS('Dados/df_sexo.rds')
 shp_Bairros <- readRDS('Dados/shp_bairros_demografia.rds')
-Atividade_CNAE <- readRDS("C:/Romulo/Comandos R/Testes/Testes_ar/Atividade_CNAE2.rds")
+Atividade_CNAE <- readRDS("Dados/Atividade_CNAE2.rds")
 
 
 ## dados mercado -----------------------------------------------------------
@@ -113,7 +113,7 @@ Atividade_CNAE <- readRDS("C:/Romulo/Comandos R/Testes/Testes_ar/Atividade_CNAE2
 
 Tipos_trab2 <- readRDS('Dados/Tipos_trab_2022.rds')
 
-write.csv(Tipos_trab2,'Dados/Tipos_trab_2022.csv')
+pnadc_12_22 <- readRDS('Dados/PNADC_12_22_For.RDS')
 
 Tipo_T <-c("Trabalho formal","Trabalho informal")
 Ano_T <-as.character(2012:2022)
@@ -346,7 +346,7 @@ output$piramide_1.2 <- renderEcharts4r({
              }")
       )
     ) |>
-    e_grid(left='20%') |> 
+    e_grid(left='28%') |> 
     e_theme('macarons') |> 
     e_legend( top= "3%")|> 
     e_title(text=input$select_1[2])#,subtext="Segundo sexo e grupo de idade" )  
@@ -381,10 +381,10 @@ output$piramide_2 <- renderEcharts4r({
              }")
       )
     ) |>
-    e_grid(left='20%') |> 
+    e_grid(left='28%') |> 
     e_theme('macarons') |> 
-    e_legend( top= "3%") |> 
-    e_title(text=input$select_1[1])#,subtext="Segundo sexo e grupo de idade" )  
+    e_legend( top= "3%") |>
+    e_title(text=input$select_1[1])
 })  
 
 
@@ -759,70 +759,67 @@ observeEvent(req(input$tabs_ba),{
 
 # Server mercado ----------------------------------------------------------
 
-output$pedro <- renderhtml({'<div class="flourish-embed flourish-hierarchy" data-src="visualisation/21354009"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/21354009/thumbnail" width="100%" alt="hierarchy visualization" /></noscript></div>' })
+output$pedro <- renderText({'<div class="flourish-embed flourish-hierarchy" data-src="visualisation/21354009"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/21354009/thumbnail" width="100%" alt="hierarchy visualization" /></noscript></div>' })
 
 ## reativos mercados -------------------------------------------------------
 
 
 
-Tipos_trab2_ano <- reactive({
-  Tipos_trab2[Tipos_trab2$Ano %in% input$Ano_filter,] 
-})
 
 Filtro_Tipos_trab <- { select_group_server(
   id = "Filtro_merc",
-  data_r = Tipos_trab2_ano,
-  vars_r = reactive(c('V2007', 'V2010','VD3004','Composição'))
+  data_r = Tipos_trab2,
+  vars_r = reactive(c( 'V2010','VD3004','idadeEco2'))
 )}
 
 
-Tipos_trab_Cnae <- reactive( aggregate(Qtd.~ Ano+Tipo+Denominação+Denom_Seção+Denom_Divisão,
+Tipos_trab_Cnae <- reactive( aggregate(Qtd.~ Ano+V2007+Denominação+Denom_Seção+Denom_Divisão,
                                        Filtro_Tipos_trab(),sum))
 
 
 
 ## treemap -----------------------------------------------------------------
-# output$F_cnaes <- renderD3plus({
-#   
-#   
-#   Tipos_trab_Cnae_G <-aggregate(Qtd.~ Ano+Denominação+Denom_Seção+Denom_Divisão,
-#                                 Tipos_trab_Cnae(),sum) 
-#   
-#   
-#   d3plus(
-#     data = if(nrow(Tipos_trab_Cnae_G)==0) {
-#       data.frame(Qtd.= NaN)
-#     } else {
-#       Tipos_trab_Cnae_G 
-#     },
-#     type = "tree_map",
-#     id = c("Denom_Seção", "Denominação"), #,"Denominação" Denom_Divisão
-#     locale = "pt_BR",
-#     width = "100%",
-#     currency = "",
-#     number_text = c("Mil", "Milhão", "Milhões", "Bilhão", "Bilhões"),
-#     height = 500)  |> 
-#     d3plusSize("Qtd.") |> 
-#     # d3plusUi(list( list(method = "depth", type = "drop",
-#     #                     value = list(list('1ª Seção' = 0), list('2ª Divisão' = 1)))))  |>  #,list('3ª Denominação' = 2)
-#     # 
-#     d3plusColor("Denom_Seção")  |> 
-#     d3plusDepth(0) |> 
-#     d3plusLabels(value = TRUE, valign = "top")  |> 
-#     d3plusTitle(value = paste0('Geral ', input$Ano_filter), font = list(size = 22, weight = 900),
-#                 total = list(value = list(prefix = "Total: "),
-#                              font = list(size = 16, weight = 900))) 
-#   
-#   
-# })
+output$F_cnaes <- renderD3plus({
+
+
+  Tipos_trab_Cnae_G <-aggregate(Qtd.~ Ano+Denominação+Denom_Seção+Denom_Divisão,
+                                Tipos_trab_Cnae(),sum)
+
+
+  d3plus(
+    data = if(nrow(Tipos_trab_Cnae_G)==0) {
+      data.frame(Qtd.= NaN)
+    } else {
+      Tipos_trab_Cnae_G
+    },
+    type = "tree_map",
+    id = c("Denom_Seção", "Denominação"), #,"Denominação" Denom_Divisão
+    locale = "pt_BR",
+    width = "100%",
+    currency = "",
+    number_text = c("Mil", "Milhão", "Milhões", "Bilhão", "Bilhões"),
+    height = 500)  |>
+    d3plusSize("Qtd.") |>
+    # d3plusUi(list( list(method = "depth", type = "drop",
+    #                     value = list(list('1ª Seção' = 0), list('2ª Divisão' = 1)))))  |>  #,list('3ª Denominação' = 2)
+    #
+    d3plusColor("Denom_Seção")  |>
+    d3plusDepth(0) |>
+    d3plusLabels(value = TRUE, valign = "top")  |>
+    d3plusTitle(value = paste0('Geral ', input$Ano_filter), font = list(size = 22, weight = 900),
+                total = list(value = list(prefix = "Total: "),
+                             font = list(size = 16, weight = 900)))
+
+
+})
 output$F_cnaes_form <- renderD3plus({
 
 
   d3plus(
-    data = if(nrow(Tipos_trab_Cnae()[Tipos_trab_Cnae()$Tipo=="Trabalho formal",])==0) {
+    data = if(nrow(Tipos_trab_Cnae()[Tipos_trab_Cnae()$V2007=="Mulher",])==0) {
       data.frame(Qtd.= NaN)
     } else {
-      Tipos_trab_Cnae()[Tipos_trab_Cnae()$Tipo=="Trabalho formal",]
+      Tipos_trab_Cnae()[Tipos_trab_Cnae()$V2007=="Mulher",]
     },
     type = "tree_map",
     id = c("Denom_Seção", "Denom_Divisão"),
@@ -832,13 +829,13 @@ output$F_cnaes_form <- renderD3plus({
     number_text = c("Mil", "Milhão", "Milhões", "Bilhão", "Bilhões"),
     height = 500)  |> 
     d3plusSize("Qtd.")  |> 
-    d3plusUi(list( list(method = "depth", type = "drop",
-                        value = list(list('1ª Seção' = 0), list('2ª Divisão' = 1)))))  |> 
+    # d3plusUi(list( list(method = "depth", type = "drop",
+    #                     value = list(list('1ª Seção' = 0), list('2ª Divisão' = 1)))))  |> 
 
     d3plusColor("Denom_Seção")  |> 
     d3plusDepth(0) |> 
     d3plusLabels(value = TRUE, valign = "top")  |> 
-    d3plusTitle(value = paste0('Formal ', input$Ano_filter), font = list(size = 22, weight = 900),
+    d3plusTitle(value = paste0('Mulher ', input$Ano_filter), font = list(size = 22, weight = 900),
                 total = list(value = list(prefix = "Total: "),
                              font = list(size = 16, weight = 900)))
 
@@ -849,10 +846,10 @@ output$F_cnaes_inform <- renderD3plus({
 
 
   d3plus(
-    data = if(nrow(Tipos_trab_Cnae()[Tipos_trab_Cnae()$Tipo=="Trabalho informal",])==0) {
+    data = if(nrow(Tipos_trab_Cnae()[Tipos_trab_Cnae()$V2007=="Homem",])==0) {
       data.frame(Qtd.= NaN)
     } else {
-      Tipos_trab_Cnae()[Tipos_trab_Cnae()$Tipo=="Trabalho informal",]
+      Tipos_trab_Cnae()[Tipos_trab_Cnae()$V2007=="Homem",]
     },
     type = "tree_map",
     id = c("Denom_Seção", "Denom_Divisão"),
@@ -862,13 +859,13 @@ output$F_cnaes_inform <- renderD3plus({
     number_text = c("Mil", "Milhão", "Milhões", "Bilhão", "Bilhões"),
     height = 500) |> 
     d3plusSize("Qtd.") |> 
-    d3plusUi(list( list(method = "depth", type = "drop",
-                        value = list(list('1ª Seção' = 0), list('2ª Divisão' = 1)))))  |> 
+    # d3plusUi(list( list(method = "depth", type = "drop",
+    #                     value = list(list('1ª Seção' = 0), list('2ª Divisão' = 1)))))  |> 
 
     d3plusColor("Denom_Seção") |> 
     d3plusDepth(0) |> 
     d3plusLabels(value = TRUE, valign = "top")  |> 
-    d3plusTitle(value = paste0('Informal ', input$Ano_filter), font = list(size = 22, weight = 900),
+    d3plusTitle(value = paste0('Homem ', input$Ano_filter), font = list(size = 22, weight = 900),
                 total = list(value = list(prefix = "Total: "),
                              font = list(size = 16, weight = 900)))
 
@@ -877,80 +874,301 @@ output$F_cnaes_inform <- renderD3plus({
 
 ## informalidade -----------------------------------------------------------
 
-# 
-# output$perc_informal <-   renderEcharts4r({
-#   
-#   
-#   
-#   e_charts(data= pivot_wider(
-#     aggregate(Qtd.~ Ano+Tipo,Tipos_trab2,sum)  |> 
-#       right_join(expand.grid(Tipo=Tipo_T,Ano=Ano_T ),
-#                  by=c("Ano"="Ano","Tipo"="Tipo"))   |> 
-#       mutate(Qtd.=ifelse(is.na(Qtd.), 0, Qtd.)),names_from=Tipo,values_from = Qtd.,values_fill = 0) |> 
-#       group_by(Ano) |> 
-#       mutate(`Trabalho formal`=round(`Trabalho formal`,0),
-#              `Trabalho informal`=round(`Trabalho informal`,0),
-#              Total=`Trabalho formal`+`Trabalho informal`,.groups="keep")   |> 
-#       ungroup() |> 
-#       arrange(Ano),
-#     x=Ano) |> 
-#     e_bar(`Trabalho formal`,stack="grp")  |> 
-#     e_bar(`Trabalho informal`,stack="grp") |> 
-#     e_toolbox() |> 
-#     e_toolbox_feature('dataZoom')  |> 
-#     e_toolbox_feature('dataView') |> 
-#     e_toolbox_feature('saveAsImage')  |> 
-#     e_toolbox_feature('restore') |> 
-#     e_tooltip() |> 
-#     e_effect_scatter(Total,symbol_size = 6,smooth=T,color= 'red') |> 
-#     e_legend(show=T,orient = 'horizontal', bottom = 0) |> 
-#     e_line(Total,smooth=T,color= '#ee6666')
-#   
-#   
-# })
-# output$perc_informal_sexo <-   renderEcharts4r({
-#   
-#   
-#   e_charts(data =  pivot_wider( aggregate(Qtd.~ Ano+Tipo+V2007,Tipos_trab2,sum)  |> 
-#                                   right_join(expand.grid(Tipo=Tipo_T,Ano=Ano_T,V2007=Sexo_T),
-#                                              by=c("Ano"="Ano","Tipo"="Tipo","V2007"="V2007"))   |> 
-#                                   mutate(Qtd.=ifelse(is.na(Qtd.), 0, Qtd.)),names_from=Tipo,values_from = Qtd.,values_fill = 0) |> 
-#              group_by(Ano,V2007) |> 
-#              summarise(Informalidade=`Trabalho informal`/(`Trabalho formal`+`Trabalho informal`),.groups="keep") |> 
-#              ungroup() |>
-#              mutate(V2007=fct_reorder(V2007,Informalidade))  |>
-#              group_by(V2007)
-#            ,
-#            x=Ano) |> 
-#     e_line(Informalidade,smooth=T,
-#            emphasis=list( focus= 'series' ))  |> 
-#     e_y_axis(formatter = e_axis_formatter("percent", digits = 0))  |> 
-#     e_toolbox() |> 
-#     e_toolbox_feature(feature='magicType', type=list('line', 'bar'))  |> 
-#     e_toolbox_feature('dataZoom') |> 
-#     e_toolbox_feature('dataView') |> 
-#     e_toolbox_feature('saveAsImage')  |> 
-#     e_toolbox_feature('restore') |> 
-#     e_legend(show=T,orient = 'horizontal', bottom = 0,emphasis= list( focus= 'series'))  |> 
-#     e_tooltip(trigger= 'axis',
-#               axisPointer=list(
-#                 type= 'shadow'
-#               ),formatter = e_tooltip_item_formatter(
-#                 style = c( "percent"))) |> 
-#     e_data(data=
-#              pivot_wider(
-#                aggregate(Qtd.~ Ano+Tipo,Tipos_trab2,sum) |> 
-#                  right_join(expand.grid(Tipo=Tipo_T,Ano=Ano_T ),
-#                             by=c("Ano"="Ano","Tipo"="Tipo"))   |> 
-#                  mutate(Qtd.=ifelse(is.na(Qtd.), 0, Qtd.)),names_from=Tipo,values_from = Qtd.,values_fill = 0) |> 
-#              group_by(Ano) |> 
-#              summarise(Geral=`Trabalho informal`/(`Trabalho formal`+`Trabalho informal`),.groups="keep")  |> 
-#              ungroup()
-#            ,x= Ano    ) |> 
-#     e_effect_scatter(Geral,symbol_size = 6,smooth=T,color= 'red') |> 
-#     e_line(Geral,smooth=T,color= '#ee6666')
-#   
-# })
+{ 
+df_ocup_geral  <- aggregate(Qtd.~ Ano,Tipos_trab2,sum)  |>
+  mutate(Qtd.=round(Qtd.),
+         V2007 = 'Geral')
+
+df_inf_geral <-   pivot_wider(
+  aggregate(Qtd.~ Ano+Tipo,Tipos_trab2,sum) |>
+    mutate(Qtd.=ifelse(is.na(Qtd.), 0, Qtd.)),names_from=Tipo,values_from = Qtd.,values_fill = 0) |>
+  group_by(Ano) |>
+  summarise(Informalidade=`Trabalho informal`/(`Trabalho formal`+`Trabalho informal`)) |>
+  mutate(V2007 = 'Geral')
+
+
+df_desemp_geral <- group_by(pnadc_12_22,
+            Ano) |>
+  summarise( Tx_desocupacao  = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+               sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) |> 
+  mutate(V2007 = 'Geral') |> 
+  ungroup()
+
+}
+
+output$ocupação_sexo <-   renderEcharts4r({
+ 
+df_ocup_temp  <- aggregate(Qtd.~ Ano+V2007,Filtro_Tipos_trab(),sum)  |>
+    group_by(V2007) |> 
+    mutate(Qtd.=round(Qtd.))
+
+df_ocup <- bind_rows(df_ocup_temp,df_ocup_geral)
+
+    e_charts(data = df_ocup[df_ocup$V2007=='Homem',], x=Ano) |>
+    e_legend(selected=list('Geral'=F), bottom= 0,right= 0) |> 
+    e_line(Qtd.,smooth=T, color='#2ec7c9',legend =F,
+           emphasis=list( focus= 'series' ),
+           endLabel=list( show=T, color='#2ec7c9',fontWeight= "bold" ,fontSize =12,
+                          formatter= htmlwidgets::JS(" function (params) { return 'Homens' }")))  |>
+    #e_y_axis(formatter = e_axis_formatter("percent", digits = 0))  |>
+    e_data(data=df_ocup[df_ocup$V2007=='Mulher',] , x= Ano    ) |>
+    e_line(Qtd.,smooth=T,color='#b6a2de',legend =F,
+           emphasis=list( focus= 'series' ),
+           endLabel=list( show=T, color='#b6a2de',fontWeight= "bold" ,fontSize =12,
+                          formatter= htmlwidgets::JS(" function (params) { return 'Mulher' }"))) |> 
+    e_data(data=df_ocup[df_ocup$V2007=='Geral',] , x= Ano    ) |>
+    e_line(Qtd.,smooth=T,color='#008acd', legend = T,
+           emphasis=list( focus= 'series' ),
+           endLabel=list( show=T, color='#008acd',fontWeight= "bold" ,fontSize =12,
+                          formatter= htmlwidgets::JS(" function (params) { return 'Geral' }"))) |> 
+      e_grid(top='2%') |> 
+      e_tooltip()
+})
+
+output$perc_informal_sexo <-   renderEcharts4r({
+
+
+  
+df_inf_temp <-   pivot_wider( aggregate(Qtd.~ Ano+Tipo+V2007,Filtro_Tipos_trab(),sum)  |>
+                 mutate(Qtd.=ifelse(is.na(Qtd.), 0, Qtd.)),names_from=Tipo,values_from = Qtd.,values_fill = 0) |>
+    group_by(Ano,V2007) |>
+    summarise(Informalidade=`Trabalho informal`/(`Trabalho formal`+`Trabalho informal`)) |>
+    ungroup() |>
+    group_by(V2007)
+
+df_inf <- bind_rows(df_inf_temp,df_inf_geral)
+
+    e_charts(data = df_inf[df_inf$V2007=='Homem',], x=Ano) |>
+    e_legend(selected=list('Geral'=F), bottom= 0,right= 0) |> 
+    e_line(Informalidade,smooth=T, color='#2ec7c9',legend =F,
+           emphasis=list( focus= 'series' ),
+           endLabel=list( show=T, color='#2ec7c9',fontWeight= "bold" ,fontSize =12,
+                          formatter= htmlwidgets::JS(" function (params) { return 'Homens' }")))  |>
+    e_y_axis(formatter = e_axis_formatter("percent", digits = 0))  |>
+    e_data(data=df_inf[df_inf$V2007=='Mulher',] , x= Ano    ) |>
+    e_line(Informalidade,smooth=T,color='#b6a2de',legend =F,
+             emphasis=list( focus= 'series' ),
+             endLabel=list( show=T, color='#b6a2de',fontWeight= "bold" ,fontSize =12,
+                            formatter= htmlwidgets::JS(" function (params) { return 'Mulher' }"))) |> 
+    e_data(data=df_inf[df_inf$V2007=='Geral',] , x= Ano    ) |>
+    e_line(Informalidade,smooth=T,color='#008acd', legend = T,
+             emphasis=list( focus= 'series' ),
+             endLabel=list( show=T, color='#008acd',fontWeight= "bold" ,fontSize =12,
+                            formatter= htmlwidgets::JS(" function (params) { return 'Geral' }"))) |> 
+    e_tooltip(formatter = e_tooltip_item_formatter(
+                style = c( "percent")))|> 
+      e_grid(top='2%') 
+  
+ 
+    
+
+    
+})
+
+output$Taxa_desemp_fort <-   renderEcharts4r({   
+
+df_desemp_temp <- group_by(pnadc_12_22,
+           Ano,V2007)  |> 
+    summarise( Tx_desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+                 sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) 
+
+df_desemp <- bind_rows(df_desemp_temp,df_desemp_geral)|> 
+  group_by(V2007)
+
+
+e_charts(data = df_desemp[df_desemp$V2007=='Homem',], x=Ano) |> # HOMEM
+  e_legend(selected=list('Geral'=F), bottom= 0,right= 0) |> 
+  e_line(Tx_desocupacao ,smooth=T, color='#2ec7c9',legend =F,
+         emphasis=list( focus= 'series' ),
+         endLabel=list( show=T, color='#2ec7c9',fontWeight= "bold" ,fontSize =12,
+                        formatter= htmlwidgets::JS(" function (params) { return 'Homens' }")))  |>
+  e_y_axis(formatter = e_axis_formatter("percent", digits = 0))  |>
+  e_data(data=df_desemp[df_desemp$V2007=='Mulher',] , x= Ano    ) |>  #MULHER
+  e_line(Tx_desocupacao ,smooth=T,color='#b6a2de',legend =F,
+         emphasis=list( focus= 'series' ),
+         endLabel=list( show=T, color='#b6a2de',fontWeight= "bold" ,fontSize =12,
+                        formatter= htmlwidgets::JS(" function (params) { return 'Mulher' }"))) |> 
+  e_data(data=df_desemp[df_desemp$V2007=='Geral',] , x= Ano    ) |>  #GERAL
+  e_line(Tx_desocupacao ,smooth=T,color='#008acd', legend = T,
+         emphasis=list( focus= 'series' ),
+         endLabel=list( show=T, color='#008acd',fontWeight= "bold" ,fontSize =12,
+                        formatter= htmlwidgets::JS(" function (params) { return 'Geral' }"))) |> 
+  e_tooltip(formatter = e_tooltip_item_formatter(
+    style = c( "percent"))) |> 
+  e_grid(top='2%')
+  
+  
+}) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{
+  
+  # 
+  # 
+  # 
+  # 
+  # output$Taxa_desemp_fort_raca <-   renderEcharts4r({  
+  #   
+  # library(dplyr)
+  #   library(echarts4r)
+  #   d <-  pnadc_12_22[ pnadc_12_22$Ano==2021 ,] |> 
+  #     mutate(
+  #       V2010=as.character(V2010),
+  #       V2010 = case_when(
+  #         V2010  %in% c("Indígena", "Amarela","Ignorado")  ~ "Outros", #
+  #         TRUE   ~ V2010
+  #       ))  
+  #   
+  #   d  |> 
+  #     group_by(V2010,V2007) |>
+  #     summarise( Tx_desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+  #                  sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) |> 
+  #     group_by(V2007=fct_reorder(V2007,-Tx_desocupacao)) |> 
+  #     e_charts(x=V2010) |> 
+  #     e_bar(Tx_desocupacao,barGap= 0) |> 
+  #     e_toolbox() |>
+  #     e_toolbox_feature(feature='magicType', type=list('line', 'bar')) |>
+  #     e_toolbox_feature('dataZoom') |>
+  #     e_toolbox_feature('dataView') |>
+  #     e_toolbox_feature('saveAsImage') |>
+  #     e_toolbox_feature('restore') |> 
+  #     e_legend(show=T,orient = 'horizontal', bottom = 0) |> 
+  #     e_tooltip(trigger="axis",axisPointer=list(type="shadow"),
+  #               formatter = e_tooltip_pointer_formatter("percent")) |> 
+  #     e_y_axis(formatter = e_axis_formatter("percent", digits = 0),max=0.3) |> 
+  #     e_data(data= d |>
+  #              group_by(V2010) |> 
+  #              summarise( Geral = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+  #                           sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) |> 
+  #              ungroup(V2010),x= V2010   ) |> 
+  #     e_bar(Geral)|> 
+  #     e_color(c('#5470c6', '#91cc75','#ee6666', '#fac858',  '#73c0de')) |> 
+  #     e_labels(show =F, emphasis= list( focus= 'series')) 
+  #   
+  # }) 
+  # 
+  # output$Taxa_desemp_fort_esc <-   renderEcharts4r({  
+  #   
+  #   
+  #   pnadc_15_20 |> 
+  #     mutate(
+  #       VD3004 = as.character(VD3004),
+  #       VD3004 = case_when( 
+  #         VD3004 == "Médio completo ou equivalente" ~ "Médio completo",
+  #         VD3004 == "Fundamental incompleto ou equivalente" ~ "Fundamental incompleto",
+  #         VD3004 == "Médio incompleto ou equivalente" ~ "Médio incompleto",
+  #         VD3004 == "Superior incompleto ou equivalente" ~ "Superior incompleto",
+  #         VD3004 == "Fundamental completo ou equivalente" ~ "Fundamental completo",
+  #         VD3004 == "Sem instrução e menos de 1 ano de estudo" ~ "Menos de 1 ano de estudo",
+  #         TRUE ~ VD3004
+  #       )) |> 
+  #     group_by(Ano,VD3004) |>
+  #     summarise( Tx_desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+  #                  sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) |>
+  #     drop_na() |> 
+  #     group_by(fct_reorder(VD3004,-Tx_desocupacao)) |> 
+  #     e_charts(x=Ano) |> 
+  #     e_bar(Tx_desocupacao) |> 
+  #     e_toolbox() |>
+  #     e_toolbox_feature(feature='magicType', type=list('line', 'bar')) |>
+  #     e_toolbox_feature('dataZoom') |>
+  #     e_toolbox_feature('dataView') |>
+  #     e_toolbox_feature('saveAsImage') |>
+  #     e_toolbox_feature('restore') |> 
+  #     e_legend(show=T,orient = 'horizontal', bottom = 0) |> 
+  #     e_tooltip(trigger= 'item',
+  #               axisPointer=list(
+  #                 type= 'shadow'
+  #               ),formatter = e_tooltip_item_formatter(
+  #                 style = c( "percent"))) |> 
+  #     e_y_axis(formatter = e_axis_formatter("percent", digits = 0)) |> 
+  #     e_data(data=group_by(pnadc_15_20[pnadc_15_20$Capital %in% "Município de Fortaleza (CE)"  ,],
+  #                          Ano) |>
+  #              summarise( Geral = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+  #                           sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) |> 
+  #              ungroup(Ano),x= Ano   ) |> 
+  #     e_effect_scatter(Geral,symbol_size = 6,smooth=T,color= 'red')|> 
+  #     e_line(Geral,smooth=T,color= '#ee6666') |> 
+  #     e_color(c('#5470c6', '#91cc75', '#fac858',  '#73c0de','#ee6666','#8378EA',
+  #               '#96BFFF')) |> 
+  #     e_grid( height = "60%") |> 
+  #     e_labels(show =F, emphasis= list( focus= 'series'))
+  #   
+  #   
+  # }) 
+  # 
+  # output$Taxa_desemp_fort_idade <-   renderEcharts4r({
+  #   
+  #   req(input$sidebar == "Tipo_ocupação")
+  #   pnadc_15_20 |> 
+  #     mutate(idadeEco2=case_when(
+  #       idadeEco2 %in% c('40-49', '50-59', '60-65', '66+') ~ '40+',
+  #       TRUE ~ idadeEco2
+  #     )) |> 
+  #     group_by(Ano,idadeEco2) |>
+  #     summarise( Tx_desocupacao = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+  #                  sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) |> 
+  #     drop_na() |> 
+  #     ungroup(Ano) |> 
+  #     e_charts(x=Ano) |> 
+  #     e_bar(Tx_desocupacao,barGap=0) |> 
+  #     e_toolbox() |>
+  #     e_toolbox_feature(feature='magicType', type=list('line', 'bar')) |>
+  #     e_toolbox_feature('dataZoom') |>
+  #     e_toolbox_feature('dataView') |>
+  #     e_toolbox_feature('saveAsImage') |>
+  #     e_toolbox_feature('restore') |> 
+  #     e_legend(show=T,orient = 'horizontal', bottom = 0) |> 
+  #     e_tooltip(trigger= 'item',
+  #               axisPointer=list(
+  #                 type= 'shadow'
+  #               ),formatter = e_tooltip_item_formatter(
+  #                 style = c( "percent"))) |> 
+  #     e_y_axis(formatter = e_axis_formatter("percent", digits = 0),
+  #              min=0.06) |> 
+  #     e_data(data=group_by(pnadc_15_20,Ano) |>
+  #              summarise( Geral = sum(V1032[VD4002=="Pessoas desocupadas"],na.rm = TRUE)/
+  #                           sum(V1032[VD4001=="Pessoas na força de trabalho"],na.rm = TRUE),.groups ='keep' ) |> 
+  #              ungroup(Ano),x= Ano   ) |> 
+  #     e_effect_scatter(Geral,symbol_size = 6,smooth=T,color= 'red') |> 
+  #     e_line(Geral,smooth=T,color= '#ee6666') |> 
+  #     e_labels(show=F,rotate=90,
+  #              position = 'top',
+  #              distance= 40,
+  #              align='right',
+  #              verticalAlign='middle',
+  #              color= 'black',
+  #              
+  #              formatter = htmlwidgets::JS("
+  #       function(params){
+  #       a= params.value[1]*100
+  #        return( a.toFixed(1) + '%' )} "),
+  #              emphasis= list( focus= 'series')) 
+  #   
+  # }) 
+  # 
+  
+  
+  
+}
+
+
+
+
+
 
 
 
