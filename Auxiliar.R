@@ -1,3 +1,67 @@
+
+df_faixa_ <- df_faixa |> 
+  mutate(grupo_de_idade =as.factor(grupo_de_idade ),
+         grupo_de_idade = forcats::fct_relevel(grupo_de_idade,
+                                               '0 a 4 anos', 
+                                               '5 a 9 anos',
+                                               '10 a 14 anos',
+                                               '15 a 19 anos',
+                                                '20 a 24 anos',
+                                               '25 a 29 anos',
+                                              '30 a 39 anos',
+                                               '40 a 49 anos',
+                                               '50 a 59 anos',
+                                              '60 a 69 anos',
+                                               '70 anos ou mais' 
+                                               )) |> 
+  arrange(NM_BAIRRO,grupo_de_idade)
+
+
+
+
+
+
+ df_faixa_ |> filter(NM_BAIRRO=='FORTALEZA') |> 
+  e_charts(x=grupo_de_idade) |>
+  e_bar(perc_masc,stack = "grp2",color='#40711A',#bind=perc_masc,
+        name='Homens',barWidth= '90%',
+        itemStyle=list( opacity= .9)
+       #  label=list(formatter=  htmlwidgets::JS("
+       # function (params) {
+       #  return Math.abs(params.name)+'%';}"),
+       #             show= T,position= "left"#,color='green'#,fontWeight= "bold"
+       #  )
+  )  |>
+  e_bar(perc_fem,stack = "grp",#bind=perc_fem,
+        name='Mulheres',color='#A02EA0',
+        itemStyle=list( opacity= 0.5),
+       #  label=list(formatter=  htmlwidgets::JS("
+       # function (params) {
+       #  return Math.abs(params.name)+'%';}"),
+       #             show= T,position= "right"#,color='blue'#,fontWeight= "bold"
+       #  )
+  ) |>
+  e_flip_coords() |>
+  e_y_axis(offset=30) |>
+  e_x_axis(#max=117799,
+    #min=-127799,
+    type= 'value',
+    show= F,
+    axisLabel=list(
+      formatter= htmlwidgets::JS("function(params) {
+               return Math.abs(params);
+             }")
+    )
+  ) |>
+  e_grid(left='20%',) |>
+  #  e_theme('macarons') |>
+  e_legend( top= "3%",selected= list()) |>
+  e_tooltip( trigger = c("axis"),axisPointer=list(type='shadow')) |>
+
+  e_title(text='População residente em Fortaleza',subtext="Segundo sexo e grupo de idade" )
+
+
+
 # library(stringr)
 # library(dplyr)
 # library(sf)
@@ -33,7 +97,7 @@
 # # 
 # # bairros_CD2022 <- bairros_CD2022 |> st_transform(4326)
 # # saveRDS(bairros_CD2022,'Dados/bairros_CD2022.rds')
-# bairros_CD2022 <- readRDS('Dados/bairros_CD2022.rds') 
+# 
 # 
 # st_crs(bairros_CD2022)
 # 
@@ -192,93 +256,96 @@
 #   
 # }
 # 
-# #Tratamento piramide por bairros
-# {
-# 
-#   
-#   faixa_M <- bairros_demografia |> 
-#     select(NM_BAIRRO,
-#            V01009:V01019) |> 
-#     pivot_longer(cols = V01009:V01019,
-#                  names_to = 'grupo_de_idade',
-#                  values_to = 'Masculina'  ) 
-#   faixa_F <- bairros_demografia |> 
-#     select(NM_BAIRRO,
-#            V01020:V01030) |> 
-#     pivot_longer(cols = V01020:V01030,
-#                  names_to = 'grupo_de_idade',
-#                  values_to = 'Feminina'  )
-#   
-#   faixa_M <- faixa_M |> 
-#     mutate(grupo_de_idade = case_match(
-#       grupo_de_idade,
-#       'V01009'	~ '0 a 4 anos',
-#       'V01010'	~ '5 a 9 anos',
-#       'V01011'	~ '10 a 14 anos',
-#       'V01012'  ~ '15 a 19 anos',
-#       'V01013'	~ '20 a 24 anos',
-#       'V01014'	~ '25 a 29 anos',
-#       'V01015'	~ '30 a 39 anos',
-#       'V01016'	~ '40 a 49 anos',
-#       'V01017'	~ '50 a 59 anos',
-#       'V01018'	~ '60 a 69 anos',
-#       'V01019'	~ '70 anos ou mais'),
-#       seq = rep(seq(from=11,to=1),121)
-#       )
-#   
-#   faixa_F <- faixa_F |> 
-#     mutate(grupo_de_idade = case_match(
-#       grupo_de_idade,
-#       'V01020' ~ '0 a 4 anos',
-#       'V01021' ~ '5 a 9 anos',
-#       'V01022' ~ '10 a 14 anos',
-#       'V01023' ~ '15 a 19 anos',
-#       'V01024' ~ '20 a 24 anos',
-#       'V01025' ~ '25 a 29 anos',
-#       'V01026' ~ '30 a 39 anos',
-#       'V01027' ~ '40 a 49 anos',
-#       'V01028' ~ '50 a 59 anos',
-#       'V01029' ~ '60 a 69 anos',
-#       'V01030' ~ '70 anos ou mais')
-#     )
-# 
-# df_faixa <- left_join(faixa_F,faixa_M)
-# 
-# #rm(faixa_F,faixa_M)
-# 
-# 
-# df_faixa <- df_faixa |>
-#     group_by(NM_BAIRRO) |> 
-#       mutate(
-#       perc_fem = round(Feminina/sum(Feminina+Masculina)*100,1),
-#       perc_masc =round(Masculina/sum(Feminina+Masculina)*100,1),
-#       Masculina = Masculina*(-1)) |> 
-#     rename(Homens=Masculina,
-#            Mulheres=Feminina)
-# 
-# #Fortaleza
-# 
-# #df_faixa <- readRDS('Dados/df_faixa.rds')
-# 
-# df_faixa_fort <- df_faixa |> 
-#   select(1:4) |>
-#   group_by(grupo_de_idade ) |> 
-#   summarise(Mulheres=sum(Mulheres),
-#             Homens=(-1)*sum(Homens)) |> 
-#   mutate(
-#     perc_fem = round(Mulheres/sum(Mulheres+Homens)*100,1),
-#     perc_masc =round(Homens/sum(Mulheres+Homens)*100,1),
-#     Homens = Homens*(-1),
-#     seq = seq(from=11,to=1),
-#     NM_BAIRRO = 'FORTALEZA' ) 
-# 
-# 
-# df_faixa <- bind_rows(df_faixa,df_faixa_fort)  
-# 
-# 
-# saveRDS(df_faixa,"Dados/df_faixa.rds")
-# 
-# }
+#Tratamento piramide por bairros
+{
+
+
+  faixa_M <- bairros_demografia |>
+    select(NM_BAIRRO,
+           V01009:V01019) |>
+    pivot_longer(cols = V01009:V01019,
+                 names_to = 'grupo_de_idade',
+                 values_to = 'Masculina'  )
+  faixa_F <- bairros_demografia |>
+    select(NM_BAIRRO,
+           V01020:V01030) |>
+    pivot_longer(cols = V01020:V01030,
+                 names_to = 'grupo_de_idade',
+                 values_to = 'Feminina'  )
+
+  faixa_M <- faixa_M |>
+    mutate(grupo_de_idade = case_match(
+      grupo_de_idade,
+      'V01009'	~ '0 a 4 anos',
+      'V01010'	~ '5 a 9 anos',
+      'V01011'	~ '10 a 14 anos',
+      'V01012'  ~ '15 a 19 anos',
+      'V01013'	~ '20 a 24 anos',
+      'V01014'	~ '25 a 29 anos',
+      'V01015'	~ '30 a 39 anos',
+      'V01016'	~ '40 a 49 anos',
+      'V01017'	~ '50 a 59 anos',
+      'V01018'	~ '60 a 69 anos',
+      'V01019'	~ '70 anos ou mais'),
+      seq = rep(seq(from=11,to=1),121)
+      )
+
+  faixa_F <- faixa_F |>
+    mutate(grupo_de_idade = case_match(
+      grupo_de_idade,
+      'V01020' ~ '0 a 4 anos',
+      'V01021' ~ '5 a 9 anos',
+      'V01022' ~ '10 a 14 anos',
+      'V01023' ~ '15 a 19 anos',
+      'V01024' ~ '20 a 24 anos',
+      'V01025' ~ '25 a 29 anos',
+      'V01026' ~ '30 a 39 anos',
+      'V01027' ~ '40 a 49 anos',
+      'V01028' ~ '50 a 59 anos',
+      'V01029' ~ '60 a 69 anos',
+      'V01030' ~ '70 anos ou mais')
+    )
+
+df_faixa <- left_join(faixa_F,faixa_M)
+
+#rm(faixa_F,faixa_M)
+
+
+df_faixa <- df_faixa |>
+    group_by(NM_BAIRRO) |>
+      mutate(
+      perc_fem = round(Feminina/sum(Feminina+Masculina)*100,1),
+      perc_masc =round(Masculina/sum(Feminina+Masculina)*100,1),
+      Masculina = Masculina*(-1)) |>
+    rename(Homens=Masculina,
+           Mulheres=Feminina)
+
+#Fortaleza
+
+#df_faixa <- readRDS('Dados/df_faixa.rds')
+
+df_faixa_fort <- df_faixa |>
+  select(1:4) |>
+  group_by(grupo_de_idade ) |>
+  summarise(Mulheres=sum(Mulheres),
+            Homens=(-1)*sum(Homens)) |>
+  mutate(
+    perc_fem = round(Mulheres/sum(Mulheres+Homens)*100,1),
+    perc_masc =round(Homens/sum(Mulheres+Homens)*100,1),
+    Homens = Homens*(-1),
+    seq = seq(from=11,to=1),
+    NM_BAIRRO = 'FORTALEZA' )
+
+
+df_faixa <- bind_rows(df_faixa,df_faixa_fort)
+
+
+#saveRDS(df_faixa_,"Dados/df_faixa_.rds")
+lista_demog <- unique(df_faixa$NM_BAIRRO)
+
+saveRDS(lista_demog,"Dados/lista_demog.rds")
+
+}
 # 
 # 
 #   
@@ -379,86 +446,195 @@
 # 
 # 
 # 
-# 
-# 
-# shinyApp(
-#   ui = fluidPage(
-#     
-#     "Update selectize input by clicking on the map",
-#     
-#     leafletOutput("map"),
-#     "I would like the selectize input to update to show all the locations selected,",
-#     "but also when items are removed here, they are removed on the map too, so linked to the map.",
-#     selectizeInput(inputId = "selected_locations",
-#                    label = "Selected:",
-#                    choices = bairros_CD2022$NM_BAIRRO,
-#                    selected = NULL,
-#                    multiple = TRUE,
-#                    options = list('plugins' = list('remove_button'),maxItems = 3))
-#   ),
-#   
-#   server = function(input, output, session){
-#     
-#     #create empty vector to hold all click ids
-#     selected_ids <- reactiveValues(ids = vector())
-#     
-#     #initial map output
-#     output$map <- renderLeaflet({
-#       leaflet() %>%
-#         addTiles() %>%
-#         addPolygons(data = bairros_CD2022,
-#                     fillColor = "white",
-#                     fillOpacity = 0.5,
-#                     color = "black",
-#                     stroke = TRUE,
-#                     weight = 1,
-#                     layerId = ~NM_BAIRRO,
-#                     group = "regions",
-#                     label = ~NM_BAIRRO) %>%
-#         addPolygons(data = bairros_CD2022,
-#                     fillColor = "red",
-#                     fillOpacity = 0.5,
-#                     weight = 1,
-#                     color = "black",
-#                     stroke = TRUE,
-#                     layerId = ~idd,
-#                     group = ~NM_BAIRRO) %>%
-#         hideGroup(group = bairros_CD2022$NM_BAIRRO) # nc$CNTY_ID
-#     }) #END RENDER LEAFLET
-#     
-#     #define leaflet proxy for second regional level map
-#     proxy <- leafletProxy("map")
-#     
-#     #create empty vector to hold all click ids
-#     selected <- reactiveValues(groups = vector())
-#     
-#     observeEvent(input$map_shape_click, {
-#       if(input$map_shape_click$group == "regions"){
-#         selected$groups <- c(selected$groups, input$map_shape_click$id)
-#         proxy %>% showGroup(group = input$map_shape_click$id)
-#       } else {
-#         selected$groups <- setdiff(selected$groups, input$map_shape_click$group)
-#         proxy %>% hideGroup(group = input$map_shape_click$group)
-#       }
-#       updateSelectizeInput(session,
-#                            inputId = "selected_locations",
-#                            choices = bairros_CD2022$NM_BAIRRO,
-#                            selected = selected$groups)
-#     })
-#     
-#     observeEvent(input$selected_locations, {
-#       removed_via_selectInput <- setdiff(selected$groups, input$selected_locations)
-#       added_via_selectInput <- setdiff(input$selected_locations, selected$groups)
-#       
-#       if(length(removed_via_selectInput) > 0){
-#         selected$groups <- input$selected_locations
-#         proxy %>% hideGroup(group = removed_via_selectInput)
-#       }
-#       
-#       if(length(added_via_selectInput) > 0){
-#         selected$groups <- input$selected_locations
-#         proxy %>% showGroup(group = added_via_selectInput)
-#       }
-#     }, ignoreNULL = FALSE)
-#     
-#   })
+library(dplyr)
+ 
+ bairros_CD2022 <- readRDS('Dados/bairros_CD2022.rds') 
+ bairros_CD2022  <-  mutate(bairros_CD2022,idd= dplyr::row_number())
+ AIS <-  readxl::read_excel('Dados/AIS.xlsx') 
+ bairros_AIS <- left_join(bairros_CD2022,AIS,by=c('NM_BAIRRO'='Bairros')) |> 
+   group_by(AIS) |> 
+   summarise() |> 
+   mutate(idd= dplyr::row_number())
+ 
+ leaflet() |>
+   addTiles() |>
+   addPolygons(data = bairros_AIS,
+               fillColor = "white",
+               fillOpacity = 0.5,
+               color = "black",
+               stroke = TRUE,
+               weight = 1,
+               layerId = ~AIS ,
+               group = "regions",
+               label = ~AIS)
+ 
+ 
+ shinyApp(
+   ui = fluidPage(
+     
+     "Update selectize input by clicking on the map",
+     
+     leafletOutput("map"),
+     "I would like the selectize input to update to show all the locations selected,",
+     "but also when items are removed here, they are removed on the map too, so linked to the map.",
+     selectizeInput(inputId = "selected_locations",
+                    label = "Selected:",
+                    choices = bairros_AIS$AIS,
+                    selected = NULL,
+                    multiple = TRUE,
+                    options = list('plugins' = list('remove_button')))
+   ),
+   
+   server = function(input, output, session){
+     
+     #create empty vector to hold all click ids
+     selected_ids <- reactiveValues(ids = vector())
+     
+     #initial map output
+     output$map <- renderLeaflet({
+       leaflet() |>
+         addTiles() |>
+         addPolygons(data = bairros_AIS,
+                     fillColor = "white",
+                     fillOpacity = 0.5,
+                     color = "black",
+                     stroke = TRUE,
+                     weight = 1,
+                     layerId = ~AIS,
+                     group = "regions",
+                     label = ~AIS) |>
+         addPolygons(data = bairros_AIS,
+                     fillColor = "red",
+                     fillOpacity = 0.5,
+                     weight = 1,
+                     color = "black",
+                     stroke = TRUE,
+                     layerId = ~idd,
+                     group = ~AIS) |>
+         hideGroup(group = bairros_AIS$AIS) # nc$CNTY_ID
+     }) #END RENDER LEAFLET
+     
+     #define leaflet proxy for second regional level map
+     proxy <- leafletProxy("map")
+     
+     #create empty vector to hold all click ids
+     selected <- reactiveValues(groups = vector())
+     
+     observeEvent(input$map_shape_click, {
+       if(input$map_shape_click$group == "regions"){
+         selected$groups <- c(selected$groups, input$map_shape_click$id)
+         proxy |> showGroup(group = input$map_shape_click$id)
+       } else {
+         selected$groups <- setdiff(selected$groups, input$map_shape_click$group)
+         proxy |> hideGroup(group = input$map_shape_click$group)
+       }
+       updateSelectizeInput(session,
+                            inputId = "selected_locations",
+                            choices = bairros_AIS$AIS,
+                            selected = selected$groups)
+     })
+     
+     observeEvent(input$selected_locations, {
+       removed_via_selectInput <- setdiff(selected$groups, input$selected_locations)
+       added_via_selectInput <- setdiff(input$selected_locations, selected$groups)
+       
+       if(length(removed_via_selectInput) > 0){
+         selected$groups <- input$selected_locations
+         proxy |> hideGroup(group = removed_via_selectInput)
+       }
+       
+       if(length(added_via_selectInput) > 0){
+         selected$groups <- input$selected_locations
+         proxy |> showGroup(group = added_via_selectInput)
+       }
+     }, ignoreNULL = FALSE)
+     
+   })
+ 
+ 
+ 
+library(leaflet)
+
+ 
+ 
+ shinyApp(
+  ui = fluidPage(
+
+    "Update selectize input by clicking on the map",
+
+    leafletOutput("map"),
+    "I would like the selectize input to update to show all the locations selected,",
+    "but also when items are removed here, they are removed on the map too, so linked to the map.",
+    selectizeInput(inputId = "selected_locations",
+                   label = "Selected:",
+                   choices = bairros_CD2022$NM_BAIRRO,
+                   selected = NULL,
+                   multiple = TRUE,
+                   options = list('plugins' = list('remove_button'),maxItems = 3))
+  ),
+
+  server = function(input, output, session){
+
+    #create empty vector to hold all click ids
+    selected_ids <- reactiveValues(ids = vector())
+
+    #initial map output
+    output$map <- renderLeaflet({
+      leaflet() |>
+        addTiles() |>
+        addPolygons(data = bairros_CD2022,
+                    fillColor = "white",
+                    fillOpacity = 0.5,
+                    color = "black",
+                    stroke = TRUE,
+                    weight = 1,
+                    layerId = ~NM_BAIRRO,
+                    group = "regions",
+                    label = ~NM_BAIRRO) |>
+        addPolygons(data = bairros_CD2022,
+                    fillColor = "red",
+                    fillOpacity = 0.5,
+                    weight = 1,
+                    color = "black",
+                    stroke = TRUE,
+                    layerId = ~idd,
+                    group = ~NM_BAIRRO) |>
+        hideGroup(group = bairros_CD2022$NM_BAIRRO) # nc$CNTY_ID
+    }) #END RENDER LEAFLET
+
+    #define leaflet proxy for second regional level map
+    proxy <- leafletProxy("map")
+
+    #create empty vector to hold all click ids
+    selected <- reactiveValues(groups = vector())
+
+    observeEvent(input$map_shape_click, {
+      if(input$map_shape_click$group == "regions"){
+        selected$groups <- c(selected$groups, input$map_shape_click$id)
+        proxy |> showGroup(group = input$map_shape_click$id)
+      } else {
+        selected$groups <- setdiff(selected$groups, input$map_shape_click$group)
+        proxy |> hideGroup(group = input$map_shape_click$group)
+      }
+      updateSelectizeInput(session,
+                           inputId = "selected_locations",
+                           choices = bairros_CD2022$NM_BAIRRO,
+                           selected = selected$groups)
+    })
+
+    observeEvent(input$selected_locations, {
+      removed_via_selectInput <- setdiff(selected$groups, input$selected_locations)
+      added_via_selectInput <- setdiff(input$selected_locations, selected$groups)
+
+      if(length(removed_via_selectInput) > 0){
+        selected$groups <- input$selected_locations
+        proxy |> hideGroup(group = removed_via_selectInput)
+      }
+
+      if(length(added_via_selectInput) > 0){
+        selected$groups <- input$selected_locations
+        proxy |> showGroup(group = added_via_selectInput)
+      }
+    }, ignoreNULL = FALSE)
+
+  })

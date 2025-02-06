@@ -25,7 +25,7 @@ box::use(
 
 
 # Load data -----------------------------------------------------------------------------------
-df_faixa <- readRDS('Dados/df_faixa.rds')
+lista_demog <- readRDS('Dados/lista_demog.rds')
 glossario <-readRDS('Dados/glossario.rds')
 
 # Funcao --------------------------------------------------------------------------------------
@@ -371,9 +371,8 @@ tabItem(
 #### Demografia --------------------------------------------------------------
 tabItem(
   tabName = "Demografia",
-  #h1("Demografia dos bairros de Fortaleza - Censo 2022"),
   hr(), 
-  selectizeInput(inputId='select_1',label = 'Bairro:', choices = sort(unique(df_faixa$NM_BAIRRO)),multiple = TRUE,
+  selectizeInput(inputId='select_1',label = 'Bairro:', choices = lista_demog,multiple = TRUE,
                  selected= 'FORTALEZA',width = '40%',
                  options = list('plugins' = list('remove_button'),maxItems = 3)),
    
@@ -472,24 +471,115 @@ tabItem(
 #### Violencia --------------------------------------------------------------  
 tabItem(
   tabName = "Violência",
-  h1("Em construção"),
-  hr() ),
+
+h1('Crimes Violentos Letais e Intencionais - CVLI'),
+  br(),
+  # fluidRow(
+# 
+#   column(width=3,
+#   select_group_ui(
+#     id = "select_ais",
+#     inline = TRUE ,
+#     btn_reset_label = "Resetar filtros",
+#     params = list(
+#       list(inputId = "AIS", label = "AIS", placeholder = 'Todos' ,  updateOn = "close")
+#     ) 
+#   )),
+
+#   
+#   ),
+fluidRow(
+  
+  column(width=6, box(
+    title = 'Caso de CVLI por sexo', status = "danger",solidHeader = F,width = 12,
+    tabsetPanel(
+      id = "tabs_viol",
+      tabPanel(
+        title = 'Por mês' ,
+        echarts4rOutput('viol_sexo')
+      ),
+      tabPanel(
+        title = 'Por ano',
+        echarts4rOutput('viol_sexo_ano')
+      )
+      
+    ))),
+  
+  
+  
+
+  column(width=6,
+         selectizeInput(inputId = "select_ano_viol",
+                        label = "Ano:",
+                        choices = 2009:2024,
+                        selected = 2024,
+                        multiple = F,
+                        options = list('plugins' = list('remove_button'))), 
+         box(
+    title = textOutput("text_ano_mapa") , status = "danger",solidHeader = F,width = 12,   
+    # sidebar = boxSidebar(
+    #   id = 'ano_viol',
+    #   width = 25,
+    #   icon = shiny::icon("filter"),
+    #   startOpen = T,
+    #     # selectizeInput(inputId = "select_ano_viol",
+    #     #                label = "Ano:",
+    #     #                choices = 2009:2024,
+    #     #                selected = 2024,
+    #     #                multiple = F,
+    #     #                options = list('plugins' = list('remove_button')))
+    #),
+  leafletOutput("map",height = 360))),
+  
+  column(width=6, box(
+    title = 'Caso de Feminicídios', status = "danger",solidHeader = F,width = 12,
+    echarts4rOutput('viol_femin'))),
+
+  column(width=6, box(
+    title = textOutput("text_ano_meios"), status = "danger",solidHeader = F,width = 12,
+    fluidRow(
+      column(width=6, echarts4rOutput('viol_meio_H',width ='110%')),
+      column(width=6, echarts4rOutput('viol_meio_M',width ='110%'))
+    ))),
+  
+  column(width=6, box(
+    title = textOutput("text_ano_etária"), status = "danger",solidHeader = F,width = 12,
+    echarts4rOutput('faixa_etaria'))),
+  
+column(width=6, box(
+  title = textOutput("text_ano_semana"), status = "danger",solidHeader = F,width = 12,
+  echarts4rOutput('viol_semana')))
+)
+  ),
      
 #### Mercado de trabalho  --------------------------------------------------------  
 tabItem(
   tabName = "Mercado",
   hr(),
 fluidRow(
-  column(width = 6,
+  
+  column(width = 2,
+         
+         shinyWidgets::pickerInput( inputId = "Ano_filter",
+                                    label = 'Ano',
+                                    choices = 2012:2023,
+                                    multiple = FALSE,
+                                    selected = 2023,
+                                    choicesOpt = list(content = 2012:2023)
+         )
+  ),
+  
+  column(width = 8,
   select_group_ui(
     id = "Filtro_merc",
     inline = TRUE ,
     btn_reset_label = "Resetar filtros",
     params = list(
-     #list(inputId = "V2007", label = "Sexo", placeholder = 'Todos' ,  updateOn = "close",selected = 'Mulher'),
+      #list(inputId = "V2007", label = "Sexo", placeholder = 'Todos' ,  updateOn = "close",selected = 'Mulher'),
       list(inputId = "V2010", label = "Raça/cor", placeholder = 'Todos',  updateOn = "close"),
       list(inputId = "VD3004", label = "Escolaridade", placeholder = 'Todos',  updateOn = "close"),
-      list(inputId = "idadeEco2", label = "Idade", placeholder = 'Todos',  updateOn = "close")
+      list(inputId = "idadeEco2", label = "Idade", placeholder = 'Todos',  updateOn = "close"),
+      list(inputId = "Composição", label = "Composição", placeholder = 'Todos',  updateOn = "close")
                   ) 
                 ),
   ),
@@ -500,22 +590,13 @@ fluidRow(
     status = "danger",
     solidHeader = F,
     width = 8,
-    fluidRow(column(width = 3,
-                    
-                    shinyWidgets::pickerInput( inputId = "Ano_filter",
-                                               label = 'Ano',
-                                               choices = 2012:2022,
-                                               multiple = FALSE,
-                                               selected = 2022,
-                                               choicesOpt = list(content = 2012:2022)
-                    )
-    ),
+
     radioButtons(label= 'Sexo',
                  inputId= "select_tipo_merc" ,
                  c( "Geral", "Por mulher e homem"),
                  selected = "Por mulher e homem",
                  inline = F
-    )),
+    ),
     
     
     conditionalPanel(condition  = "input.select_tipo_merc == 'Geral' ",
@@ -541,30 +622,36 @@ fluidRow(
 
 
     box(
-    title = 'Ocupação ',
+    title = 'Pessoas ocupadas',
     status = "danger",
     solidHeader = F,
     echarts4rOutput('ocupação_sexo'),
-    width = 4
+    width = 6
   ),
 
   box(
-    title = 'Informalidade',
+    title = 'Taxa de informalidade',
     status = "danger",
     solidHeader = F,
     echarts4rOutput('perc_informal_sexo'),
-    width = 4
+    width = 6
     
   ),
   
   box(
-    title = 'Desemprego',
+    title = 'Taxa de desemprego',
     status = "danger",
     solidHeader = F,
-    echarts4rOutput('Taxa_desemp_fort'),
-    width = 4
-  )
-  
+    echarts4rOutput('taxa_desemp_fort'),
+    width = 6
+  ),
+  box(
+    title = 'Rendimento médio real habitual (R$/mês)',
+    status = "danger",
+    solidHeader = F,
+    echarts4rOutput('renda_fort'),
+    width = 6
+  )  
   
 )
   
