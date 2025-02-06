@@ -493,6 +493,6 @@ df_cvli_idade |>
       e_legend( top= "3%") |>
       e_title(text='População residente em Fortaleza - 2022',subtext="Segundo sexo e grupo de idade" )
     b
-    htmlwidgets::saveWidget(b, "C:/Romulo/Dados/Censo2022/temp.html");
-    webshot2::webshot("C:/Romulo/Dados/Censo2022/temp.html","C:/Romulo/Dados/Censo2022/piramide_22_.png",
-                      vwidth = 900, vheight = 800,delay = 1)
+    # htmlwidgets::saveWidget(b, "C:/Romulo/Dados/Censo2022/temp.html");
+    # webshot2::webshot("C:/Romulo/Dados/Censo2022/temp.html","C:/Romulo/Dados/Censo2022/piramide_22_.png",
+       #               vwidth = 900, vheight = 800,delay = 1)
