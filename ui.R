@@ -3,7 +3,7 @@
 box::use(
   shiny[...],
   bs4Dash[...],
-  bslib[...],
+ bslib[layout_columns],
   reactable[reactableOutput],
   echarts4r[echarts4rOutput,
             e_theme_register],
@@ -26,11 +26,9 @@ box::use(
 
 # Load data -----------------------------------------------------------------------------------
 lista_demog <- readRDS('Dados/lista_demog.rds')
-glossario <-readRDS('Dados/glossario.rds')
+glossario <-readxl::read_excel('Dados/Glossário.xlsx')
 
 # Funcao --------------------------------------------------------------------------------------
-
-
 
 
 constroi_glossario <- function(nchunks = 3) {
@@ -40,11 +38,11 @@ constroi_glossario <- function(nchunks = 3) {
         length.out = nrow(glossario),
         each = ceiling(nrow(glossario)/nchunks)))
   
-  width <- 12%/%nchunks
+  width_ <- 12%/%nchunks
   
   lapply(1:nchunks, function(i){
     div(
-      class = sprintf("col-xl-%s", width),
+      class = sprintf("col-xl-%s", width_),
       bs4Dash::box(
         width = 12,
         closable = FALSE,
@@ -54,7 +52,6 @@ constroi_glossario <- function(nchunks = 3) {
           list(id = sprintf('accordion_glossario_%s', i)),
           apply(df[[i]], 1, function(r) bs4Dash::accordionItem(title = r[1], r[2]))))))})
 }
-
 
 
 
@@ -206,7 +203,7 @@ diobs_theme <- create_theme(
 
 
 ui <- dashboardPage(
- 
+  
   # preloader = list(
   #   html = tagList(
   #     spin_cube_grid(),
@@ -230,7 +227,7 @@ ui <- dashboardPage(
       image = 'Brasão_de_Fortaleza.svg',
       opacity = 1
     ),
-    fixed = FALSE
+    fixed = F #### F
   ),
 
   
@@ -329,8 +326,8 @@ ui <- dashboardPage(
   
   body = dashboardBody(
     use_googlefont(font1),
-    use_googlefont(font2),
-    use_googlefont(font3),
+    # use_googlefont(font2),
+    # use_googlefont(font3),
     use_theme(diobs_theme),
     e_theme_register(
       paste(readLines("www/atlas_capital_humano.json"), collapse = ""),
@@ -372,20 +369,20 @@ tabItem(
 tabItem(
   tabName = "Demografia",
   hr(), 
+  
   selectizeInput(inputId='select_1',label = 'Bairro:', choices = lista_demog,multiple = TRUE,
                  selected= 'FORTALEZA',width = '40%',
-                 options = list('plugins' = list('remove_button'),maxItems = 3)),
+                 options = list('plugins' = list('remove_button'),maxItems = 3,minItem=1)),
    
    fluidRow(
     
     ### Pizza sexo 1
-    column(width = 3,
-           echarts4rOutput('pizza_1.1',height = '80%')),
+    column(width = 3,echarts4rOutput('pizza_1.1',height = '80%')),
     ### Qtd Moradores 1
     valueBoxOutput("vbox_mulher.1", width = 2),
     valueBoxOutput("vbox2.1", width = 2),
     valueBoxOutput("vbox1.1", width = 2),
-    echarts4rOutput('raca1', width = '25%',height=200)
+    column(width = 3,echarts4rOutput('raca1',height=200) )
     
     
   ),
@@ -398,7 +395,7 @@ tabItem(
                      valueBoxOutput("vbox_mulher.2", width = 2),  
                      valueBoxOutput("vbox2.2", width = 2), 
                      valueBoxOutput("vbox1.2", width = 2),
-                     echarts4rOutput('raca2', width = '25%',height=200)
+                     column(width = 3,echarts4rOutput('raca2',height=200))
                      ) )
   
 
@@ -418,12 +415,14 @@ tabItem(
     
     conditionalPanel(condition  = "input.select_1.length ==1 ",
                      layout_columns( 
-                       withSpinner( echarts4rOutput("piramide_1.1")))        
+                       withSpinner( echarts4rOutput("piramide_1.1"))
+                       )        
     ),
     conditionalPanel(condition  = "input.select_1.length == 2 ",
                      layout_columns( 
                        echarts4rOutput("piramide_2"),
-                       echarts4rOutput("piramide_1.2"))
+                       echarts4rOutput("piramide_1.2")
+                     )
     )),
   box(
     title = 'Mapa',
@@ -459,10 +458,11 @@ tabItem(
     # fluidRow( downloadButton("down_bairro", ".GEOJSON"), downloadButton("down_bairro_xlsx", ".XLSX"))
   )
   ),
+
   
-  
-  
-   reactableOutput("table_bairro")
+   reactableOutput("table_bairro"),
+  hr(class = "divider"),
+  p('Fonte: Censo Demográfico - IBGE - 2022')
   
   ),
   
@@ -517,18 +517,7 @@ fluidRow(
                         options = list('plugins' = list('remove_button'))), 
          box(
     title = textOutput("text_ano_mapa") , status = "danger",solidHeader = F,width = 12,   
-    # sidebar = boxSidebar(
-    #   id = 'ano_viol',
-    #   width = 25,
-    #   icon = shiny::icon("filter"),
-    #   startOpen = T,
-    #     # selectizeInput(inputId = "select_ano_viol",
-    #     #                label = "Ano:",
-    #     #                choices = 2009:2024,
-    #     #                selected = 2024,
-    #     #                multiple = F,
-    #     #                options = list('plugins' = list('remove_button')))
-    #),
+
   leafletOutput("map",height = 360))),
   
   column(width=6, box(
@@ -549,7 +538,9 @@ fluidRow(
 column(width=6, box(
   title = textOutput("text_ano_semana"), status = "danger",solidHeader = F,width = 12,
   echarts4rOutput('viol_semana')))
-)
+),
+hr(class = "divider"),
+p('Fonte: Secretaria da Segurança Pública e Defesa Social do Estado do Ceará - 2024')
   ),
      
 #### Mercado de trabalho  --------------------------------------------------------  
@@ -667,8 +658,32 @@ fluidRow(
 #### Educação  --------------------------------------------------------  
 tabItem(
   tabName = "Educação",
-  h1("Em construção"),
-  hr() ),  
+  hr(),
+  fluidRow(
+  column(width=6,box(
+    title = 'Taxa de alfabetização', status = "danger",solidHeader = F,width = 12,
+    
+    withSpinner(leafletOutput("map_educ",height=638)))),
+
+  
+  column(width=6, 
+    fluidRow(valueBoxOutput("alf_M", width = 4),
+             valueBoxOutput("alf_qtd", width = 4),
+             valueBoxOutput("alf", width = 4)),      
+         
+    #      box(
+    # title = textOutput("Alfabetização"), status = "danger",solidHeader = F,width = 12,
+    fluidRow(
+      column(width=6, echarts4rOutput('pizza_alfab_M',width ='110%',height=250)),
+      column(width=6, echarts4rOutput('pizza_alfab_H',width ='110%',height=250))
+    #)
+    ),
+    echarts4rOutput('idade_alfab')
+    )
+
+      )  
+   
+  ),  
 
 #### Saúde  --------------------------------------------------------  
 tabItem(
@@ -681,6 +696,7 @@ tabItem(
      
     tabItem(
       tabName = "glossario",
+      
       tagList(
         fluidRow(
           class = "align-center justify-content-center text-center mt-2",
@@ -692,6 +708,7 @@ tabItem(
         ),
         fluidRow(
           constroi_glossario(nchunks = 3)
+    
         )
         
       )

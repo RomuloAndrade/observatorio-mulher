@@ -134,6 +134,12 @@ bairros_AIS_ <- readRDS('Dados/bairros_AIS_.rds')
 df_cvli_idade <- readRDS('Dados/df_cvli_idade.rds')
 
 
+# dados educação ----------------------------------------------------------
+
+shp_Bairros_alfab <- readRDS('Dados/shp_Bairros_alfab.rds')
+bairros_alfab <- readRDS('Dados/bairros_alfab.rds')
+Qtd_alfab <- readRDS('Dados/Qtd_alfab.rds')
+Tx_faixa_alfab <- readRDS('Dados/Tx_faixa_alfab.rds')
 # Load functions ------------------------------------------------------------------------------
 bar_chart <- function(label, width = "100%", height = "1rem", fill = "#00bfc4", background = NULL) {
   bar <- div(style = list(background = fill, width = width, height = height))
@@ -158,12 +164,24 @@ server <- function(input, output, session) {
 
 # server demografia -------------------------------------------------------
 
-
+  observeEvent(input$select_1 ,{
+    if(length(input$select_1)==3)  { 
+      
+      updateSelectizeInput(session = getDefaultReactiveDomain(),
+                           inputId = "select_1",
+                           selected = input$select_1[2:3])
+    } 
+    
+  },ignoreInit =T)
+  
+ 
   
 ## Moradores ---------------------------------------------------------------
 
   
   output$vbox2.1 <- renderValueBox({
+
+    
     valueBox(
       value = format(sum(bairros_demografia[bairros_demografia$NM_BAIRRO==input$select_1[1],'V01006']),  big.mark   = '.',decimal.mark = ',') ,
       subtitle = "Moradores",
@@ -280,16 +298,11 @@ output$pizza_1.2 <- renderEcharts4r({
  
 ## Piramide --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-observeEvent(input$select_1 ,{
-   if(length(input$select_1)==3)  { 
-   
-updateSelectizeInput(session = getDefaultReactiveDomain(),
-                     inputId = "select_1",
-                     selected = input$select_1[2:3] )
-  }
-  },ignoreInit =T)
+
+
 
 output$piramide_1.1 <- renderEcharts4r({
+  
     df_faixa |> 
      filter(NM_BAIRRO == input$select_1[1]) |> 
       e_charts(x=grupo_de_idade) |> 
@@ -325,6 +338,8 @@ output$piramide_1.1 <- renderEcharts4r({
     #e_title(text=input$select_1[1])#,subtext="Segundo sexo e grupo de idade" )  
   })  
 output$piramide_1.2 <- renderEcharts4r({
+  req(length(input$select_1)>=1)
+  
     df_faixa |> 
     filter(NM_BAIRRO == input$select_1[2]) |> 
     e_charts(x=grupo_de_idade) |> 
@@ -360,6 +375,8 @@ output$piramide_1.2 <- renderEcharts4r({
     e_title(text=input$select_1[2])#,subtext="Segundo sexo e grupo de idade" )  
 })  
 output$piramide_2 <- renderEcharts4r({
+  req(length(input$select_1)>=1)
+  
   df_faixa |> 
     filter(NM_BAIRRO == input$select_1[1]) |> 
     e_charts(x=grupo_de_idade) |> 
@@ -399,25 +416,18 @@ output$piramide_2 <- renderEcharts4r({
 
 output$raca1 <- renderEcharts4r({
 df_cor_ |> 
-  filter(NM_BAIRRO==input$select_1[1]) |> 
+  filter(NM_BAIRRO== input$select_1[1]) |>  #
   group_by(Sexo) |> 
+  mutate(Perc = Qtd/sum(Qtd)) |>   
   e_chart(x=Cor_raça,name='Moradores') |> 
-  e_bar(Qtd) |> 
+  e_bar(Perc) |> 
   e_color(c("#2ec7c9","#b6a2de" )) |> 
   e_toolbox(iconStyle= list(
     color= "rgba(35, 210, 32, 1)"
   )) |>
-    e_tooltip(trigger="item", formatter =
-                htmlwidgets::JS(
-                  "function(p) {
-          v = Intl.NumberFormat('pt-BR', { style: 'decimal'}).format(p.value[1]);
-          return('<strong>' + p.seriesName + '</strong>' +
-          '<br>Moradores: ' + Intl.NumberFormat('pt-BR', { style: 'decimal'}).format(p.value[1]) +
-          '<br>Raça_cor: ' +p.value[0]  );
-          }"),
-              textStyle=list(fontFamily="arial", fontSize=12)
-              
-    )|>  
+    e_tooltip(
+      trigger="axis",formatter = e_tooltip_pointer_formatter(
+        style = c( "percent"),digits = 1) )|>  
     e_legend( orient= "vertical",
                    right= 0) |> 
     e_y_axis(show=F) |> 
@@ -429,23 +439,16 @@ output$raca2 <- renderEcharts4r({
   df_cor_ |> 
     filter(NM_BAIRRO==input$select_1[2]) |> 
     group_by(Sexo) |> 
+    mutate(Perc = Qtd/sum(Qtd)) |>   
     e_chart(x=Cor_raça,name='Moradores') |> 
-    e_bar(Qtd) |> 
+    e_bar(Perc) |> 
     e_color(c("#2ec7c9","#b6a2de" )) |> 
     e_toolbox(iconStyle= list(
       color= "rgba(35, 210, 32, 1)"
     )) |>
-    e_tooltip(trigger="item", formatter =
-                htmlwidgets::JS(
-                  "function(p) {
-          v = Intl.NumberFormat('pt-BR', { style: 'decimal'}).format(p.value[1]);
-          return('<strong>' + p.seriesName + '</strong>' +
-          '<br>Moradores: ' + Intl.NumberFormat('pt-BR', { style: 'decimal'}).format(p.value[1]) +
-          '<br>Raça_cor: ' +p.value[0]  );
-          }"),
-              textStyle=list(fontFamily="arial", fontSize=12)
-              
-    )|>  
+    e_tooltip(
+      trigger="axis",formatter = e_tooltip_pointer_formatter(
+        style = c( "percent"),digits = 1) )|>  
     e_legend( orient= "vertical",
               right= 0) |> 
     e_y_axis(show=F) |> 
@@ -460,13 +463,13 @@ output$map_bairro <-  renderLeaflet({
   leaflet( ) |>
     setMapWidgetStyle(list(background = "white"))  |> 
     addProviderTiles(providers$CartoDB.PositronNoLabels, group = "CartoDB.PositronNoLabels")|> 
-    addLayersControl(
-      overlayGroups = c(
-        "Bairros",
-        'id_final')) |>
+    # addLayersControl(
+    #   overlayGroups = c(
+    #     "Bairros",
+    #     'id_final')) |>
     addScaleBar(position = "bottomright",
                 options = scaleBarOptions(imperial = F))  |>
-    setView(-38.52782, -3.785804, zoom = 11) |>
+     setView(-38.51782, -3.795804, zoom = 11) |> #-38.52782, -3.785804,
     addFullscreenControl(pseudoFullscreen = T)
 }) 
 
@@ -742,6 +745,7 @@ observeEvent(req(input$tabs_ba),{
   }
   
 },ignoreInit = T) 
+
 
 
 
@@ -1062,17 +1066,6 @@ output$renda_fort <-   renderEcharts4r({
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 # Violencia ---------------------------------------------------------------
 output$text_ano_mapa <- renderText({paste0('Caso de CVLI por AIS ', input$select_ano_viol)}) 
 output$text_ano_meios <- renderText({paste0('CVLI por meios empregados ', input$select_ano_viol)}) 
@@ -1138,7 +1131,7 @@ temp <-   df_cvli |>
     group_by(Semana,Gênero) |>  #
     summarise(Qtd. = n()) |> 
     group_by(Gênero) |> 
-    mutate(Perc. = Qtd./sum(Qtd.)) |> 
+    mutate(Perc. = round(Qtd./sum(Qtd.),2)) |> 
     pivot_wider(
       names_from = Gênero,
       values_from = c(Perc.,Qtd.))
@@ -1150,8 +1143,9 @@ temp|>
       lineStyle=list(width= 4 ))) |> 
     e_radar_opts( splitLine=list(show=T),axisLine=list(show=T),axisName=list(color='black')) |>
     e_radar(Perc._Masculino,max = maximo,name='Homem') |> 
- e_tooltip(trigger = c("axis"),
-    formatter = e_tooltip_choro_formatter("percent")
+    e_tooltip(#formatter = e_tooltip_pie_formatter("percent")
+    #   trigger = c("axis"),
+    # formatter = e_tooltip_choro_formatter("percent")
   ) |> 
   #   e_tooltip(trigger="item", formatter =
   #               htmlwidgets::JS(
@@ -1162,41 +1156,7 @@ temp|>
     e_color(c('#b6a2de','#2ec7c9')) |> 
     e_legend(right=1) 
   
-  
-  
-  # 
-  # 
-  # 
-  # 
-  # 
-  # df_cvli |> 
-  # group_by(Semana,Gênero) |> 
-  # summarise(Qtd. = n()) |> 
-  # ungroup() |> 
-  # mutate(Perc. = Qtd./sum(Qtd.)) |> 
-  # group_by(Gênero) |>
-  # e_chart(x=Semana,stack='1') |> 
-  # e_bar(Perc.) |> 
-  # e_y_axis(formatter = e_axis_formatter("percent", digits = 0))  |>   
-  # e_legend(selected=list('Não Informado'=F)) |> 
-  #   e_tooltip(trigger="item", formatter =
-  #               htmlwidgets::JS(
-  #                 "function(p) {
-  #         v = Intl.NumberFormat('pt-BR', { style: 'decimal'}).format(p.value[1]);
-  #         return('<strong>' + p.seriesName + '</strong>' +
-  #         '<br>Percentual: ' + Intl.NumberFormat('pt-BR', { style: 'decimal',minimumFractionDigits: 1, 
-  # maximumFractionDigits: 1}).format(p.value[1]*100) + '%'
-  #           );
-  #         }"), textStyle=list(fontFamily="arial", fontSize=13)) |> 
-  # e_color(c('#b6a2de','#2ec7c9','#008acd')) |> 
-  # e_labels(color='black',position='insideTop',formatter =
-  #            htmlwidgets::JS(
-  #              "function(p) {
-  #         v = Intl.NumberFormat('pt-BR', { style: 'decimal'}).format(p.value[1]);
-  #         return(Intl.NumberFormat('pt-BR', { style: 'decimal',minimumFractionDigits: 1, 
-  # maximumFractionDigits: 1}).format(p.value[1]*100) + '%'
-  #           );
-  #         }"))
+
 })
 
 output$viol_meio_H <-   renderEcharts4r({
@@ -1234,7 +1194,6 @@ output$viol_meio_M <- renderEcharts4r({
   e_title(text='Mulher')
 })
 
-
 output$faixa_etaria <-   renderEcharts4r({
 df_cvli_idade |> 
   filter(Gênero!='Não Informado', Ano == input$select_ano_viol) |> 
@@ -1263,7 +1222,7 @@ df_cvli_idade |>
 })
 
 
-### MAPA select
+## Mapa Violencia ----------------------------------------------------------
 
 
 df_bairros_AIS<-reactive({
@@ -1301,6 +1260,295 @@ output$map <- renderLeaflet({
 
 
 
-###
+# Educação ----------------------------------------------------------------
+
+
+output$alf_M <- renderValueBox({
+valueBox(
+  value = format( sum(bairros_alfab[ ,'Alfab_mais_de_15_M'])/sum(bairros_alfab[ ,"Pessoas_mais_de_15_M"])*100  ,digits= 2  , nsmall = 2, big.mark   = '.',decimal.mark = ',') ,
+  subtitle = "Taxa de Alfabetização" ,
+  color = "purple",
+  icon = icon("book-open-reader"),
+  footer = 'Mulheres !local',
+  gradient = T
+)
+})
+output$alf_qtd <- renderValueBox({
+  valueBox(
+    value = format( sum(bairros_alfab[ ,'Alfab_mais_de_15_M']), big.mark   = '.',decimal.mark = ',') ,
+    subtitle = "Mulheres alfabetizadas",
+    color = "teal",
+    icon = icon("book-open-reader"),
+    footer = '!local',
+    gradient = T
+  )
+})
+output$alf <- renderValueBox({
+  
+  
+  valueBox(
+    value = format( sum(bairros_alfab[ ,'Alfab_mais_de_15'])/sum(bairros_alfab[ ,"Pessoas_mais_de_15"])*100  ,digits= 2,nsmall = 2,  big.mark   = '.',decimal.mark = ',') ,
+    subtitle = "Taxa de alfabetização",
+    color = "warning",
+    icon = icon("book-open-reader"),
+    footer = 'Geral Fortaleza',
+    gradient = T
+  )
+})
+output$pizza_alfab_H <- renderEcharts4r({
+Qtd_alfab |> 
+  filter(NM_BAIRRO == 'Centro') |> 
+  filter(V2007== 'Homem' ) |> 
+  e_charts(Tipo,reorder = F) |> 
+  e_pie(Qtd,radius = c("30%", "60%"),startAngle = 150,
+        label = list(color='black',show = T,formatter = "{b} \n {d}%"),
+        emphasis = list(
+          label = list( 
+            show = T,
+            fontSize = 15,
+            fontWeight = "bold"))) |>
+  e_tooltip(formatter=e_tooltip_choro_formatter(
+    locale = 'PT-BR')) |> 
+  e_legend(show=F) |> 
+  e_color(c( "#4B9695","#D1EB28")) |> 
+  e_title(text='Homem',left= "center") 
+})
+output$pizza_alfab_M <- renderEcharts4r({
+  Qtd_alfab |> 
+    filter(NM_BAIRRO == 'Centro') |> 
+    filter(V2007== 'Mulher' ) |> 
+    e_charts(Tipo,reorder = F) |> 
+    e_pie(Qtd,radius = c("30%", "60%"),startAngle = 150,
+          label = list(color='black',show = T,formatter = "{b} \n {d}%"),
+          emphasis = list(
+            label = list( 
+              show = T,
+              fontSize = 15,
+              fontWeight = "bold"))) |>
+    e_tooltip(formatter=e_tooltip_choro_formatter(
+      locale = 'PT-BR')) |> 
+    e_legend(show=F) |> 
+    e_color(c( "#4B9695","#D1EB28"))|> 
+    e_title(text='Mulher',left= "center") 
+})
+
+ 
+
+
+selected <- reactiveVal('Fortaleza')
+
+observeEvent(input$map_educ_shape_click, {
+ 
+  #capture the info of the clicked polygon
+  click <- input$map_educ_shape_click
+
+  #subset your table with the id of the clicked polygon
+  select <- click$id
+
+  #if click id isn't null render the table
+  if(is.null(click$id)){
+    selected <- 'Fortaleza'
+  }
+  selected( select)
+
+},)
+
+#input$input$map_educ_shape_click$id
+
+output$idade_alfab <- renderEcharts4r({
+
+  
+  Tx_faixa_alfab |> 
+  filter(NM_BAIRRO == selected(), V2007!='Geral') |>
+  group_by(V2007) |>   
+  e_chart(x=Tipo,) |> 
+  e_bar(Alfabetização) |> 
+  e_y_axis(min=.19) |> 
+  e_tooltip(
+    trigger="axis",formatter = e_tooltip_pointer_formatter(
+      style = c( "percent"),digits = 1) )|>  
+      # e_legend( orient= "vertical",
+      #           ) |> 
+      e_y_axis(show=F) |> 
+      #e_grid(top = "-5%") |> 
+  e_color(c('#2ec7c9','#b6a2de')) |> 
+  e_title(text=selected(),subtext = 'Taxa de alfabetização')
+  
+})
+## Mapa Educação ----------------------------------------------------------
+
+# Aux map Educação 
+{
+pal_tx_alfab<- colorNumeric(
+  palette = 'OrRd',
+  domain = shp_Bairros_alfab$`Tx. alfabetização`
+)
+pal_tx_alfab_h<- colorNumeric(
+  palette = 'PuBu',
+  domain = shp_Bairros_alfab$`Tx. alfab. homem`
+)
+pal_tx_alfab_m<- colorNumeric(
+  palette = 'PuRd',
+  domain = shp_Bairros_alfab$`Tx. alfab. mulher`
+)
+
+}
+
+output$map_educ <-  renderLeaflet({
+  
+  leaflet(options = leafletOptions(zoomControl = FALSE,
+                                   dragging = F,
+                                   doubleClickZoom = FALSE,
+                                   scrollWheelZoom = F) ) |>
+    setMapWidgetStyle(list(background = "white"))  |> 
+    addScaleBar(position = "bottomright",
+                options = scaleBarOptions(imperial = F))  |>
+    setView(-38.51782, -3.795804, zoom = 12) |> 
+    addPolygons(data=shp_Bairros_alfab,
+                weight=.6,
+                fillColor=~pal_tx_alfab(shp_Bairros_alfab$`Tx. alfabetização`),
+                color = 'purple',
+                opacity = 1,
+                group = 'id_final_',
+                popup =  popupTable(shp_Bairros_alfab,zcol = c("Bairro", 
+                                                               "Tx. alfabetização"),
+                                    feature.id = FALSE,
+                                    row.numbers = FALSE),
+                dashArray = "0",
+                fillOpacity =1 ,
+                layerId = ~Bairro,
+                label = ~Bairro,
+                highlightOptions=highlightOptions(
+                  color = "#500050", weight = 3, bringToFront = F)
+    ) |>
+    addLegend(data = shp_Bairros_alfab ,"bottomright", pal = pal_tx_alfab, values = ~`Tx. alfabetização`,
+              title = "Taxa de alfabetização",
+              opacity = 1 )#-38.52782, -3.785804
+    
+
+  
+}) 
+
+# observeEvent(req(input$current_tab=='Educação'), {
+#   
+#   leafletProxy('map_educ') |>
+#     addPolygons(data=shp_Bairros_alfab,
+#                 weight=.6,
+#                 fillColor=~pal_tx_alfab(shp_Bairros_alfab$`Tx. alfabetização`),
+#                 color = 'purple',
+#                 opacity = 1,
+#                 group = 'id_final_',
+#                 popup =  popupTable(shp_Bairros_alfab,zcol = c("Bairro", 
+#                                                                "Tx. alfabetização"),
+#                                     feature.id = FALSE,
+#                                     row.numbers = FALSE),
+#                 dashArray = "0",
+#                 fillOpacity =1 ,
+#                 layerId = ~Bairro,
+#                 label = ~Bairro,
+#                 highlightOptions=highlightOptions(
+#                   color = "#500050", weight = 3, bringToFront = F)
+#     ) |>
+#     addLegend(data = shp_Bairros_alfab ,"bottomright", pal = pal_tx_alfab, values = ~`Tx. alfabetização`,
+#               title = "Taxa de alfabetização",
+#               opacity = 1 )
+#   
+# },once=T)
+
+# observeEvent(req(input$tabs_alf),{ 
+#   
+#   
+#   leafletProxy("map_educ" )  |> 
+#     clearGroup(c('id_final_')) |> 
+#    clearControls() 
+#   
+#   if(input$tabs_alf =='Em mulheres' )
+#   {
+#     leafletProxy('map_educ') |>
+#       addPolygons(data=shp_Bairros_alfab,
+#                   weight=.6,
+#                   fillColor=~pal_tx_alfab_m(shp_Bairros_alfab$`Tx. alfab. mulher`),
+#                   color = 'purple',
+#                   opacity = 1,
+#                   group = 'id_final_',
+#                   popup =  popupTable(shp_Bairros_alfab,zcol = c("Bairro", 
+#                                                                  "Tx. alfab. mulher",
+#                                                                  "Tx. alfab. homem",
+#                                                                  "Tx. alfabetização"
+#                                                                  ),
+#                                       feature.id = FALSE,
+#                                       row.numbers = FALSE),
+#                   dashArray = "0",
+#                   fillOpacity =1 ,
+#                   label = ~Bairro,
+#                   highlightOptions=highlightOptions(
+#                     color = "#500050", weight = 3, bringToFront = F)
+#       ) |>
+#       addLegend(data = shp_Bairros_alfab ,"bottomright", pal = pal_tx_alfab_m, values = ~`Tx. alfab. mulher`,
+#                 title = "Taxa de alfabetização",
+#                 opacity = 1 )  
+#     
+#   
+#   }
+#   
+#   if(input$tabs_alf == 'Em homens' )
+#   {
+#     
+#     leafletProxy('map_educ') |>
+#       addPolygons(data=shp_Bairros_alfab,
+#                   weight=.6,
+#                   fillColor=~pal_tx_alfab_h(shp_Bairros_alfab$`Tx. alfab. homem`),
+#                   color = 'purple',
+#                   opacity = 1,
+#                   group = 'id_final_',
+#                   popup =  popupTable(shp_Bairros_alfab,zcol = c("Bairro", 
+#                                                                  "Tx. alfab. homem",
+#                                                                  "Tx. alfab. mulher",
+#                                                                  "Tx. alfabetização"),
+#                                       feature.id = FALSE,
+#                                       row.numbers = FALSE),
+#                   dashArray = "0",
+#                   fillOpacity =1 ,
+#                   label = ~Bairro,
+#                   highlightOptions=highlightOptions(
+#                     color = "#500050", weight = 3, bringToFront = F)
+#       ) |>
+#       addLegend(data = shp_Bairros_alfab ,"bottomright", pal = pal_tx_alfab_h, values = ~`Tx. alfab. homem`,
+#                 title = "Taxa de alfabetização",
+#                 opacity = 1 )
+# 
+#   }
+#   
+#   if(input$tabs_alf == 'Geral' )
+#   {
+#   leafletProxy('map_educ') |>
+#     addPolygons(data=shp_Bairros_alfab,
+#                 weight=.6,
+#                 fillColor=~pal_tx_alfab(shp_Bairros_alfab$`Tx. alfabetização`),
+#                 color = 'purple',
+#                 opacity = 1,
+#                 group = 'id_final_',
+#                 popup =  popupTable(shp_Bairros_alfab,zcol = c("Bairro", 
+#                                                                "Tx. alfabetização",
+#                                                                "Tx. alfab. mulher",
+#                                                                "Tx. alfab. homem"),
+#                                     feature.id = FALSE,
+#                                     row.numbers = FALSE),
+#                 dashArray = "0",
+#                 fillOpacity =1 ,
+#                 label = ~Bairro,
+#                 highlightOptions=highlightOptions(
+#                   color = "#500050", weight = 3, bringToFront = F)
+#     ) |>
+#     addLegend(data = shp_Bairros_alfab ,"bottomright", pal = pal_tx_alfab, values = ~`Tx. alfabetização`,
+#               title = "Taxa de alfabetização",
+#               opacity = 1 )
+#   }
+#   
+# 
+# },ignoreInit = T) 
+#   
+  
+
 
 }

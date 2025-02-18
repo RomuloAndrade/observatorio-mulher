@@ -5,9 +5,9 @@ account: romulo-andrade
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 13849003
-bundleId: 9760555
+bundleId: 9783188
 url: https://romulo-andrade.shinyapps.io/previa-painel-mulher/
 version: 1
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: .Rprofile|Auxiliar.R|Auxiliar_cor.R|Auxiliar_mercado.R|Auxiliar_violencia.R|bairros.xlsx|graficos_piramid.R|mapa.R|README.md
+ignoredFiles: .Rprofile|Auxiliar.R|Auxiliar_cor.R|Auxiliar_educacao.R|Auxiliar_mercado.R|Auxiliar_violencia.R|bairros.xlsx|graficos_piramid.R|mapa.R|README.md
