@@ -4,6 +4,9 @@
 box::use(
   shiny[...],
   bs4Dash[...],
+  shinyjs[disable,
+          enable,
+          delay],
   forcats[fct_reorder],
   echarts4r[e_theme_register,
             renderEcharts4r,
@@ -43,7 +46,7 @@ box::use(
   dplyr[#left_join,
         #right_join,
         #bind_rows,
-        #  arrange,
+          if_else, 
           n,
           ungroup,
           mutate,
@@ -125,7 +128,7 @@ df_desemp <- readRDS('Dados/df_desemp.rds')
 df_inf <- readRDS('Dados/df_inf.rds')
 df_ocup <- readRDS('Dados/df_ocup.rds') 
 df_renda <- readRDS('Dados/df_renda_.rds') # todas as fontes habitual real
-
+df_pnadc <- readRDS('Dados/pnadc_12_23_df_cnae.rds')
 
 ## dados violencia ---------------------------------------------------------
 
@@ -137,7 +140,7 @@ df_cvli_idade <- readRDS('Dados/df_cvli_idade.rds')
 # dados educação ----------------------------------------------------------
 
 shp_Bairros_alfab <- readRDS('Dados/shp_Bairros_alfab.rds')
-bairros_alfab <- readRDS('Dados/bairros_alfab.rds')
+bairros_alfab <- readRDS('Dados/tx_bairros_alfab.rds')
 Qtd_alfab <- readRDS('Dados/Qtd_alfab.rds')
 Tx_faixa_alfab <- readRDS('Dados/Tx_faixa_alfab.rds')
 # Load functions ------------------------------------------------------------------------------
@@ -160,8 +163,42 @@ my_labelFormat <- function(...) {
 # Server --------------------------------------------------------------------------------------
 
 server <- function(input, output, session) {
+  
+# observe( #input[["Filtro_merc-Ano"]]
+#   print(input[["Filtro_merc-V2010"]])
+# )
+# Controle de carregamento ------------------------------------------------
 
-
+  
+  # # Lista com os IDs das abas
+  tab_ids <- c(
+    "tab-Abertura", "tab-Demografia","tab-Educação", "tab-Saúde",
+    "tab-Mercado", "tab-Violência", "tab-Glossário", "tab-Referências", "tab-Sobre"
+  )
+  
+  observeEvent(req(input$current_tab=="Demografia"), {
+    lapply(tab_ids, disable)# Desabilitar os botões do menu
+    delay(2000, lapply(tab_ids, enable)) # Espera 2 segundos antes de reativar os botões
+  },once = T)
+  
+  observeEvent(req(input$current_tab=="Educação"), {
+    lapply(tab_ids, disable)# Desabilitar os botões do menu
+    delay(2000, lapply(tab_ids, enable)) # Espera 2 segundos antes de reativar os botões
+  },once = T)
+  
+  observeEvent(req(input$current_tab=="Mercado"), {
+    lapply(tab_ids, disable)# Desabilitar os botões do menu
+    delay(2000, lapply(tab_ids, enable)) # Espera 2 segundos antes de reativar os botões
+  },once = T)
+  
+  
+  observeEvent(req(input$current_tab=="Violência"), {
+    lapply(tab_ids, disable)# Desabilitar os botões do menu
+    delay(2000, lapply(tab_ids, enable)) # Espera 2 segundos antes de reativar os botões
+  },once = T)
+  
+  
+  
 # server demografia -------------------------------------------------------
 
   observeEvent(input$select_1 ,{
@@ -753,22 +790,53 @@ observeEvent(req(input$tabs_ba),{
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 # Server mercado ----------------------------------------------------------
 
-output$pedro <- renderText({'<div class="flourish-embed flourish-hierarchy" data-src="visualisation/21354009"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/21354009/thumbnail" width="100%" alt="hierarchy visualization" /></noscript></div>' })
-# 
+#output$pedro <- renderText({'<div class="flourish-embed flourish-hierarchy" data-src="visualisation/21354009"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/21354009/thumbnail" width="100%" alt="hierarchy visualization" /></noscript></div>' })
+
+
+# Tabela renda ------------------------------------------------------------
+
+output$tab_ocup <- renderReactable({
+  
+   rend <-  df_pnadc |>  
+      filter(Ano == 2023) |> 
+      group_by(`Ocupação e categoria do emprego do trabalho`,V2007) |> #V2007 "Denominação"   "Denom_Seção"   "Denom_Divisão" "Composição"   
+      summarise(Rendimento = weighted.mean(VD4019*CO2,w = V1032,na.rm =TRUE)) |>
+      mutate(Rendimento = round(Rendimento,2)) |> 
+      pivot_wider(names_from = V2007, values_from =Rendimento ) |> 
+      select(1,3,2) |> 
+      drop_na()
+
+  
+   rend |> 
+      reactable(bordered = TRUE,compact = T,defaultPageSize = 15,
+                highlight = TRUE, 
+                defaultColDef = colDef(
+                  style = list(fontSize = 14,headerClass = "sort-header"
+                               )#headerClass = "sort-header",
+                ),
+                columns = list(
+                  
+                  Homem = colDef(name = "Homens (R$)", align = "left",  width = 200,
+                                  cell = function(value) {
+                                    width <- paste0(value / max(rend$Homem) * 100,'%')
+                                    value <- format(value,big.mark = ".",decimal.mark=",")
+                                    value <- format(value, width = 9, justify = "right")
+                                    bar_chart(value, width = width,background = "#e1e1e1",fill = '#2ec7c9')
+                                  }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
+                  Mulher = colDef(name = "Mulheres (R$)", align = "left", width = 200,
+                                   cell = function(value) {
+                                     width <- paste0(value / max(rend$Homem) * 100,'%')
+                                     value <- format(value,big.mark = ".",decimal.mark=",")
+                                     value <- format(value, width = 9, justify = "right")
+                                     bar_chart(value, width = width,background = "#e1e1e1",fill ='#b6a2de')
+                                   }, style = list(fontFamily = "monospace", whiteSpace = "pre")) 
+                )
+      )
+
+})
+
 ## reativos mercados -------------------------------------------------------
 
 
@@ -835,7 +903,7 @@ output$F_cnaes_form <- renderD3plus({
       Tipos_trab_Cnae()[Tipos_trab_Cnae()$V2007=="Mulher",]
     },
     type = "tree_map",
-    id = c("Denom_Seção", "Denom_Divisão"),
+    id = c("Denom_Seção"), #, "Denom_Divisão"),
     locale = "pt_BR",
     width = "100%",
     currency = "",
@@ -865,7 +933,7 @@ output$F_cnaes_inform <- renderD3plus({
       Tipos_trab_Cnae()[Tipos_trab_Cnae()$V2007=="Homem",]
     },
     type = "tree_map",
-    id = c("Denom_Seção", "Denom_Divisão"),
+    id = c("Denom_Seção"),#, "Denom_Divisão"),
     locale = "pt_BR",
     width = "100%",
     currency = "",
@@ -1066,7 +1134,7 @@ output$renda_fort <-   renderEcharts4r({
 
 
 
-# Violencia ---------------------------------------------------------------
+# Server Violencia ---------------------------------------------------------------
 output$text_ano_mapa <- renderText({paste0('Caso de CVLI por AIS ', input$select_ano_viol)}) 
 output$text_ano_meios <- renderText({paste0('CVLI por meios empregados ', input$select_ano_viol)}) 
 output$text_ano_etária <- renderText({paste0('CVLI por faixa etária ', input$select_ano_viol)}) 
@@ -1260,26 +1328,26 @@ output$map <- renderLeaflet({
 
 
 
-# Educação ----------------------------------------------------------------
+#  Serve Educação ----------------------------------------------------------------
 
 
 output$alf_M <- renderValueBox({
 valueBox(
-  value = format( sum(bairros_alfab[ ,'Alfab_mais_de_15_M'])/sum(bairros_alfab[ ,"Pessoas_mais_de_15_M"])*100  ,digits= 2  , nsmall = 2, big.mark   = '.',decimal.mark = ',') ,
+  value = paste0(format( bairros_alfab[bairros_alfab$NM_BAIRRO==selected() ,"Tx_alfab_mais_de_15_M"]*100  ,digits= 2  , nsmall = 2, big.mark   = '.',decimal.mark = ','),"%") ,
   subtitle = "Taxa de Alfabetização" ,
   color = "purple",
   icon = icon("book-open-reader"),
-  footer = 'Mulheres !local',
+  footer = 'Mulheres' ,
   gradient = T
 )
 })
-output$alf_qtd <- renderValueBox({
+output$alf_posicao <- renderValueBox({
   valueBox(
-    value = format( sum(bairros_alfab[ ,'Alfab_mais_de_15_M']), big.mark   = '.',decimal.mark = ',') ,
-    subtitle = "Mulheres alfabetizadas",
+    value = paste0(bairros_alfab[bairros_alfab$NM_BAIRRO==selected() , "posição"],'º') ,
+    subtitle = "Entre as melhores taxas" ,
     color = "teal",
     icon = icon("book-open-reader"),
-    footer = '!local',
+    footer = paste0('Posição entre ', if_else(selected() == 'Fortaleza', 'as capitais', 'os bairros')    ) , 
     gradient = T
   )
 })
@@ -1287,17 +1355,17 @@ output$alf <- renderValueBox({
   
   
   valueBox(
-    value = format( sum(bairros_alfab[ ,'Alfab_mais_de_15'])/sum(bairros_alfab[ ,"Pessoas_mais_de_15"])*100  ,digits= 2,nsmall = 2,  big.mark   = '.',decimal.mark = ',') ,
+    value = paste0(format( bairros_alfab[bairros_alfab$NM_BAIRRO=='Fortaleza' ,'Tx_alfab_mais_de_15']*100 ,digits= 2,nsmall = 2,  big.mark   = '.',decimal.mark = ','),'%') ,
     subtitle = "Taxa de alfabetização",
     color = "warning",
     icon = icon("book-open-reader"),
-    footer = 'Geral Fortaleza',
+    footer = 'Geral em Fortaleza',
     gradient = T
   )
 })
 output$pizza_alfab_H <- renderEcharts4r({
 Qtd_alfab |> 
-  filter(NM_BAIRRO == 'Centro') |> 
+  filter(NM_BAIRRO == selected()) |> 
   filter(V2007== 'Homem' ) |> 
   e_charts(Tipo,reorder = F) |> 
   e_pie(Qtd,radius = c("30%", "60%"),startAngle = 150,
@@ -1315,7 +1383,7 @@ Qtd_alfab |>
 })
 output$pizza_alfab_M <- renderEcharts4r({
   Qtd_alfab |> 
-    filter(NM_BAIRRO == 'Centro') |> 
+    filter(NM_BAIRRO == selected()) |> 
     filter(V2007== 'Mulher' ) |> 
     e_charts(Tipo,reorder = F) |> 
     e_pie(Qtd,radius = c("30%", "60%"),startAngle = 150,
@@ -1332,26 +1400,28 @@ output$pizza_alfab_M <- renderEcharts4r({
     e_title(text='Mulher',left= "center") 
 })
 
- 
+output$text_selected <- renderText({ selected()})
 
 
 selected <- reactiveVal('Fortaleza')
 
+
+
 observeEvent(input$map_educ_shape_click, {
  
   #capture the info of the clicked polygon
-  click <- input$map_educ_shape_click
+  select <- input$map_educ_shape_click$id
 
-  #subset your table with the id of the clicked polygon
-  select <- click$id
 
   #if click id isn't null render the table
-  if(is.null(click$id)){
-    selected <- 'Fortaleza'
+  if(selected() == select){
+    select <- 'Fortaleza'
   }
-  selected( select)
+  
+  selected(select)
 
-},)
+
+})
 
 #input$input$map_educ_shape_click$id
 
@@ -1369,10 +1439,11 @@ output$idade_alfab <- renderEcharts4r({
       style = c( "percent"),digits = 1) )|>  
       # e_legend( orient= "vertical",
       #           ) |> 
-      e_y_axis(show=F) |> 
+      e_y_axis(show=T,name="Taxa de alfabetização",
+               formatter=e_axis_formatter(style = c("percent"),
+                                          locale = 'PT-BR')) |> 
       #e_grid(top = "-5%") |> 
-  e_color(c('#2ec7c9','#b6a2de')) |> 
-  e_title(text=selected(),subtext = 'Taxa de alfabetização')
+  e_color(c('#2ec7c9','#b6a2de'))
   
 })
 ## Mapa Educação ----------------------------------------------------------
@@ -1383,14 +1454,14 @@ pal_tx_alfab<- colorNumeric(
   palette = 'OrRd',
   domain = shp_Bairros_alfab$`Tx. alfabetização`
 )
-pal_tx_alfab_h<- colorNumeric(
-  palette = 'PuBu',
-  domain = shp_Bairros_alfab$`Tx. alfab. homem`
-)
-pal_tx_alfab_m<- colorNumeric(
-  palette = 'PuRd',
-  domain = shp_Bairros_alfab$`Tx. alfab. mulher`
-)
+# pal_tx_alfab_h<- colorNumeric(
+#   palette = 'PuBu',
+#   domain = shp_Bairros_alfab$`Tx. alfab. homem`
+# )
+# pal_tx_alfab_m<- colorNumeric(
+#   palette = 'PuRd',
+#   domain = shp_Bairros_alfab$`Tx. alfab. mulher`
+# )
 
 }
 
@@ -1411,7 +1482,10 @@ output$map_educ <-  renderLeaflet({
                 opacity = 1,
                 group = 'id_final_',
                 popup =  popupTable(shp_Bairros_alfab,zcol = c("Bairro", 
-                                                               "Tx. alfabetização"),
+                                                                 "Tx. alfab. mulher",
+                                                                 "Tx. alfab. homem",
+                                                                 "Tx. alfabetização"
+                                                                 ),
                                     feature.id = FALSE,
                                     row.numbers = FALSE),
                 dashArray = "0",

@@ -89,20 +89,99 @@ library(forcats)
 library(PNADcIBGE)
 library(tidyr)
 library(dplyr)
+
+pnadc_12_23 <- readRDS('Dados/pnadc12_23_fort.rds')
+
 pnadc_12_23_df <-  pnadc_deflator(pnadc_12_23,
                                   "Dados/deflator_PNADC_2023.xls")
 
-w <- pnadc_12_23_df |> 
-  filter(Capital=="Município de Fortaleza (CE)") |> 
-  group_by(Ano) |> 
-  summarise(Rendimento = weighted.mean(VD4019*CO2,w = V1032,na.rm =TRUE))
-w
 
-ws <- pnadc_12_23_df |> 
-  filter(Capital=="Município de Fortaleza (CE)")  |> 
-  group_by(Ano,V2007) |> 
-  summarise(Rendimento = weighted.mean(VD4019*CO2,w = V1032,na.rm =TRUE)) 
+pnadc_12_23_df_ <- pnadc_12_23_df |> 
+  filter(Capital=="Município de Fortaleza (CE)",VD4002 == 'Pessoas ocupadas' ) |> 
+  select(Capital,Ano,V1032,VD4019,VD4009,VD4010,VD4011,V4013,V2007,V2010,VD3004,idadeEco2,CO2)
 
+
+pnadc_12_23_df_cnae<- left_join(pnadc_12_23_df_,Atividade_CNAE,by=c("V4013"="Classe")) |> 
+  rename(`Ocupação e categoria do emprego do trabalho` = VD4009 ,
+         `Atividade do empreendimento`= VD4010,
+         `Grupamentos ocupacionais do trabalho` = VD4011)
+
+saveRDS(pnadc_12_23_df_cnae,'Dados/pnadc_12_23_df_cnae.rds')
+
+rend <- pnadc_12_23_df_cnae |> 
+  filter(Ano %in% 2012:2012) |> 
+group_by(`Ocupação e categoria do emprego do trabalho`,V2007) |> #V2007 "Denominação"   "Denom_Seção"   "Denom_Divisão" "Composição"   
+  summarise(Rendimento = weighted.mean(VD4019*CO2,w = V1032,na.rm =TRUE)) |>
+  mutate(Rendimento = round(Rendimento,2)) |> 
+  pivot_wider(names_from = V2007, values_from =Rendimento ) |> 
+  drop_na()  
+  
+
+rend |> 
+  reactable(bordered = TRUE,compact = TRUE,defaultPageSize = 15,
+            highlight = TRUE, searchable = TRUE,defaultColDef = colDef(
+              style = list(fontSize = 15,fontFamily = "monospace"),#headerClass = "sort-header",
+              footerStyle = list(fontWeight = "bold",align = "right")),
+            columns = list(
+        
+             Homem = colDef( align = "left", 
+                                cell = function(value) {
+                                  width <- paste0(value / max(rend$Homem) * 100,'%')
+                                  value <- format(value,big.mark = ".",decimal.mark=",")
+                                  value <- format(value, width = 9, justify = "right")
+                                  bar_chart(value, width = width,background = "#e1e1e1")
+                                }, style = list(fontSize = 14,fontFamily = "monospace", whiteSpace = "pre")),
+             Mulher = colDef( align = "left", 
+                             cell = function(value) {
+                               width <- paste0(value / max(rend$Homem) * 100,'%')
+                               value <- format(value,big.mark = ".",decimal.mark=",")
+                               value <- format(value, width = 9, justify = "right")
+                               bar_chart(value, width = width,background = "#e1e1e1")
+                             }, style = list(fontFamily = "monospace", whiteSpace = "pre"))
+              # Razão = colDef(name = "Razão de sexo", align = "left", footer=format(razB,big.mark = ".",decimal.mark=","), 
+              #                cell = function(value) {
+              #                  width <- paste0(value / max(shp_Bairros$Razão) * 100,"%")
+              #                  value <- format(value,big.mark = ".",decimal.mark=",")
+              #                  value <- format(value, width = 7, justify = "right")
+              #                  bar_chart(value, width = width,fill = "#720072",background = "#e1e1e1")
+              #                }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
+              # Percentual = colDef(name='Percentual',  align = "left", footer=format(percB,big.mark = ".",decimal.mark=","), 
+              #                     cell = function(value) {
+              #                       width <- paste0(value / max(shp_Bairros$Percentual) * 100,"%")
+              #                       value <- format(value,big.mark = ".",decimal.mark=",")
+              #                       value <- format(value, width = 7, justify = "right")
+              #                       bar_chart(value, width = width,fill = "pink",background = "#e1e1e1")
+              #                     }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
+              # Domicílios = colDef( align = "left",footer=format(domiB,big.mark = ".",decimal.mark=","), 
+              #                      cell = function(value) {
+              #                        width <- paste0(value / max(shp_Bairros$Domicílios) * 100, "%")
+              #                        value <- format(value,big.mark = ".",decimal.mark=",")
+              #                        value <- format(value, width = 7, justify = "right")
+              #                        bar_chart(value, width = width, fill = "#fc5185", background = "#e1e1e1")
+              #                      }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
+              # Densidade = colDef( align = "left",footer=format(densB,big.mark = ".",decimal.mark=","), 
+              #                     cell = function(value) {
+              #                       width <- paste0(value / max(shp_Bairros$Densidade) * 100, "%")
+              #                       value <- format(value,big.mark = ".",decimal.mark=",")
+              #                       value <- format(value, width = 7, justify = "right")
+              #                       bar_chart(value, width = width, fill = "#245", background = "#e1e1e1")
+              #                     }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
+              # V01008 = colDef(name = "Mulheres",  align = "left", footer=format(mulB,big.mark = ".",decimal.mark=","), 
+              #                 cell = function(value) {
+              #                   width <- paste0(value / max(shp_Bairros$V01008) * 100,"%")
+              #                   value <- format(value,big.mark = ".",decimal.mark=",")
+              #                   value <- format(value, width = 7, justify = "right")
+              #                   bar_chart(value, width = width,fill = "#E016AB",background = "#e1e1e1")
+              #                 }, style = list(fontFamily = "monospace", whiteSpace = "pre"))
+            )
+  )
+
+rend
+
+na<- pnadc_12_23_df_cnae%>% summarise_all(list(name = ~sum(!is.na(.))))
+
+
+names(Atividade_CNAE)
 
 df <- dplyr::full_join(w,pivot_wider(ws,values_from = Rendimento,names_from = V2007))
 
@@ -113,7 +192,46 @@ df_renda <- df |>
                    values_to = 'Renda' ) |> 
   group_by(V2007)
 
-saveRDS(df_renda,'Dados/df_renda.rds')
+#saveRDS(df_renda,'Dados/df_renda.rds')
+
+Atividade_CNAE <- readRDS("C:/Romulo/Iplanfor/Pnadc/Pnadc_Visita_5/Atividade_CNAE2.rds")
+
+Tipos_trab <-  rbind(   ### Organizando dados
+  group_by(pnadc12_23_idade[pnadc12_23_idade$Capital %in% "Município de Fortaleza (CE)" , ],
+           Ano,V4013,V2007,V2010,VD3004,idadeEco2)  %>%
+    summarise(Qtd. = sum(V1032[  (VD4012 == "Contribuinte" & VD4009 == "Empregador")    |
+                                   (VD4012 == "Contribuinte" & VD4009 == "Conta-própria") |
+                                   VD4009 %in% c("Empregado no setor privado com carteira de trabalho assinada",
+                                                 "Empregado no setor público com carteira de trabalho assinada",
+                                                 "Trabalhador doméstico com carteira de trabalho assinada",
+                                                 "Militar e servidor estatutário") ],
+                         na.rm = TRUE),.groups="keep")  %>%
+    filter(Qtd.!=0) %>%
+    mutate(Tipo="Trabalho formal")
+  ,
+  group_by(pnadc12_23_idade[pnadc12_23_idade$Capital %in% "Município de Fortaleza (CE)", ],
+           Ano,V4013,V2007,V2010,VD3004,idadeEco2)  %>%
+    summarise(Qtd. = sum(V1032[VD4009 %in% c("Empregado no setor privado sem carteira de trabalho assinada",
+                                             "Trabalhador doméstico sem carteira de trabalho assinada",
+                                             "Trabalhador familiar auxiliar",
+                                             "Empregado no setor público sem carteira de trabalho assinada") |
+                                 (VD4012 == "Não contribuinte" & VD4009 == "Conta-própria")|
+                                 (VD4012 == "Não contribuinte" & VD4009 == "Empregador") ],
+                         na.rm = TRUE),.groups="keep") %>%
+    filter(Qtd.!=0) %>%
+    mutate(Tipo="Trabalho informal")) %>%
+  left_join(Atividade_CNAE,by=c("V4013"="Classe"))
+
+
+
+
+
+
+
+
+
+
+
 
 
 

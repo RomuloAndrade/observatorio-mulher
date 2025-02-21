@@ -1,6 +1,7 @@
 
 # Load library --------------------------------------------------------------------------------
 box::use(
+  shinyjs[useShinyjs],
   shiny[...],
   bs4Dash[...],
  bslib[layout_columns],
@@ -26,7 +27,7 @@ box::use(
 
 # Load data -----------------------------------------------------------------------------------
 lista_demog <- readRDS('Dados/lista_demog.rds')
-glossario <-readxl::read_excel('Dados/Glossário.xlsx')
+glossario <-readxl::read_excel('Dados/Glossario.xlsx')
 
 # Funcao --------------------------------------------------------------------------------------
 
@@ -203,7 +204,7 @@ diobs_theme <- create_theme(
 
 
 ui <- dashboardPage(
-  
+
   # preloader = list(
   #   html = tagList(
   #     spin_cube_grid(),
@@ -326,6 +327,7 @@ ui <- dashboardPage(
   
   body = dashboardBody(
     use_googlefont(font1),
+    useShinyjs(),
     # use_googlefont(font2),
     # use_googlefont(font3),
     use_theme(diobs_theme),
@@ -567,20 +569,24 @@ fluidRow(
     btn_reset_label = "Resetar filtros",
     params = list(
       #list(inputId = "V2007", label = "Sexo", placeholder = 'Todos' ,  updateOn = "close",selected = 'Mulher'),
-      list(inputId = "V2010", label = "Raça/cor", placeholder = 'Todos',  updateOn = "close"),
-      list(inputId = "VD3004", label = "Escolaridade", placeholder = 'Todos',  updateOn = "close"),
-      list(inputId = "idadeEco2", label = "Idade", placeholder = 'Todos',  updateOn = "close"),
-      list(inputId = "Composição", label = "Composição", placeholder = 'Todos',  updateOn = "close")
-                  ) 
+      list(inputId = "V2010", label = "Raça/cor", placeholder = 'Todos'  ),
+      list(inputId = "VD3004", label = "Escolaridade", placeholder = 'Todos'),
+      list(inputId = "idadeEco2", label = "Idade", placeholder = 'Todos'),
+      list(inputId = "Composição", label = "Composição", placeholder = 'Todos')
+                  )#,
+   #vs_args = list(updateOn = c( "close"))
                 ),
   ),
+  # column(width = 2, 
+  #        actionButton("rodar-filtro", "Executar filtro")
+  #        ),
 
   box(
     title = 'Tipo de ocupação',
     id = "mybox",
     status = "danger",
     solidHeader = F,
-    width = 8,
+    width = 6,
 
     radioButtons(label= 'Sexo',
                  inputId= "select_tipo_merc" ,
@@ -605,10 +611,16 @@ fluidRow(
     )
   ),
 
-  column(width = 4,htmlOutput('pedro')),
-  # valueBoxOutput("vbox_mulher_ocup", width = 2),
-  # valueBoxOutput("vbox_mulher_inf", width = 2),
-  # valueBoxOutput("vbox_mulher_desemp", width = 2),
+  column(width = 6,
+         box(
+           title = 'Rendimento mensal habitual de todos os trabalhos',
+           id = "mybox",
+           status = "danger",
+           solidHeader = F,
+           width = 12, 
+          # height = 
+         withSpinner(reactableOutput('tab_ocup'))  )
+         ),#htmlOutput('pedro')),
 
 
 
@@ -663,25 +675,33 @@ tabItem(
   column(width=6,box(
     title = 'Taxa de alfabetização', status = "danger",solidHeader = F,width = 12,
     
-    withSpinner(leafletOutput("map_educ",height=638)))),
+    withSpinner(leafletOutput("map_educ",height=638))),
+    'Taxa de alfabetização para maiores de 15 anos'    
+    ),
 
   
   column(width=6, 
+         div(h2(textOutput('text_selected')) , style = "text-align:center"),
+         br(),
     fluidRow(valueBoxOutput("alf_M", width = 4),
-             valueBoxOutput("alf_qtd", width = 4),
+             valueBoxOutput("alf_posicao", width = 4),
              valueBoxOutput("alf", width = 4)),      
          
     #      box(
     # title = textOutput("Alfabetização"), status = "danger",solidHeader = F,width = 12,
+   
     fluidRow(
-      column(width=6, echarts4rOutput('pizza_alfab_M',width ='110%',height=250)),
+      
+      column(width=6, echarts4rOutput('pizza_alfab_M',width ='100%',height=250)),
       column(width=6, echarts4rOutput('pizza_alfab_H',width ='110%',height=250))
     #)
     ),
-    echarts4rOutput('idade_alfab')
+    echarts4rOutput('idade_alfab',height=325)
     )
 
-      )  
+      ),
+  hr(class = "divider"),
+  p('Fonte: Censo Demográfico - IBGE - 2022')
    
   ),  
 

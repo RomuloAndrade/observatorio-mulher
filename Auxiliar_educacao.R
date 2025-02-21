@@ -6,6 +6,55 @@ bairros_alfab<- read.csv2("Dados/Agregados_por_bairros_alfabetizacao_BR.csv",enc
 bairros_alfab <- bairros_alfab |>
   filter(str_detect(CD_BAIRRO, "^230440")) |>
   mutate_at(vars(starts_with("V")), as.numeric )
+
+posicao <- bairros_alfab |> 
+  mutate(posição = rank(-Tx_alfab_mais_de_15_M)) |> 
+  select(2,posição,Tx_alfab_mais_de_15_M,
+         Pessoas_mais_de_15_H,
+         Pessoas_mais_de_15_M,
+         Alfab_mais_de_15_H,
+         Alfab_mais_de_15_M,
+         Tx_alfab_mais_de_15,
+         Tx_alfab_mais_de_15_M,
+         Tx_alfab_mais_de_15_H)
+
+#Fortaleza
+posicao_for <- bairros_alfab_ |> 
+  mutate(posição = 22) |> 
+  select(2,posição,Tx_alfab_mais_de_15_M,
+         Pessoas_mais_de_15_H,
+         Pessoas_mais_de_15_M,
+         Alfab_mais_de_15_H,
+         Alfab_mais_de_15_M,
+         Tx_alfab_mais_de_15,
+         Tx_alfab_mais_de_15_M,
+         Tx_alfab_mais_de_15_H) |> 
+  rename(NM_BAIRRO=NM_MUN)
+
+posic<- bind_rows(posicao,posicao_for)
+
+posic_ <- posic |>
+  mutate(
+    Analfab_mais_de_15_H = Pessoas_mais_de_15_H - Alfab_mais_de_15_H,
+    Analfab_mais_de_15_M = Pessoas_mais_de_15_M - Alfab_mais_de_15_M)
+
+names(posic_)
+
+Qtd_alfab <- posic_ |>
+  select(NM_BAIRRO,6,7,10,11) |>
+  pivot_longer(cols=2:5,names_to='Tipo',values_to = 'Qtd') |>
+  mutate(V2007 = if_else(stringr::str_detect(Tipo,'M'), 'Mulher','Homem'),
+         Tipo = if_else(stringr::str_detect(Tipo,'Alfab'), 'Alfabetizado','Não\n alfabetizado'))
+
+
+
+
+saveRDS(posic,'Dados/tx_bairros_alfab.rds')
+
+saveRDS(Qtd_alfab,'Dados/Qtd_alfab.rds')
+
+save
+
 {
 # 
 # bairros_alfab_ <- mutate(bairros_alfab,
@@ -122,7 +171,7 @@ bairros_alfab <- bairros_alfab |>
 bairros_alfab_fort <- readxl::read_excel("Dados/Agregados_fortaleza_alfabetizacao.xlsx")
 
 
-bairros_alfab_ <- mutate(bairros_alfab,  #bairros_alfab_fort  bairros_alfab
+bairros_alfab_ <- mutate(bairros_alfab_fort,  #bairros_alfab_fort  bairros_alfab
                          Pessoas_mais_de_15 = rowSums(across(V00644:V00656)),
                          Alfab_mais_de_15 = rowSums(across(V00748:V00760)),
                          Pessoas_mais_de_15_H = rowSums(across(V00722:V00734)),
@@ -250,11 +299,17 @@ names(bairros_alfab)
 # 
 # 
 # 
-# Qtd_alfab <- bairros_alfab |> 
-#   select(NM_BAIRRO,7:10) |>
-#   pivot_longer(cols=2:5,names_to='Tipo',values_to = 'Qtd') |> 
-#   mutate(V2007 = if_else(stringr::str_detect(Tipo,'M'), 'Mulher','Homem'),
-#          Tipo = if_else(stringr::str_detect(Tipo,'Alfab'), 'Alfabetizado','Não alfabetizado'))
+
+Analfab_mais_de_15_H = Pessoas_mais_de_15_H - Alfab_mais_de_15_H,
+Analfab_mais_de_15_M = Pessoas_mais_de_15_M - Alfab_mais_de_15_M,
+
+
+Qtd_alfab <- bairros_alfab |>
+  select(NM_BAIRRO,7:10) |>
+  pivot_longer(cols=2:5,names_to='Tipo',values_to = 'Qtd') |>
+  mutate(V2007 = if_else(stringr::str_detect(Tipo,'M'), 'Mulher','Homem'),
+         Tipo = if_else(stringr::str_detect(Tipo,'Alfab'), 'Alfabetizado','Não alfabetizado'))
+
 
 
 Tx_faixa <- bairros_alfab_ |> 
@@ -332,12 +387,18 @@ names(bairros_alfab_)
 names(bairros_alfab)
 
 
+listaCapitais <- rvest::read_html('https://pt.wikipedia.org/wiki/Lista_de_capitais_do_Brasil_por_%C3%A1rea')  |> 
+  rvest::html_node("table")  |> 
+  rvest::html_table() |> 
+  dplyr::rename(Cod=`Código do IBGE`,
+                Local=`Sede de governo` ) |> 
+  select(Cod,Local) |> 
+  mutate(Local=gsub('\\[nota 1]',"",Local),
+         Cod=stringr::str_sub(Cod,1,6))
 
+posicao_forta <- readxl::read_excel("Dados/Censo 2022 - Taxa de alfabetização - Ranking por Município.xlsx")
 
-
-
-
-
+ posição_ <- dplyr::inner_join(posicao_forta,listaCapitais[,1],by=c("Código"="Cod"))
 
 
 
