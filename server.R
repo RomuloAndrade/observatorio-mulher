@@ -42,7 +42,9 @@ box::use(
     #sf_use_s2,
     #st_read,
     ],
-  tidyr[pivot_wider,pivot_longer],
+  tidyr[pivot_wider,
+        pivot_longer,
+        drop_na],
   dplyr[#left_join,
         #right_join,
         #bind_rows,
@@ -50,11 +52,11 @@ box::use(
           n,
           ungroup,
           mutate,
-          #rename,
           select,
           filter,
           summarise,
-          group_by],
+          group_by,
+          group_by_at],
     # readr[read_csv2,read_csv],
     leaflet[leaflet,
             leafletOptions,
@@ -113,8 +115,8 @@ df_faixa <- readRDS('Dados/df_faixa_.rds')
 df_cor_ <- readRDS('Dados/df_cor_.rds')
 df_sexo <- readRDS('Dados/df_sexo.rds')
 shp_Bairros <- readRDS('Dados/shp_bairros_demografia.rds')
-Atividade_CNAE <- readRDS("Dados/Atividade_CNAE2.rds")
-
+composicao <- readRDS('Dados/composicao.rds')
+favela <- readRDS('Dados/favela.rds')
 
 ## dados mercado -----------------------------------------------------------
 
@@ -129,6 +131,8 @@ df_inf <- readRDS('Dados/df_inf.rds')
 df_ocup <- readRDS('Dados/df_ocup.rds') 
 df_renda <- readRDS('Dados/df_renda_.rds') # todas as fontes habitual real
 df_pnadc <- readRDS('Dados/pnadc_12_23_df_cnae.rds')
+
+
 
 ## dados violencia ---------------------------------------------------------
 
@@ -164,9 +168,7 @@ my_labelFormat <- function(...) {
 
 server <- function(input, output, session) {
   
-# observe( #input[["Filtro_merc-Ano"]]
-#   print(input[["Filtro_merc-V2010"]])
-# )
+
 # Controle de carregamento ------------------------------------------------
 
   
@@ -199,6 +201,7 @@ server <- function(input, output, session) {
   
   
   
+  
 # server demografia -------------------------------------------------------
 
   observeEvent(input$select_1 ,{
@@ -211,7 +214,9 @@ server <- function(input, output, session) {
     
   },ignoreInit =T)
   
- 
+
+   
+  
   
 ## Moradores ---------------------------------------------------------------
 
@@ -333,6 +338,36 @@ output$pizza_1.2 <- renderEcharts4r({
     }
   })
  
+
+## Favela ------------------------------------------------------------------
+output$favela <- renderEcharts4r({
+favela |> 
+  group_by(V2007   ) |> 
+  e_chart(x=Raca  ) |> 
+  e_bar(Perc,barGap=0.02) |> 
+  e_tooltip(trigger = c("axis"),
+            e_tooltip_pointer_formatter(locale = "PT-BR",style = c("percent"),digits = 1,
+            )) |> 
+  e_x_axis(name= 'Raça',axisLabel = list(color='black',  fontWeight= "bolder") ) |> 
+  e_color(c('#008acd','#b6a2de','#2ec7c9')) |> 
+  e_y_axis(min= .10,formatter=e_axis_formatter(style = c("percent"),
+                                               locale = 'PT-BR') ) |> 
+  e_legend(selected=list('Geral'=F),right= 0,top= "3%") 
+})
+## Composição --------------------------------------------------------------
+
+
+output$composicao <- renderEcharts4r({
+composicao |> 
+  e_chart(x=Composição) |> 
+  e_bar(`Responsável mulher`,barGap=0.02) |> 
+  e_bar(`Responsável homens`) |> 
+  e_tooltip(trigger = c("axis")) |> 
+  e_x_axis(axisLabel = list(color='black',  fontWeight= "bolder") ) |> 
+  e_color(c('#b6a2de','#2ec7c9')) |> 
+  e_flip_coords() |> 
+  e_grid(left='40%')
+})
 ## Piramide --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -493,6 +528,7 @@ output$raca2 <- renderEcharts4r({
     e_group("decomp") |> 
     e_connect_group("decomp")
 })
+
 
 ## Mapa demografia ---------------------------------------------------------
 
@@ -790,51 +826,132 @@ observeEvent(req(input$tabs_ba),{
 
 
 
+
 # Server mercado ----------------------------------------------------------
 
 #output$pedro <- renderText({'<div class="flourish-embed flourish-hierarchy" data-src="visualisation/21354009"><script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img src="https://public.flourish.studio/visualisation/21354009/thumbnail" width="100%" alt="hierarchy visualization" /></noscript></div>' })
 
 
+
 # Tabela renda ------------------------------------------------------------
 
-output$tab_ocup <- renderReactable({
-  
-   rend <-  df_pnadc |>  
-      filter(Ano == 2023) |> 
-      group_by(`Ocupação e categoria do emprego do trabalho`,V2007) |> #V2007 "Denominação"   "Denom_Seção"   "Denom_Divisão" "Composição"   
-      summarise(Rendimento = weighted.mean(VD4019*CO2,w = V1032,na.rm =TRUE)) |>
-      mutate(Rendimento = round(Rendimento,2)) |> 
-      pivot_wider(names_from = V2007, values_from =Rendimento ) |> 
-      select(1,3,2) |> 
-      drop_na()
+output$ano_mercado <- renderText({paste0('Rendimento médio real habitual (R$/mês) - ',input$Ano_filter)})
 
-  
-   rend |> 
-      reactable(bordered = TRUE,compact = T,defaultPageSize = 15,
-                highlight = TRUE, 
-                defaultColDef = colDef(
-                  style = list(fontSize = 14,headerClass = "sort-header"
-                               )#headerClass = "sort-header",
-                ),
-                columns = list(
-                  
-                  Homem = colDef(name = "Homens (R$)", align = "left",  width = 200,
-                                  cell = function(value) {
-                                    width <- paste0(value / max(rend$Homem) * 100,'%')
-                                    value <- format(value,big.mark = ".",decimal.mark=",")
-                                    value <- format(value, width = 9, justify = "right")
-                                    bar_chart(value, width = width,background = "#e1e1e1",fill = '#2ec7c9')
-                                  }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
-                  Mulher = colDef(name = "Mulheres (R$)", align = "left", width = 200,
-                                   cell = function(value) {
-                                     width <- paste0(value / max(rend$Homem) * 100,'%')
-                                     value <- format(value,big.mark = ".",decimal.mark=",")
-                                     value <- format(value, width = 9, justify = "right")
-                                     bar_chart(value, width = width,background = "#e1e1e1",fill ='#b6a2de')
-                                   }, style = list(fontFamily = "monospace", whiteSpace = "pre")) 
-                )
-      )
+output$tab_Cat <- renderReactable({
 
+ rend <-  df_pnadc |>  
+    filter(Ano == input$Ano_filter) |> 
+    group_by(`Categoria do emprego`,V2007) |>
+    summarise(Rendimento = weighted.mean(VD4019*CO2,w = V1032,na.rm =TRUE)) |>
+    mutate(Rendimento = round(Rendimento,2)) |> 
+    pivot_wider(names_from = V2007, values_from =Rendimento ) |> 
+    select(1,3,2) |> 
+    drop_na()  
+  
+  rend |> 
+    reactable(bordered = TRUE,compact = T,defaultPageSize = 15,
+              highlight = TRUE, 
+              defaultColDef = colDef(
+                style = list(fontSize = 14,headerClass = "sort-header"
+                )#headerClass = "sort-header",
+              ),
+              columns = list(
+                
+                Homem = colDef(name = "Homens (R$)", align = "left",  width = 200,
+                               cell = function(value) {
+                                 width <- paste0(value / max(rend$Homem) * 100,'%')
+                                 value <- format(value,big.mark = ".",decimal.mark=",")
+                                 value <- format(value, width = 9, justify = "right")
+                                 bar_chart(value, width = width,background = "#e1e1e1",fill = '#2ec7c9')
+                               }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
+                Mulher = colDef(name = "Mulheres (R$)", align = "left", width = 200,
+                                cell = function(value) {
+                                  width <- paste0(value / max(rend$Homem) * 100,'%')
+                                  value <- format(value,big.mark = ".",decimal.mark=",")
+                                  value <- format(value, width = 9, justify = "right")
+                                  bar_chart(value, width = width,background = "#e1e1e1",fill ='#b6a2de')
+                                }, style = list(fontFamily = "monospace", whiteSpace = "pre")) 
+              )
+    )
+  
+})
+
+output$tab_Ativ <- renderReactable({
+  
+  rend <-  df_pnadc |>  
+    filter(Ano == input$Ano_filter) |> 
+    group_by(`Atividade do empreendimento`,V2007) |>
+    summarise(Rendimento = weighted.mean(VD4019*CO2,w = V1032,na.rm =TRUE)) |>
+    mutate(Rendimento = round(Rendimento,2)) |> 
+    pivot_wider(names_from = V2007, values_from =Rendimento ) |> 
+    select(1,3,2) |> 
+    drop_na()  
+  
+  rend |> 
+    reactable(bordered = TRUE,compact = T,defaultPageSize = 15,
+              highlight = TRUE, 
+              defaultColDef = colDef(
+                style = list(fontSize = 14,headerClass = "sort-header"
+                )#headerClass = "sort-header",
+              ),
+              columns = list(
+                
+                Homem = colDef(name = "Homens (R$)", align = "left",  width = 200,
+                               cell = function(value) {
+                                 width <- paste0(value / max(rend$Homem) * 100,'%')
+                                 value <- format(value,big.mark = ".",decimal.mark=",")
+                                 value <- format(value, width = 9, justify = "right")
+                                 bar_chart(value, width = width,background = "#e1e1e1",fill = '#2ec7c9')
+                               }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
+                Mulher = colDef(name = "Mulheres (R$)", align = "left", width = 200,
+                                cell = function(value) {
+                                  width <- paste0(value / max(rend$Homem) * 100,'%')
+                                  value <- format(value,big.mark = ".",decimal.mark=",")
+                                  value <- format(value, width = 9, justify = "right")
+                                  bar_chart(value, width = width,background = "#e1e1e1",fill ='#b6a2de')
+                                }, style = list(fontFamily = "monospace", whiteSpace = "pre")) 
+              )
+    )
+  
+})
+
+output$tab_Grup <- renderReactable({
+  
+  rend <-  df_pnadc |>  
+    filter(Ano == input$Ano_filter) |> 
+    group_by(`Grupos ocupacionais`,V2007) |>
+    summarise(Rendimento = weighted.mean(VD4019*CO2,w = V1032,na.rm =TRUE)) |>
+    mutate(Rendimento = round(Rendimento,2)) |> 
+    pivot_wider(names_from = V2007, values_from =Rendimento ) |> 
+    select(1,3,2) |> 
+    drop_na()  
+  
+  rend |> 
+    reactable(bordered = TRUE,compact = T,defaultPageSize = 15,
+              highlight = TRUE, 
+              defaultColDef = colDef(
+                style = list(fontSize = 14,headerClass = "sort-header"
+                )#headerClass = "sort-header",
+              ),
+              columns = list(
+                
+                Homem = colDef(name = "Homens (R$)", align = "left",  width = 200,
+                               cell = function(value) {
+                                 width <- paste0(value / max(rend$Homem) * 100,'%')
+                                 value <- format(value,big.mark = ".",decimal.mark=",")
+                                 value <- format(value, width = 9, justify = "right")
+                                 bar_chart(value, width = width,background = "#e1e1e1",fill = '#2ec7c9')
+                               }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
+                Mulher = colDef(name = "Mulheres (R$)", align = "left", width = 200,
+                                cell = function(value) {
+                                  width <- paste0(value / max(rend$Homem) * 100,'%')
+                                  value <- format(value,big.mark = ".",decimal.mark=",")
+                                  value <- format(value, width = 9, justify = "right")
+                                  bar_chart(value, width = width,background = "#e1e1e1",fill ='#b6a2de')
+                                }, style = list(fontFamily = "monospace", whiteSpace = "pre")) 
+              )
+    )
+  
 })
 
 ## reativos mercados -------------------------------------------------------
@@ -848,7 +965,7 @@ Tipos_trab2_ano <- reactive({
 Filtro_Tipos_trab <- { select_group_server(
   id = "Filtro_merc",
   data_r = Tipos_trab2_ano,
-  vars_r = reactive(c('V2010','VD3004','idadeEco2','Composição'))
+  vars_r = reactive(c('V2010','VD3004','Composição')) #'idadeEco2',
 )}
 
 
@@ -1134,6 +1251,7 @@ output$renda_fort <-   renderEcharts4r({
 
 
 
+
 # Server Violencia ---------------------------------------------------------------
 output$text_ano_mapa <- renderText({paste0('Caso de CVLI por AIS ', input$select_ano_viol)}) 
 output$text_ano_meios <- renderText({paste0('CVLI por meios empregados ', input$select_ano_viol)}) 
@@ -1290,6 +1408,7 @@ df_cvli_idade |>
 })
 
 
+
 ## Mapa Violencia ----------------------------------------------------------
 
 
@@ -1325,6 +1444,7 @@ output$map <- renderLeaflet({
               title = "CVLI",
               opacity = 1 )
 }) 
+
 
 
 
@@ -1446,6 +1566,7 @@ output$idade_alfab <- renderEcharts4r({
   e_color(c('#2ec7c9','#b6a2de'))
   
 })
+
 ## Mapa Educação ----------------------------------------------------------
 
 # Aux map Educação 
@@ -1623,6 +1744,7 @@ output$map_educ <-  renderLeaflet({
 # },ignoreInit = T) 
 #   
   
+
 
 
 }

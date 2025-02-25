@@ -638,3 +638,39 @@ library(leaflet)
     }, ignoreNULL = FALSE)
 
   })
+
+ 
+ 
+ 
+composicao <- readxl::read_excel('Dados/Composição de domicílios por sexo do responsável.xlsx') |> 
+  dplyr::arrange(`Responsável mulher`)
+
+saveRDS(composicao,'Dados/composicao.rds')
+
+composicao |> 
+e_chart(x=Composição) |> 
+  e_bar(`Responsável mulher`,barGap=0.02) |> 
+  e_bar(`Responsável homens`) |> 
+  e_tooltip(trigger = c("axis")) |> 
+  e_x_axis(axisLabel = list(color='black',  fontWeight= "bolder") ) |> 
+  e_color(c('#b6a2de','#2ec7c9')) |> 
+  e_flip_coords() |> 
+  e_grid(left='40%')
+
+
+
+favela <- readxl::read_excel('Dados/Favela.xlsx')
+saveRDS(favela,'Dados/favela.rds')
+
+favela |> 
+  group_by(V2007   ) |> 
+  e_chart(x=Raca  ) |> 
+  e_bar(Perc,barGap=0.02) |> 
+  e_tooltip(trigger = c("axis"),
+            e_tooltip_pointer_formatter(locale = "PT-BR",style = c("percent"),digits = 1,
+            )) |> 
+  e_x_axis(name= 'Raça',axisLabel = list(color='black',  fontWeight= "bolder") ) |> 
+  e_color(c('#008acd','#b6a2de','#2ec7c9')) |> 
+  e_y_axis(min= .10,formatter=e_axis_formatter(style = c("percent"),
+                                      locale = 'PT-BR') ) |> 
+  e_legend(selected=list('Geral'=F),right= 0,top= "3%") 

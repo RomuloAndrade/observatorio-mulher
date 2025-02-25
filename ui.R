@@ -119,6 +119,8 @@ sidebar_light_submenu_bg <- main_bg
 sidebar_light_submenu_color <- NULL
 sidebar_light_submenu_hover_color <- NULL
 
+## FONTE LATO
+
 
 font1 <- "Exo 2"
 
@@ -372,7 +374,7 @@ tabItem(
   tabName = "Demografia",
   hr(), 
   
-  selectizeInput(inputId='select_1',label = 'Bairro:', choices = lista_demog,multiple = TRUE,
+  selectizeInput(inputId='select_1',label = 'Território:', choices = lista_demog,multiple = TRUE,
                  selected= 'FORTALEZA',width = '40%',
                  options = list('plugins' = list('remove_button'),maxItems = 3,minItem=1)),
    
@@ -463,6 +465,24 @@ tabItem(
 
   
    reactableOutput("table_bairro"),
+  br(),
+  fluidRow(
+  box(
+    title = 'Composição de domicílios por sexo do responsável',
+    id = "mybox",
+    status = "danger",
+    solidHeader = F,
+    width = 7,
+    echarts4rOutput('composicao')),
+  box(
+    title = 'Residentes em Favelas e Comunidades Urbanas',
+    id = "mybox",
+    status = "danger",
+    solidHeader = F,
+    width = 5,
+    echarts4rOutput('favela'))
+    ),
+  
   hr(class = "divider"),
   p('Fonte: Censo Demográfico - IBGE - 2022')
   
@@ -491,7 +511,7 @@ h1('Crimes Violentos Letais e Intencionais - CVLI'),
 #   
 #   ),
 fluidRow(
-  
+  ####
   column(width=6, box(
     title = 'Caso de CVLI por sexo', status = "danger",solidHeader = F,width = 12,
     tabsetPanel(
@@ -508,7 +528,7 @@ fluidRow(
     ))),
   
   
-  
+
 
   column(width=6,
          selectizeInput(inputId = "select_ano_viol",
@@ -521,7 +541,7 @@ fluidRow(
     title = textOutput("text_ano_mapa") , status = "danger",solidHeader = F,width = 12,   
 
   leafletOutput("map",height = 360))),
-  
+
   column(width=6, box(
     title = 'Caso de Feminicídios', status = "danger",solidHeader = F,width = 12,
     echarts4rOutput('viol_femin'))),
@@ -546,80 +566,102 @@ p('Fonte: Secretaria da Segurança Pública e Defesa Social do Estado do Ceará 
   ),
      
 #### Mercado de trabalho  --------------------------------------------------------  
-tabItem(
-  tabName = "Mercado",
-  hr(),
-fluidRow(
-  
-  column(width = 2,
-         
-         shinyWidgets::pickerInput( inputId = "Ano_filter",
-                                    label = 'Ano',
-                                    choices = 2012:2023,
-                                    multiple = FALSE,
-                                    selected = 2023,
-                                    choicesOpt = list(content = 2012:2023)
-         )
-  ),
-  
-  column(width = 8,
-  select_group_ui(
-    id = "Filtro_merc",
-    inline = TRUE ,
-    btn_reset_label = "Resetar filtros",
-    params = list(
-      #list(inputId = "V2007", label = "Sexo", placeholder = 'Todos' ,  updateOn = "close",selected = 'Mulher'),
-      list(inputId = "V2010", label = "Raça/cor", placeholder = 'Todos'  ),
-      list(inputId = "VD3004", label = "Escolaridade", placeholder = 'Todos'),
-      list(inputId = "idadeEco2", label = "Idade", placeholder = 'Todos'),
-      list(inputId = "Composição", label = "Composição", placeholder = 'Todos')
-                  )#,
-   #vs_args = list(updateOn = c( "close"))
-                ),
-  ),
-  # column(width = 2, 
-  #        actionButton("rodar-filtro", "Executar filtro")
-  #        ),
-
-  box(
-    title = 'Tipo de ocupação',
-    id = "mybox",
-    status = "danger",
-    solidHeader = F,
-    width = 6,
-
-    radioButtons(label= 'Sexo',
-                 inputId= "select_tipo_merc" ,
-                 c( "Geral", "Por mulher e homem"),
-                 selected = "Por mulher e homem",
-                 inline = F
-    ),
+  tabItem(
+    tabName = "Mercado",
+    hr(),
+  fluidRow(
     
+ 
     
-    conditionalPanel(condition  = "input.select_tipo_merc == 'Geral' ",
-                     layout_columns(
-                       withSpinner(d3plusOutput('F_cnaes'))
-                       #htmlOutput("pedro", container = tags$li, class = "custom-li-output")
-                       
-                     )
+    column(width = 8,
+    select_group_ui(
+      id = "Filtro_merc",
+      inline = TRUE ,
+      btn_reset_label = "Resetar filtros",
+      params = list(
+        #list(inputId = "V2007", label = "Sexo", placeholder = 'Todos' ,  updateOn = "close",selected = 'Mulher'),
+        list(inputId = "V2010", label = "Raça/cor", placeholder = 'Todos'  ),
+        list(inputId = "VD3004", label = "Escolaridade", placeholder = 'Todos'),
+       # list(inputId = "idadeEco2", label = "Idade", placeholder = 'Todos'),
+        list(inputId = "Composição", label = "Composição", placeholder = 'Todos')
+                    )#,
+     #vs_args = list(updateOn = c( "close"))
+                  ),
     ),
-    conditionalPanel(condition  = "input.select_tipo_merc =='Por mulher e homem' ",
-                     layout_columns(
-                       withSpinner(d3plusOutput('F_cnaes_form')),
-                       withSpinner(d3plusOutput('F_cnaes_inform'))
-                     )
-    )
-  ),
+    column(width = 2,
+           
+           shinyWidgets::pickerInput( inputId = "Ano_filter",
+                                      label = 'Ano',
+                                      choices = 2012:2023,
+                                      multiple = FALSE,
+                                      selected = 2023,
+                                      choicesOpt = list(content = 2012:2023)
+           )
+    ),
 
-  column(width = 6,
-         box(
-           title = 'Rendimento mensal habitual de todos os trabalhos',
-           id = "mybox",
-           status = "danger",
-           solidHeader = F,
-           width = 12, 
+  
+    box(
+      title = 'Tipo de ocupação',
+      id = "mybox",
+      status = "danger",
+      solidHeader = F,
+      width = 6,
+      height=540,
+  
+      radioButtons(label= 'Sexo',
+                   inputId= "select_tipo_merc" ,
+                   c( "Geral", "Por mulher e homem"),
+                   selected = "Por mulher e homem",
+                   inline = F
+      ),
+      
+      
+      conditionalPanel(condition  = "input.select_tipo_merc == 'Geral' ",
+                       layout_columns(
+                         withSpinner(d3plusOutput('F_cnaes'))
+                         #htmlOutput("pedro", container = tags$li, class = "custom-li-output")
+                         
+                       )
+      ),
+      conditionalPanel(condition  = "input.select_tipo_merc =='Por mulher e homem' ",
+                       layout_columns(
+                         withSpinner(d3plusOutput('F_cnaes_form')),
+                         withSpinner(d3plusOutput('F_cnaes_inform'))
+                       )
+      )
+    ),
+  
+    column(width = 6,
+           box(
+             title = textOutput("ano_mercado")  ,
+             id = "mybox",
+             status = "danger",
+             solidHeader = F,
+             width = 12, 
+             height=540,
+             tabsetPanel(
+               id = "tabs_ocup",
+               tabPanel(
+                 title = 'Grupos ocupacionais',
+                 br(),
+                 withSpinner(reactableOutput('tab_Grup'))  ),
+               
+               tabPanel(
+                 title = 'Categoria do emprego' ,
+                 br(),
+                 withSpinner(reactableOutput('tab_Cat'))  ),
+               
+               tabPanel(
+                 title = 'Atividade do empreendimento',
+                 br(),
+                 withSpinner(reactableOutput('tab_Ativ'))  )
+               
+             
+               )
+             )
+          
           # height = 
-         withSpinner(reactableOutput('tab_ocup'))  )
+        # withSpinner(reactableOutput('tab_ocup'))  
          ),#htmlOutput('pedro')),
 
 
@@ -656,15 +698,12 @@ fluidRow(
     width = 6
   )  
   
-)
+),
   
 
   
-  # echarts4rOutput('perc_informal',width = "32%"),
-  # 
-  # 
-  # 
-  
+hr(class = "divider"),
+p('Fonte: IBGE. Pesquisa Nacional por Amostra de Domicílios Contínua')
   ),     
 
 #### Educação  --------------------------------------------------------  
