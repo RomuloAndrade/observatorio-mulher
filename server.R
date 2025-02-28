@@ -4,6 +4,8 @@
 box::use(
   shiny[...],
   bs4Dash[...],
+  bslib[value_box,
+        value_box_theme],
   shinyjs[disable,
           enable,
           delay],
@@ -105,6 +107,13 @@ box::use(
 
 
 
+
+# # tema ------------------------------------------------------------------
+
+cor_h = '#6963A5'
+cor_m = '#C2ACFF'
+cor_g = '#F96335'
+
 # Load data -----------------------------------------------------------------------------------
 
 
@@ -148,6 +157,10 @@ bairros_alfab <- readRDS('Dados/tx_bairros_alfab.rds')
 Qtd_alfab <- readRDS('Dados/Qtd_alfab.rds')
 Tx_faixa_alfab <- readRDS('Dados/Tx_faixa_alfab.rds')
 # Load functions ------------------------------------------------------------------------------
+
+
+
+
 bar_chart <- function(label, width = "100%", height = "1rem", fill = "#00bfc4", background = NULL) {
   bar <- div(style = list(background = fill, width = width, height = height))
   chart <- div(style = list(flexGrow = 1, marginLeft = "0.375rem", background = background), bar)
@@ -221,30 +234,56 @@ server <- function(input, output, session) {
 ## Moradores ---------------------------------------------------------------
 
   
-  output$vbox2.1 <- renderValueBox({
-
-    
-    valueBox(
-      value = format(sum(bairros_demografia[bairros_demografia$NM_BAIRRO==input$select_1[1],'V01006']),  big.mark   = '.',decimal.mark = ',') ,
-      subtitle = "Moradores",
-      color = "info",
-      icon = icon("people-roof"),
-      footer = input$select_1[1],
-      gradient = T
+  #output$vbox2.1 <- renderValueBox({
+  #
+  #   
+  #   valueBox(
+  #     value = format(sum(bairros_demografia[bairros_demografia$NM_BAIRRO==input$select_1[1],'V01006']),  big.mark   = '.',decimal.mark = ',') ,
+  #     subtitle = "Moradores",
+  #     color = "info",
+  #     icon = icon("people-roof"),
+  #     footer = input$select_1[1],
+  #     gradient = T
+  #   )
+  # })
+  # 
+  
+  output$vbox2.1 <- renderUI({
+    value_box(
+      title = span(format(sum(bairros_demografia[bairros_demografia$NM_BAIRRO==input$select_1[1],'V01006']),  big.mark   = '.',decimal.mark = ',') , class = "value-box-title"),
+      value =  'Moradores' ,
+      br(),
+      span(input$select_1[1], style = "font-size: 20px;color: #F3ECE4") ,
+      theme = value_box_theme(bg = "#271F41", fg = "#C2ACFF"),
+      height = 150
     )
   })
   
-  output$vbox2.2 <- renderValueBox({
-    valueBox(
-      value = format(sum(bairros_demografia[bairros_demografia$NM_BAIRRO==input$select_1[2],'V01006']),  big.mark   = '.',decimal.mark = ',') ,
-      subtitle = "Moradores",
-      color = "info",
-      icon = icon("people-roof"),
-      footer = input$select_1[2],
-      gradient = T
+  
+  
+  # output$vbox2.2 <- renderValueBox({
+  #   valueBox(
+  #     value = format(sum(bairros_demografia[bairros_demografia$NM_BAIRRO==input$select_1[2],'V01006']),  big.mark   = '.',decimal.mark = ',') ,
+  #     subtitle = "Moradores",
+  #     color = "info",
+  #     icon = icon("people-roof"),
+  #     footer = input$select_1[2],
+  #     gradient = T
+  #   )
+  # })
+
+  
+  output$vbox2.2 <- renderUI({
+    value_box(
+      title = span(format(sum(bairros_demografia[bairros_demografia$NM_BAIRRO==input$select_1[2],'V01006']),  big.mark   = '.',decimal.mark = ',') , class = "value-box-title"),
+      value =  'Moradores' ,
+      br(),
+      span(input$select_1[2], style = "font-size: 20px;color: #F3ECE4") ,
+      theme = value_box_theme(bg = "#271F41", fg = "#C2ACFF"),
+      height = 150
     )
   })
-
+  
 
 ## Razao sexo --------------------------------------------------------------
 
@@ -254,48 +293,98 @@ razao_sexo1  <- reactive({ sum(bairros_demografia[bairros_demografia$NM_BAIRRO==
 razao_sexo2  <- reactive({ sum(bairros_demografia[bairros_demografia$NM_BAIRRO==input$select_1[2],'V01008'])/
     sum(bairros_demografia[bairros_demografia$NM_BAIRRO==input$select_1[2],'V01007'])*100 })
 
-output$vbox_mulher.1 <- renderValueBox({
-  valueBox(
-    value = format(sum(bairros_demografia[bairros_demografia$NM_BAIRRO==input$select_1[1],'V01008']) ,  big.mark   = '.',decimal.mark = ',') ,
-    subtitle = "Mulheres",
-    color = "fuchsia",
-    icon = icon("person-dress"),
-    footer = input$select_1[1],
-    gradient = T
-  )
-})
-output$vbox_mulher.2 <- renderValueBox({
-  valueBox(
-    value = format(sum(bairros_demografia[bairros_demografia$NM_BAIRRO==input$select_1[2],'V01008']) ,  big.mark   = '.',decimal.mark = ',') ,
-    subtitle = "Mulheres",
-    color = "fuchsia",
-    icon = icon("person-dress"),
-    footer = input$select_1[2],
-    gradient = T
-  )
-})
-output$vbox1.1 <- renderValueBox({
-    valueBox(
-      value = format(round(razao_sexo1(),2) ,  big.mark   = '.',decimal.mark = ',') ,
-      subtitle = "Mulheres p/ cada 100 Homem",
-      color = "maroon",
-      icon = icon("venus-mars"),
-      footer = input$select_1[1],
-      gradient = T
-    )
-  })
-output$vbox1.2 <- renderValueBox({
-    valueBox(
-      value = format(round(razao_sexo2(),2) ,  big.mark   = '.',decimal.mark = ',') ,
-      subtitle = "Mulheres p/ cada 100 Homem
+# output$vbox_mulher.1 <- renderValueBox({
+#   valueBox(
+#     value = format(sum(bairros_demografia[bairros_demografia$NM_BAIRRO==input$select_1[1],'V01008']) ,  big.mark   = '.',decimal.mark = ',') ,
+#     subtitle = "Mulheres",
+#     color = "fuchsia",
+#     icon = icon("person-dress"),
+#     footer = input$select_1[1],
+#     gradient = T
+#   )
+# })
 
-",
-      color = "maroon",
-      icon = icon("venus-mars"),
-      footer = input$select_1[2],
-      gradient = T
-    )
-  })
+output$vbox_mulher.1 <- renderUI({
+value_box(
+  title = span(format(sum(bairros_demografia[bairros_demografia$NM_BAIRRO==input$select_1[1],'V01008']) ,  big.mark   = '.',decimal.mark = ',') , class = "value-box-title"),
+  value =  'Mulheres' ,
+  span(input$select_1[1], style = "font-size: 20px;color: #F3ECE4") ,
+  theme = value_box_theme(bg = "#271F41", fg = "#C2ACFF"),
+  height = 150
+)
+})
+
+
+
+# output$vbox_mulher.2 <- renderValueBox({
+#   valueBox(
+#     value = format(sum(bairros_demografia[bairros_demografia$NM_BAIRRO==input$select_1[2],'V01008']) ,  big.mark   = '.',decimal.mark = ',') ,
+#     subtitle = "Mulheres",
+#     color = "fuchsia",
+#     icon = icon("person-dress"),
+#     footer = input$select_1[2],
+#     gradient = T
+#   )
+# })
+
+
+output$vbox_mulher.2 <- renderUI({
+  value_box(
+    title = span(format(sum(bairros_demografia[bairros_demografia$NM_BAIRRO==input$select_1[2],'V01008']) ,  big.mark   = '.',decimal.mark = ',') , class = "value-box-title"),
+    value =  'Mulheres' ,
+    br(),
+    span(input$select_1[2], style = "font-size: 20px;color: #F3ECE4") ,
+    theme = value_box_theme(bg = "#271F41", fg = "#C2ACFF"),
+    height = 150
+  )
+})
+
+
+# output$vbox1.1 <- renderValueBox({
+#     valueBox(
+#       value = format(round(razao_sexo1(),2) ,  big.mark   = '.',decimal.mark = ',') ,
+#       subtitle = "Mulheres p/ cada 100 Homem",
+#       color = "maroon",
+#       icon = icon("venus-mars"),
+#       footer = input$select_1[1],
+#       gradient = T
+#     )
+#   })
+
+output$vbox1.1 <- renderUI({
+  value_box(
+    title = span(format(round(razao_sexo1(),2) ,  big.mark   = '.',decimal.mark = ',') , class = "value-box-title"),
+    value =  'Mulheres p/ cada 100 Homem' ,
+    br(),
+    span(input$select_1[1], style = "font-size: 20px;color: #F3ECE4") ,
+    theme = value_box_theme(bg = "#271F41", fg = "#C2ACFF"),
+    height = 150
+  )
+})
+
+
+# output$vbox1.2 <- renderValueBox({
+#     valueBox(
+#       value = format(round(razao_sexo2(),2) ,  big.mark   = '.',decimal.mark = ',') ,
+#       subtitle = "Mulheres p/ cada 100 Homem",
+#       color = "maroon",
+#       icon = icon("venus-mars"),
+#       footer = input$select_1[2],
+#       gradient = T
+#     )
+#   })
+
+
+output$vbox1.2 <- renderUI({
+  value_box(
+    title = span(format(round(razao_sexo2(),2) ,  big.mark   = '.',decimal.mark = ',') , class = "value-box-title"),
+    value =  'Mulheres p/ cada 100 Homem' ,
+    br(),
+    span(input$select_1[2], style = "font-size: 20px;color: #F3ECE4") ,
+    theme = value_box_theme(bg = "#271F41", fg = "#C2ACFF"),
+    height = 150
+  )
+})
 
 ## Pizza sexo --------------------------------------------------------------
 
@@ -304,17 +393,19 @@ output$pizza_1.1 <- renderEcharts4r({
     filter(NM_BAIRRO == input$select_1[1]) |> 
     summarise(Qtd=sum(Qtd)) |> 
     e_charts(Sexo,reorder = F) |> 
-    e_pie(Qtd, roseType = "radius", clockwise=F,   radius = c("5%", "65%"),
-          label = list(color='black',show = T,formatter = "{b} \n {d}%"),
+    e_pie(Qtd, roseType = F , clockwise=F,   radius = c("30%", "65%"),
+          labelLine= list(show=F,length=0),
+          label = list(fontSize = 16,color='black',show = T,formatter = "{d}% \n {b}"),
           emphasis = list(
-            label = list( 
+            label = list(
               show = T,
               fontSize = 20,
               fontWeight = "bold"))) |>
-    e_tooltip() |> 
+    e_tooltip(e_tooltip_choro_formatter(locale = "PT-BR")) |> 
     e_legend(show=F) |> 
-    e_color(c("#2ec7c9", "#b6a2de"))|> 
-    e_title(text=input$select_1[1])      }) 
+    e_color(c(cor_h, cor_m),background = '#FCF5EC')#|> 
+    #e_title(text=input$select_1[1])     
+    }) 
   
 output$pizza_1.2 <- renderEcharts4r({
     
@@ -324,17 +415,18 @@ output$pizza_1.2 <- renderEcharts4r({
         filter(NM_BAIRRO == input$select_1[2]) |> 
         summarise(Qtd=sum(Qtd)) |> 
         e_charts(Sexo,reorder = F) |> 
-        e_pie(Qtd, roseType = "radius", clockwise=F,   radius = c("5%", "65%"),
-              label = list(color='black',show = T,formatter = "{b} \n {d}%"),
+        e_pie(Qtd, roseType = F , clockwise=F,   radius = c("30%", "65%"),
+              labelLine= list(show=F,length=0),
+              label = list(fontSize = 16,color='black',show = T,formatter = "{d}% \n {b}"),
               emphasis = list(
                 label = list(
                   show = T,
                   fontSize = 20,
                   fontWeight = "bold"))) |>
-        e_tooltip() |> 
+        e_tooltip(e_tooltip_pointer_formatter(locale = "PT-BR")) |> 
         e_legend(show=F) |> 
-        e_color(c("#2ec7c9", "#b6a2de"))|> 
-        e_title(text=input$select_1[2])    
+        e_color(c(cor_h, cor_m),background = '#FCF5EC') #|> 
+        #e_title(text=input$select_1[2])    
     }
   })
  
@@ -349,7 +441,7 @@ favela |>
             e_tooltip_pointer_formatter(locale = "PT-BR",style = c("percent"),digits = 1,
             )) |> 
   e_x_axis(name= 'Raça',axisLabel = list(color='black',  fontWeight= "bolder") ) |> 
-  e_color(c('#008acd','#b6a2de','#2ec7c9')) |> 
+  e_color(c(cor_g,cor_m,cor_h)) |> 
   e_y_axis(min= .10,formatter=e_axis_formatter(style = c("percent"),
                                                locale = 'PT-BR') ) |> 
   e_legend(selected=list('Geral'=F),right= 0,top= "3%") 
@@ -364,7 +456,7 @@ composicao |>
   e_bar(`Responsável homens`) |> 
   e_tooltip(trigger = c("axis")) |> 
   e_x_axis(axisLabel = list(color='black',  fontWeight= "bolder") ) |> 
-  e_color(c('#b6a2de','#2ec7c9')) |> 
+  e_color(c(cor_m,cor_h)) |> 
   e_flip_coords() |> 
   e_grid(left='40%')
 })
@@ -405,7 +497,7 @@ output$piramide_1.1 <- renderEcharts4r({
         )
       ) |>
       e_grid(left='20%') |> 
-      e_theme('macarons') |> 
+      e_color(c(cor_h,cor_m)) |> 
       e_legend( top= "3%")# |> 
     #e_title(text=input$select_1[1])#,subtext="Segundo sexo e grupo de idade" )  
   })  
@@ -442,7 +534,7 @@ output$piramide_1.2 <- renderEcharts4r({
       )
     ) |>
     e_grid(left='28%') |> 
-    e_theme('macarons') |> 
+      e_color(c(cor_h,cor_m)) |> 
     e_legend( top= "3%")|> 
     e_title(text=input$select_1[2])#,subtext="Segundo sexo e grupo de idade" )  
 })  
@@ -479,12 +571,15 @@ output$piramide_2 <- renderEcharts4r({
       )
     ) |>
     e_grid(left='28%') |> 
-    e_theme('macarons') |> 
+    e_color(c(cor_h,cor_m)) |> 
     e_legend( top= "3%") |>
     e_title(text=input$select_1[1])
 })  
 
-# Barras cor
+
+# Raça --------------------------------------------------------------------
+
+
 
 output$raca1 <- renderEcharts4r({
 df_cor_ |> 
@@ -493,17 +588,17 @@ df_cor_ |>
   mutate(Perc = Qtd/sum(Qtd)) |>   
   e_chart(x=Cor_raça,name='Moradores') |> 
   e_bar(Perc) |> 
-  e_color(c("#2ec7c9","#b6a2de" )) |> 
+  e_color(c(cor_h,cor_m ),background = '#FCF5EC') |> # 
   e_toolbox(iconStyle= list(
     color= "rgba(35, 210, 32, 1)"
   )) |>
     e_tooltip(
       trigger="axis",formatter = e_tooltip_pointer_formatter(
         style = c( "percent"),digits = 1) )|>  
-    e_legend( orient= "vertical",
-                   right= 0) |> 
+    e_legend(icon = 'circle', left= 0) |>  
     e_y_axis(show=F) |> 
-    e_grid(top = "-5%") |> 
+    e_x_axis( axisLine= list(show=F), axisTick = list(show=F), axisLabel= list(interval= 0,overflow= 'truncate')) |> 
+    e_grid(top = "5%",bottom= "20%") |> 
     e_group("decomp") 
 })
 
@@ -514,17 +609,17 @@ output$raca2 <- renderEcharts4r({
     mutate(Perc = Qtd/sum(Qtd)) |>   
     e_chart(x=Cor_raça,name='Moradores') |> 
     e_bar(Perc) |> 
-    e_color(c("#2ec7c9","#b6a2de" )) |> 
+    e_color(c(cor_h,cor_m ),background = '#FCF5EC') |> 
     e_toolbox(iconStyle= list(
       color= "rgba(35, 210, 32, 1)"
     )) |>
     e_tooltip(
       trigger="axis",formatter = e_tooltip_pointer_formatter(
         style = c( "percent"),digits = 1) )|>  
-    e_legend( orient= "vertical",
-              right= 0) |> 
+    e_legend(icon = 'circle', left= 0) |> 
     e_y_axis(show=F) |> 
-    e_grid(top = "-5%")|>
+    e_x_axis( axisLine= list(show=F), axisTick = list(show=F), axisLabel= list(interval= 0,overflow= 'truncate')) |> 
+    e_grid(top = "5%",bottom= "20%") |>
     e_group("decomp") |> 
     e_connect_group("decomp")
 })
@@ -862,14 +957,14 @@ output$tab_Cat <- renderReactable({
                                  width <- paste0(value / max(rend$Homem) * 100,'%')
                                  value <- format(value,big.mark = ".",decimal.mark=",")
                                  value <- format(value, width = 9, justify = "right")
-                                 bar_chart(value, width = width,background = "#e1e1e1",fill = '#2ec7c9')
+                                 bar_chart(value, width = width,background = "#e1e1e1",fill = cor_h)
                                }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
                 Mulher = colDef(name = "Mulheres (R$)", align = "left", width = 200,
                                 cell = function(value) {
                                   width <- paste0(value / max(rend$Homem) * 100,'%')
                                   value <- format(value,big.mark = ".",decimal.mark=",")
                                   value <- format(value, width = 9, justify = "right")
-                                  bar_chart(value, width = width,background = "#e1e1e1",fill ='#b6a2de')
+                                  bar_chart(value, width = width,background = "#e1e1e1",fill =cor_m)
                                 }, style = list(fontFamily = "monospace", whiteSpace = "pre")) 
               )
     )
@@ -901,14 +996,14 @@ output$tab_Ativ <- renderReactable({
                                  width <- paste0(value / max(rend$Homem) * 100,'%')
                                  value <- format(value,big.mark = ".",decimal.mark=",")
                                  value <- format(value, width = 9, justify = "right")
-                                 bar_chart(value, width = width,background = "#e1e1e1",fill = '#2ec7c9')
+                                 bar_chart(value, width = width,background = "#e1e1e1",fill = cor_h)
                                }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
                 Mulher = colDef(name = "Mulheres (R$)", align = "left", width = 200,
                                 cell = function(value) {
                                   width <- paste0(value / max(rend$Homem) * 100,'%')
                                   value <- format(value,big.mark = ".",decimal.mark=",")
                                   value <- format(value, width = 9, justify = "right")
-                                  bar_chart(value, width = width,background = "#e1e1e1",fill ='#b6a2de')
+                                  bar_chart(value, width = width,background = "#e1e1e1",fill =cor_m)
                                 }, style = list(fontFamily = "monospace", whiteSpace = "pre")) 
               )
     )
@@ -940,14 +1035,14 @@ output$tab_Grup <- renderReactable({
                                  width <- paste0(value / max(rend$Homem) * 100,'%')
                                  value <- format(value,big.mark = ".",decimal.mark=",")
                                  value <- format(value, width = 9, justify = "right")
-                                 bar_chart(value, width = width,background = "#e1e1e1",fill = '#2ec7c9')
+                                 bar_chart(value, width = width,background = "#e1e1e1",fill = cor_h)
                                }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
                 Mulher = colDef(name = "Mulheres (R$)", align = "left", width = 200,
                                 cell = function(value) {
                                   width <- paste0(value / max(rend$Homem) * 100,'%')
                                   value <- format(value,big.mark = ".",decimal.mark=",")
                                   value <- format(value, width = 9, justify = "right")
-                                  bar_chart(value, width = width,background = "#e1e1e1",fill ='#b6a2de')
+                                  bar_chart(value, width = width,background = "#e1e1e1",fill =cor_m)
                                 }, style = list(fontFamily = "monospace", whiteSpace = "pre")) 
               )
     )
@@ -1082,7 +1177,7 @@ output$ocupação_sexo <-   renderEcharts4r({
     e_tooltip(trigger = c("axis"),
               e_tooltip_pointer_formatter(locale = "PT-BR")
     ) |> 
-    e_color(c('#008acd','#2ec7c9','#b6a2de')) |> 
+    e_color(c(cor_g,cor_h,cor_m)) |> 
     e_y_axis(name="Qtd.",min=500,formatter=e_axis_formatter(style = c("decimal"),
                                                   locale = 'PT-BR') )
   
@@ -1090,20 +1185,20 @@ output$ocupação_sexo <-   renderEcharts4r({
 # 
 #     e_charts(data = df_ocup[df_ocup$V2007=='Homem',], x=Ano) |>
 #     e_legend(selected=list('Geral'=F), bottom= 0,right= 0) |> 
-#     e_line(Qtd.,smooth=T, color='#2ec7c9',legend =F,symbolSize= 10,
+#     e_line(Qtd.,smooth=T, color=cor_h,legend =F,symbolSize= 10,
 #            emphasis=list( focus= 'series' ),
-#            endLabel=list( show=T, color='#2ec7c9',fontWeight= "bold" ,fontSize =10,
+#            endLabel=list( show=T, color=cor_h,fontWeight= "bold" ,fontSize =10,
 #                           formatter= htmlwidgets::JS(" function (params) { return 'Homem' }")))  |>
 #     e_y_axis(show=F)  |>
 #     e_data(data=df_ocup[df_ocup$V2007=='Mulher',] , x= Ano    ) |>
-#     e_line(Qtd.,smooth=T,color='#b6a2de',legend =F,symbolSize= 10,
+#     e_line(Qtd.,smooth=T,color=cor_m,legend =F,symbolSize= 10,
 #            emphasis=list( focus= 'series' ),
-#            endLabel=list( show=T, color='#b6a2de',fontWeight= "bold" ,fontSize =10,
+#            endLabel=list( show=T, color=cor_m,fontWeight= "bold" ,fontSize =10,
 #                           formatter= htmlwidgets::JS(" function (params) { return 'Mulher' }"))) |> 
 #     e_data(data=df_ocup[df_ocup$V2007=='Geral',] , x= Ano    ) |>
-#     e_line(Qtd.,smooth=T,color='#008acd', legend = T,symbolSize= 10,
+#     e_line(Qtd.,smooth=T,color=cor_g, legend = T,symbolSize= 10,
 #            emphasis=list( focus= 'series' ),
-#            endLabel=list( show=T, color='#008acd',fontWeight= "bold" ,fontSize =10,
+#            endLabel=list( show=T, color=cor_g,fontWeight= "bold" ,fontSize =10,
 #                           formatter= htmlwidgets::JS(" function (params) { return 'Geral' }"))) |> 
 #     e_tooltip(trigger="item", formatter =
 #                    htmlwidgets::JS("function(p) {
@@ -1122,26 +1217,26 @@ output$perc_informal_sexo <-   renderEcharts4r({
     e_tooltip(trigger = c("axis"),
               e_tooltip_pointer_formatter(locale = "PT-BR",style = c("percent"),digits = 1,
               )) |> 
-    e_color(c('#008acd','#2ec7c9','#b6a2de')) |> 
+    e_color(c(cor_g,cor_h,cor_m)) |> 
     e_y_axis(formatter=e_axis_formatter(style = c("percent"),
                                         locale = 'PT-BR') )
   # 
   #   e_charts(data = df_inf[df_inf$V2007=='Homem',], x=Ano) |>
   #   e_legend(selected=list('Geral'=F), bottom= 0,right= 0) |> 
-  #   e_line(Informalidade,smooth=T, color='#2ec7c9',legend =F,symbolSize= 10,
+  #   e_line(Informalidade,smooth=T, color=cor_h,legend =F,symbolSize= 10,
   #          emphasis=list( focus= 'series' ),
-  #          endLabel=list( show=T, color='#2ec7c9',fontWeight= "bold" ,fontSize =10,
+  #          endLabel=list( show=T, color=cor_h,fontWeight= "bold" ,fontSize =10,
   #                         formatter= htmlwidgets::JS(" function (params) { return 'Homem' }")))  |>
   #   e_y_axis(show=F,formatter = e_axis_formatter("percent", digits = 0),min=0.3)  |>
   #   e_data(data=df_inf[df_inf$V2007=='Mulher',] , x= Ano    ) |>
-  #   e_line(Informalidade,smooth=T,color='#b6a2de',legend =F,symbolSize= 10,
+  #   e_line(Informalidade,smooth=T,color=cor_m,legend =F,symbolSize= 10,
   #            emphasis=list( focus= 'series' ),
-  #            endLabel=list( show=T, color='#b6a2de',fontWeight= "bold" ,fontSize =10,
+  #            endLabel=list( show=T, color=cor_m,fontWeight= "bold" ,fontSize =10,
   #                           formatter= htmlwidgets::JS(" function (params) { return 'Mulher' }"))) |> 
   #   e_data(data=df_inf[df_inf$V2007=='Geral',] , x= Ano    ) |>
-  #   e_line(Informalidade,smooth=T,color='#008acd', legend = T,symbolSize= 10,
+  #   e_line(Informalidade,smooth=T,color=cor_g, legend = T,symbolSize= 10,
   #            emphasis=list( focus= 'series' ),
-  #            endLabel=list( show=T, color='#008acd',fontWeight= "bold" ,fontSize =10,
+  #            endLabel=list( show=T, color=cor_g,fontWeight= "bold" ,fontSize =10,
   #                           formatter= htmlwidgets::JS(" function (params) { return 'Geral' }"))) |> 
   #   e_tooltip(trigger="item", formatter =
   #                 htmlwidgets::JS(
@@ -1164,7 +1259,7 @@ output$taxa_desemp_fort <-   renderEcharts4r({
     e_tooltip(trigger = c("axis"),
               e_tooltip_pointer_formatter(locale = "PT-BR",style = c("percent"),digits = 1,
     )) |> 
-    e_color(c('#008acd','#2ec7c9','#b6a2de')) |> 
+    e_color(c(cor_g,cor_h,cor_m)) |> 
     e_y_axis(formatter=e_axis_formatter(style = c("percent"),
                                                   locale = 'PT-BR') )
   
@@ -1172,20 +1267,20 @@ output$taxa_desemp_fort <-   renderEcharts4r({
 #   
 # e_charts(data = df_desemp[df_desemp$V2007=='Homem',], x=Ano) |> # HOMEM
 #   e_legend(selected=list('Geral'=F), bottom= 0,right= 0) |> 
-#   e_line(Tx_desocupacao ,smooth=T, color='#2ec7c9',legend =F,symbolSize= 10,
+#   e_line(Tx_desocupacao ,smooth=T, color=cor_h,legend =F,symbolSize= 10,
 #          emphasis=list( focus= 'series' ),
-#          endLabel=list( show=T, color='#2ec7c9',fontWeight= "bold" ,fontSize =10,
+#          endLabel=list( show=T, color=cor_h,fontWeight= "bold" ,fontSize =10,
 #                         formatter= htmlwidgets::JS(" function (params) { return 'Homem' }")))  |>
 #   e_y_axis(show=F,formatter = e_axis_formatter("percent", digits = 0))  |>
 #   e_data(data=df_desemp[df_desemp$V2007=='Mulher',] , x= Ano    ) |>  #MULHER
-#   e_line(Tx_desocupacao ,smooth=T,color='#b6a2de',legend =F,symbolSize= 10,
+#   e_line(Tx_desocupacao ,smooth=T,color=cor_m,legend =F,symbolSize= 10,
 #          emphasis=list( focus= 'series' ),
-#          endLabel=list( show=T, color='#b6a2de',fontWeight= "bold" ,fontSize =10,
+#          endLabel=list( show=T, color=cor_m,fontWeight= "bold" ,fontSize =10,
 #                         formatter= htmlwidgets::JS(" function (params) { return 'Mulher' }"))) |> 
 #   e_data(data=df_desemp[df_desemp$V2007=='Geral',] , x= Ano    ) |>  #GERAL
-#   e_line(Tx_desocupacao ,smooth=T,color='#008acd', legend = T,symbolSize= 10,
+#   e_line(Tx_desocupacao ,smooth=T,color=cor_g, legend = T,symbolSize= 10,
 #          emphasis=list( focus= 'series' ),
-#          endLabel=list( show=T, color='#008acd',fontWeight= "bold" ,fontSize =10,
+#          endLabel=list( show=T, color=cor_g,fontWeight= "bold" ,fontSize =10,
 #                         formatter= htmlwidgets::JS(" function (params) { return 'Geral' }"))) |> 
 #   e_tooltip(trigger="item", formatter =
 #               htmlwidgets::JS(
@@ -1209,29 +1304,29 @@ output$renda_fort <-   renderEcharts4r({
     e_tooltip(trigger = c("axis"),
               e_tooltip_pointer_formatter(locale = "PT-BR")
               ) |> 
-    e_color(c('#008acd','#2ec7c9','#b6a2de')) |> 
+    e_color(c(cor_g,cor_h,cor_m)) |> 
     e_y_axis(name="R$",formatter=e_axis_formatter(style = c("decimal"),
       locale = 'PT-BR') )
   # 
   # 
   # e_charts(data = df_renda[df_renda$V2007=='Homem',], x=Ano) |> # HOMEM
   #  # e_legend(selected=list('Geral'=F), bottom= 0,right= 0) |> 
-  #   e_line(renda ,smooth=T, color='#2ec7c9',legend =T,symbolSize= 0,
+  #   e_line(renda ,smooth=T, color=cor_h,legend =T,symbolSize= 0,
   #          #emphasis=list( focus= 'series' ),
-  #          # endLabel=list( show=T, color='#2ec7c9',fontWeight= "bold" ,fontSize =10,
+  #          # endLabel=list( show=T, color=cor_h,fontWeight= "bold" ,fontSize =10,
   #          #                formatter= htmlwidgets::JS(" function (params) { return 'Homem' }"))
   #          )  |>
   #   e_tooltip(trigger="axis") |> 
   #   e_y_axis(show=F,formatter = e_axis_formatter("percent", digits = 0))  |>
   #   e_data(data=df_renda[df_renda$V2007=='Mulher',] , x= Ano    ) |>  #MULHER
-  #   e_line(renda ,smooth=T,color='#b6a2de',legend =F,symbolSize= 0,
+  #   e_line(renda ,smooth=T,color=cor_m,legend =F,symbolSize= 0,
   #          emphasis=list( focus= 'series' ),
-  #          endLabel=list( show=T, color='#b6a2de',fontWeight= "bold" ,fontSize =10,
+  #          endLabel=list( show=T, color=cor_m,fontWeight= "bold" ,fontSize =10,
   #                         formatter= htmlwidgets::JS(" function (params) { return 'Mulher' }"))) |> 
   #   e_data(data=df_renda[df_renda$V2007=='Total',] , x= Ano    ) |>  #GERAL
-  #   e_line(renda ,smooth=T,color='#008acd', legend = T,symbolSize= 0,
+  #   e_line(renda ,smooth=T,color=cor_g, legend = T,symbolSize= 0,
   #          emphasis=list( focus= 'series' ),
-  #          endLabel=list( show=T, color='#008acd',fontWeight= "bold" ,fontSize =10,
+  #          endLabel=list( show=T, color=cor_g,fontWeight= "bold" ,fontSize =10,
   #                         formatter= htmlwidgets::JS(" function (params) { return 'Geral' }"))) |> 
   #   e_tooltip(
   #     # trigger="item", formatter =
@@ -1270,7 +1365,7 @@ output$viol_femin<-   renderEcharts4r({
     e_chart(x = mes) |>
     e_line(Qtd.,name ="Feminicídios" , symbolSize= 10) |> 
     e_tooltip(trigger = c("axis")) |> 
-    e_color(c('#b6a2de','#2ec7c9','#008acd')) |> 
+    e_color(c(cor_m,cor_h,cor_g)) |> 
     e_legend(selected=list('Masculino'=T,'Não Informado'=F))  |> 
     e_labels()
   
@@ -1287,7 +1382,7 @@ output$viol_sexo_ano <-   renderEcharts4r({
     e_line(Qtd.,symbolSize= 0) |> 
     e_tooltip(trigger = c("axis"),
               e_tooltip_pointer_formatter(locale = "PT-BR")) |> 
-    e_color(c('#b6a2de','#2ec7c9','#008acd')) |> 
+    e_color(c(cor_m,cor_h,cor_g)) |> 
     e_legend(selected=list('Masculino'=T,'Não Informado'=F)) |> 
     e_labels()  |> 
     e_y_axis(formatter=e_axis_formatter(
@@ -1304,7 +1399,7 @@ output$viol_sexo <-   renderEcharts4r({
   e_chart(x = mes) |>
   e_line(Qtd.,symbolSize= 0) |> 
   e_tooltip(trigger = c("axis")) |> 
-  e_color(c('#b6a2de','#2ec7c9','#008acd')) |> 
+  e_color(c(cor_m,cor_h,cor_g)) |> 
   e_legend(selected=list('Masculino'=T,'Não Informado'=F)) 
 
   })
@@ -1339,7 +1434,7 @@ temp|>
   #         return('<strong>' + p.name + '</strong>' +
   #         '<br>Percentual: ' + Intl.NumberFormat('pt-BR', { style: 'decimal',minimumFractionDigits: 1, 
   # maximumFractionDigits: 1}).format(p.value[1]*100) + '%')}"))  |> 
-    e_color(c('#b6a2de','#2ec7c9')) |> 
+    e_color(c(cor_m,cor_h)) |> 
     e_legend(right=1) 
   
 
@@ -1403,7 +1498,7 @@ df_cvli_idade |>
   e_x_axis(
     axisLabel = list(interval= 0,rotate = 45,color='black') ) |>
 
-  e_color(c('#b6a2de','#2ec7c9')) |> 
+  e_color(c(cor_m,cor_h)) |> 
   e_legend( top= "3%", bottom= 1,right= 0) 
 })
 
@@ -1495,8 +1590,7 @@ Qtd_alfab |>
             show = T,
             fontSize = 15,
             fontWeight = "bold"))) |>
-  e_tooltip(formatter=e_tooltip_choro_formatter(
-    locale = 'PT-BR')) |> 
+  e_tooltip() |> 
   e_legend(show=F) |> 
   e_color(c( "#4B9695","#D1EB28")) |> 
   e_title(text='Homem',left= "center") 
@@ -1513,8 +1607,7 @@ output$pizza_alfab_M <- renderEcharts4r({
               show = T,
               fontSize = 15,
               fontWeight = "bold"))) |>
-    e_tooltip(formatter=e_tooltip_choro_formatter(
-      locale = 'PT-BR')) |> 
+    e_tooltip() |> 
     e_legend(show=F) |> 
     e_color(c( "#4B9695","#D1EB28"))|> 
     e_title(text='Mulher',left= "center") 
@@ -1563,7 +1656,7 @@ output$idade_alfab <- renderEcharts4r({
                formatter=e_axis_formatter(style = c("percent"),
                                           locale = 'PT-BR')) |> 
       #e_grid(top = "-5%") |> 
-  e_color(c('#2ec7c9','#b6a2de'))
+  e_color(c(cor_h,cor_m))
   
 })
 

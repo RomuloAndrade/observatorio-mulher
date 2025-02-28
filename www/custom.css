@@ -2,15 +2,26 @@
     display: inline;
     margin-right: 1rem;
 }
-
+ .selectize-control.multi .selectize-input>div {
+     cursor: pointer;
+     margin: 0 3px 3px 0;
+     padding: 1px 5px;
+     background: #C2ACFF;
+       color: #333;
+       border: 0 solid rgba(0,0,0,0)
+  }
+  .selectize-input,.selectize-control.single .selectize-input.input-active {
+     background: #6963A5;
+       cursor: text;
+   }
 .card, .small-box, .info-box {
-    border-radius: 1rem !important;
+    border-radius: 0rem !important;
 }
 .card-header {
-    border-radius: 1rem 1rem 0 0 !important;
+    border-radius: 0rem 0rem 0 0 !important;
 }
 .small-box-footer {
-    border-radius: 0 0 1rem 1rem !important;
+    border-radius: 0 0 0rem 0rem !important;
 }
 .small-box > .inner {
     font-size: 2.125rem;

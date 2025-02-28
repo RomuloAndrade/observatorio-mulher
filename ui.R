@@ -18,7 +18,7 @@ box::use(
         create_theme,
         bs4dash_font,bs4dash_color,bs4dash_status,bs4dash_layout],
   D3plusR[d3plusOutput],
-  #shinyWidgets[pickerInput]
+  shinyWidgets[setBackgroundImage]
 )
 
 
@@ -71,7 +71,7 @@ violet2 <- "#5b5b9b"
 
 orange2 <- "#925106"
 
-
+head <- '#0F072E'
 
 ## Status colors ##
 
@@ -122,7 +122,7 @@ sidebar_light_submenu_hover_color <- NULL
 ## FONTE LATO
 
 
-font1 <- "Exo 2"
+font1 <- "Lato"
 
 font2 <- "Roboto"
 
@@ -215,12 +215,83 @@ ui <- dashboardPage(
   #   ),
   #   color = primary
   # ),
-
-  dark = F,
+ # skin = "purple",
+  dark = NULL,
   help = NULL,
-  fullscreen = TRUE,
+  fullscreen = F,
   scrollToTop = TRUE,
   header = dashboardHeader(
+   
+### value_box
+    tags$head(
+      tags$style(HTML("
+        .value-box {
+          box-shadow: none !important; /* Remove a sombra */
+          border: none; /* Opcional: adiciona borda leve */
+        }
+        
+        .card, .small-box, .info-box {
+          border-radius: 0rem !important;
+        }
+          
+       .value-box-title {
+          font-size: 32px !important; /* Aumenta o tamanho do título */
+          font-weight: bold; /* Deixa em negrito (opcional) */
+       }
+       
+       .bslib-value-box .value-box-title {
+          margin-top: -25px;
+          margin-bottom: .5rem;
+          font-weight: 400;
+          line-height: 1.2;
+           }
+          .value-box-value {
+          font-size: 14px !important; /* Reduz o tamanho da fonte */
+          }
+          
+       .value-box-area {
+          margin-bottom: -20px;
+          margin-top: 0px;
+        }
+      "))
+    ),
+    
+    
+
+    
+    
+    
+### Cabeçalho    
+    div(
+      class = "header-container",
+      tags$head(
+        tags$style(HTML("
+      .card {
+          box-shadow: none !important; /* Remove a sombra */
+          border: none; /* Opcional: adiciona borda leve */
+        }
+      .navbar-white {
+          background-color: #0F072E !important; /* Cor azul */
+          color: white !important; /* Cor do texto */
+        }
+        .navbar-white .navbar-nav > li > a {
+          color: white !important; /* Cor do texto dos links */
+        }
+      .header-container {
+        display: grid;
+        grid-template-columns: auto auto; /* Duas colunas automáticas */
+        gap: 20px; /* Espaçamento entre as imagens */
+        align-items: center;
+      }
+      .logo-header-esq, .logo-header-dir {
+        height: 50px;
+      }
+    "))
+      ),
+      img(class = "logo-header-esq", src = "Logo fortaleza.svg"),
+      img(class = "logo-header-dir", src = "omf - cor - 01.svg")
+    ),
+    
     
     title = dashboardBrand(
      
@@ -240,7 +311,7 @@ ui <- dashboardPage(
   
   sidebar = dashboardSidebar(
     fixed = TRUE,
-    skin = "light",
+    #skin = "light",
     status = "info",
     id = "sidebar",
     collapsed = FALSE,
@@ -266,11 +337,11 @@ ui <- dashboardPage(
         tabName = "Educação",
         icon = icon("book-open")
       ),
-      menuItem(
-        "Saúde",
-        tabName = "Saúde",
-        icon = icon("heart-pulse")
-      ),
+      # menuItem(
+      #   "Saúde",
+      #   tabName = "Saúde",
+      #   icon = icon("heart-pulse")
+      # ),
       
       menuItem(
         "Mercado de trabalho",
@@ -283,25 +354,7 @@ ui <- dashboardPage(
         tabName = "Violência",
         icon = icon("gun")
       ),
-      # menuItem(
-      #   "Bairros",
-      #   #tabName = "metodologia",
-      #   icon = icon("map"),
-      #   
-      #   menuSubItem("Raça",
-      #               tabName = "Raça",
-      #               icon = icon("circle")
-      #   ),
-      #   menuSubItem("Idade",
-      #               tabName = "Idade",
-      #               icon = icon("circle")
-      #   ),
-      #   menuSubItem("Infraestrutura",
-      #               tabName = "infraestrutura",
-      #               icon = icon("circle")
-      #   )
-      #   
-      # ),
+
       sidebarHeader("Metadados"),
       menuItem(
         "Glossário",
@@ -328,14 +381,25 @@ ui <- dashboardPage(
 
   
   body = dashboardBody(
-    use_googlefont(font1),
+
+    
+    setBackgroundImage(
+      src = "/backgroundpaineis.png",
+      shinydashboard = T),
+    
+  
+    #use_googlefont(font1),
     useShinyjs(),
     # use_googlefont(font2),
     # use_googlefont(font3),
-    use_theme(diobs_theme),
-    e_theme_register(
-      paste(readLines("www/atlas_capital_humano.json"), collapse = ""),
-      "diobs"),
+    #use_theme(diobs_theme),
+
+ 
+    
+    
+    # e_theme_register(
+    #   paste(readLines("www/atlas_capital_humano.json"), collapse = ""),
+    #   "diobs"),
     tags$head(
       tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
       # Listen for dark-mode messages
@@ -375,42 +439,48 @@ tabItem(
   hr(), 
   
   selectizeInput(inputId='select_1',label = 'Território:', choices = lista_demog,multiple = TRUE,
-                 selected= 'FORTALEZA',width = '40%',
+                 selected= 'FORTALEZA',width = '50%',
                  options = list('plugins' = list('remove_button'),maxItems = 3,minItem=1)),
    
    fluidRow(
-    
-    ### Pizza sexo 1
-    column(width = 3,echarts4rOutput('pizza_1.1',height = '80%')),
-    ### Qtd Moradores 1
-    valueBoxOutput("vbox_mulher.1", width = 2),
-    valueBoxOutput("vbox2.1", width = 2),
-    valueBoxOutput("vbox1.1", width = 2),
-    column(width = 3,echarts4rOutput('raca1',height=200) )
+     ### Qtd Moradores 1
+     #valueBoxOutput("vbox_mulher.1", width = 2),
+     column(width = 2,style = "padding: 2px; margin: 0px;",uiOutput('vbox_mulher.1')),
+     #valueBoxOutput("vbox2.1", width = 2),
+     column(width = 2,style = "padding: 2px; margin: 0px;",uiOutput('vbox2.1')),
+     #valueBoxOutput("vbox1.1", width = 2),
+     column(width = 2,style = "padding: 2px; margin: 0px;",uiOutput('vbox1.1')),
+     ### Pizza sexo 1
+    column(width = 3,style = "padding: 2px; margin: 0px;",echarts4rOutput('pizza_1.1',height=150)),
+     ### Raça
+    column(width = 3,style = "padding: 2px; margin: 0px;",echarts4rOutput('raca1',height=150) )
     
     
   ),
   conditionalPanel(condition  = "input.select_1.length >1",
                    fluidRow(
-                     ### Pizza sexo 2
-                     column(width = 3,
-                            echarts4rOutput('pizza_1.2',height = '80%')),
                      ### Qtd Moradores 2
-                     valueBoxOutput("vbox_mulher.2", width = 2),  
-                     valueBoxOutput("vbox2.2", width = 2), 
-                     valueBoxOutput("vbox1.2", width = 2),
-                     column(width = 3,echarts4rOutput('raca2',height=200))
+                     #valueBoxOutput("vbox_mulher.2", width = 2),  
+                     column(width = 2,style = "padding: 2px; margin: 0px;",uiOutput('vbox_mulher.2')),
+                     #valueBoxOutput("vbox2.2", width = 2), 
+                     column(width = 2,style = "padding: 2px; margin: 0px;",uiOutput('vbox2.2')),
+                     #valueBoxOutput("vbox1.2", width = 2),
+                     column(width = 2,style = "padding: 2px; margin: 0px;",uiOutput('vbox1.2')),
+                     ### Pizza sexo 2
+                     column(width = 3,style = "padding: 2px; margin: 0px;",echarts4rOutput('pizza_1.2',height=150 )),
+                     ### Raça
+                     column(width = 3,style = "padding: 2px; margin: 0px;",echarts4rOutput('raca2',height=150))
                      ) )
   
 
   ,
   fluidRow(
-  box(
+    box(
     title = 'Pirâmide etária',
     id = "mybox",
-    status = "danger",
+    #status = "danger",
     # background = 'white',
-    solidHeader = F,
+    solidHeader = T,
     width = 8,
     # gradient = TRUE,
     # collapsible = TRUE,
@@ -806,8 +876,13 @@ tabItem(
         strong('Sistema Nacional de Habitação de Interesse Social.'), "Brasília: Ministério das cidades, 2024. 
         Disponível em: https://www.gov.br/cidades/pt-br/assuntos/habitacao/sistema-nacional-de-habitacao-de-interesse-social"),
       
-      p("FORTALEZA. ",
-        strong('Conheça as etapas.'), "Fortaleza: plataforma do Plano Diretor de Fortaleza, 2024. Disponível em: https://planodiretor.fortaleza.ce.gov.br"),
+      p("BRASIL. ",
+        strong('Sistema Nacional de Habitação de Interesse Social.'), "Brasília: Ministério das cidades, 2024. 
+        Disponível em: https://www.gov.br/cidades/pt-br/assuntos/habitacao/sistema-nacional-de-habitacao-de-interesse-social"),
+      
+
+      p("DATASUS, Tabnet.",
+        strong('Demográficas e Socioeconômicas.'), "Brasília: Ministério da Saúde, 2023. Disponível em: https://datasus.saude.gov.br/informacoes-de-saude-tabnet/."),
       
       
       p("IBGE – INSTITUTO BRASILEIRO DE GEOGRAFIA E ESTATÍSTICA.",
@@ -826,8 +901,10 @@ tabItem(
       
       p("R Core Team (2024). ",
         strong('R: A Language and Environment for Statistical
-      Computing.'), "R Foundation for Statistical Computing, Vienna, Austria.
-      <https://www.R-project.org/>."),
+      Computing.'), "R Foundation for Statistical Computing, Vienna, Austria. https://www.R-project.org/)"),
+  
+      p("SSPDS - SECRETARIA DA SEGURANÇA PÚBLICA E DEFESA SOCIAL. ",
+        strong('ESTATÍSTICAS.'), "Fortaleza: SSPDS, 2025. Disponível em: https://www.sspds.ce.gov.br/estatisticas-2-3/"),
       
       )
     
