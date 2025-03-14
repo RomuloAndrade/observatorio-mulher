@@ -2,23 +2,50 @@
     display: inline;
     margin-right: 1rem;
 }
+
+
+ .d3plus-text, .d3plus-label, .d3plus-title {
+        font-family: 'Lato', sans-serif !important;
+      }
+
+a {
+    color: #0F072E;
+    text-decoration: none;
+    background-color: transparent
+}
+
+[class*=sidebar-light] .brand-link {
+    border-bottom: 0px solid #dee2e6;
+}
+
+  .selectize-input.focus {
+     border-color: #0F072E;
+     outline: 0;
+     border-radius: 0px
+     border: 1px
+   }
+
  .selectize-control.multi .selectize-input>div {
      cursor: pointer;
      margin: 0 3px 3px 0;
      padding: 1px 5px;
      background: #C2ACFF;
-       color: #333;
-       border: 0 solid rgba(0,0,0,0)
+     color: #333;
+     border: 0px solid rgba(0,0,0,0)
   }
   .selectize-input,.selectize-control.single .selectize-input.input-active {
-     background: #6963A5;
-       cursor: text;
+     background: #0F072E;
+     border: 0px;
+     cursor: text;
+     border-radius:0px
    }
 .card, .small-box, .info-box {
     border-radius: 0rem !important;
 }
 .card-header {
     border-radius: 0rem 0rem 0 0 !important;
+    background-color: #E8E2D9;
+    border-bottom: 0px solid rgba(0,0,0,.125); 
 }
 .small-box-footer {
     border-radius: 0 0 0rem 0rem !important;
@@ -46,24 +73,24 @@
 }
 .description-text {
     font-size: 1.125rem;
-    font-family:  'Roboto', sans-serif !important; 
+    font-family:  'Lato', sans-serif !important; 
 }
 .card-pane-right {
     border-radius: 1rem !important;
 }
 
 /* p { */
-/*     font-family: 'Roboto', sans-serif !important; */
+/*     font-family: 'Lato', sans-serif !important; */
 /* } */
 
 .card-body > p {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Lato', sans-serif;
 }
 .tab-pane > p {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Lato', sans-serif;
 }
 .list-group > p {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Lato', sans-serif;
 }
 
 

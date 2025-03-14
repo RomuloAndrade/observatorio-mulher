@@ -4,7 +4,10 @@ box::use(
   shinyjs[useShinyjs],
   shiny[...],
   bs4Dash[...],
- bslib[layout_columns],
+ bslib[layout_columns,
+       card_header,
+       card,
+       bs_theme],
   reactable[reactableOutput],
   echarts4r[echarts4rOutput,
             e_theme_register],
@@ -20,7 +23,6 @@ box::use(
   D3plusR[d3plusOutput],
   shinyWidgets[setBackgroundImage]
 )
-
 
 
 
@@ -124,17 +126,17 @@ sidebar_light_submenu_hover_color <- NULL
 
 font1 <- "Lato"
 
-font2 <- "Roboto"
+font2 <- 'Lato' #"Roboto"
 
-font3 <- "Roboto Mono"
+font3 <- 'Lato'# "Roboto Mono"
 
-main_font <- "'Exo 2', sans-serif"
+main_font <- 'Lato'# "'Exo 2', sans-serif"
 
-secondary_font <- "'Roboto', sans-serif"
+secondary_font <-'Lato'# "'Roboto', sans-serif"
 
-monospace_font <- "'Roboto Mono', monospace"
+monospace_font <-'Lato'# "'Roboto Mono', monospace"
 
-base_font <- "Exo 2"
+base_font <- 'Lato' # "Exo 2"
 
 diobs_theme <- create_theme(
   bs4dash_font(
@@ -256,43 +258,108 @@ ui <- dashboardPage(
       "))
     ),
     
-    
+  
+## Cabeçalho    
+        div(
+          class = "header-container",
+          tags$head(
+            
+            
+            tags$style(HTML("
+          
+          
+          
+            
+[class*=sidebar-light] .brand-link {
+    border-bottom: 0px solid #dee2e6;
+}
 
-    
-    
-    
-### Cabeçalho    
-    div(
-      class = "header-container",
-      tags$head(
-        tags$style(HTML("
-      .card {
-          box-shadow: none !important; /* Remove a sombra */
-          border: none; /* Opcional: adiciona borda leve */
+            
+.nav-pills .nav-link.active, .nav-link:hover {
+              border-radius: 0rem;
+              margin: 0px
+              }
+
+.nav-sidebar .nav-item>.nav-link {
+    margin-bottom:.2rem;/
+}
+
+
+.sidebar-dark-info .nav-sidebar>.nav-item>.nav-link.active,.sidebar-light-info .nav-sidebar>.nav-item>.nav-link.active {
+    background-color: #C2ACFF;
+    color: #0F072E
+}
+
+[class*=sidebar-light-] .nav-sidebar>.nav-item>.nav-link.active {
+    color: #000;
+    box-shadow: 0 0px 0px rgba(0,0,0,.12),0 0px 0px rgba(0,0,0,.24);
+}
+
+.nav-item {
+          background-color:  #C2ACFF; /* Cor padrão */
+          transition: background-color 0.3s;
+	        color: #C2ACFF!important;
+
         }
-      .navbar-white {
-          background-color: #0F072E !important; /* Cor azul */
-          color: white !important; /* Cor do texto */
-        }
-        .navbar-white .navbar-nav > li > a {
-          color: white !important; /* Cor do texto dos links */
-        }
-      .header-container {
-        display: grid;
-        grid-template-columns: auto auto; /* Duas colunas automáticas */
-        gap: 20px; /* Espaçamento entre as imagens */
-        align-items: center;
-      }
-      .logo-header-esq, .logo-header-dir {
-        height: 50px;
-      }
-    "))
-      ),
-      img(class = "logo-header-esq", src = "Logo fortaleza.svg"),
-      img(class = "logo-header-dir", src = "omf - cor - 01.svg")
-    ),
+
+.nav-tabs .nav-item.show .nav-link,.nav-tabs .nav-link.active {
+    color: #0D0629;
+    background-color: #C2ACFF;
+    border-color: #0D0629 #0D0629 #C2ACFF
+}
+
+
+.nav-tabs .nav-link {
+    border: 1px solid transparent;
+    border-top-left-radius: 0rem;
+    border-top-right-radius: 0rem;
     
+}
+
+.nav-tabs .nav-link:focus,.nav-tabs .nav-link:hover {
+    color: #0D0629;
+    border-color: #e9ecef #e9ecef #dee2e6
     
+}
+
+            
+            
+            
+            
+            
+            
+            
+              .bg-secondary {
+                background-color: #0F072E!important;
+                height: 4.1rem;
+              }
+              
+              .card {
+                  box-shadow: none !important; /* Remove a sombra */
+                  border: none; /* Opcional: adiciona borda leve */
+                }
+              .navbar-white {
+                  background-color: #0F072E !important; /* Cor azul */
+                  color: white !important; /* Cor do texto */
+                }
+                .navbar-white .navbar-nav > li > a {
+                  color: white !important; /* Cor do texto dos links */
+                }
+              .header-container {
+                display: grid;
+                grid-template-columns: auto auto; /* Duas colunas automáticas */
+                gap: 20px; /* Espaçamento entre as imagens */
+                align-items: center;
+              }
+              .logo-header-esq, .logo-header-dir {
+                height: 50px;
+              }
+            "))
+          ),
+          img(class = "logo-header-esq", src = "Logo fortaleza.svg"),
+          img(class = "logo-header-dir", src = "omf - cor - 01.svg")
+        ),
+            
     title = dashboardBrand(
      
       title = "Prévia Mulher",
@@ -382,11 +449,11 @@ ui <- dashboardPage(
   
   body = dashboardBody(
 
-    
+ 
     setBackgroundImage(
       src = "/backgroundpaineis.png",
       shinydashboard = T),
-    
+
   
     #use_googlefont(font1),
     useShinyjs(),
@@ -395,13 +462,45 @@ ui <- dashboardPage(
     #use_theme(diobs_theme),
 
  
-    
+    # CSS code to fix the graphs
+    tags$head(
+      tags$script(
+        "$(function() {
+              $('[data-card-widget=\"maximize\"]').on('click', function() {
+                setTimeout(function() {
+                  var isMaximized = $('html').hasClass('maximized-card');
+                  if (isMaximized) {
+                    $('#piramide_1.1').css('height', '100%');
+                    $('#plot2').css('height', '100%');
+                    $('#plot3').css('height', '100%');
+                  } else {
+                    $('#piramide_1.1').css('height', '355px');
+                    $('#plot2').css('height', '400px');
+                    $('#plot3').css('height', '400px');
+                  }
+                }, 300);
+                $('#piramide_1.1').trigger('resize');
+                $('#plot2').trigger('resize');
+                $('#plot3').trigger('resize');
+              });
+            });
+            "
+      )
+    ),
     
     # e_theme_register(
     #   paste(readLines("www/atlas_capital_humano.json"), collapse = ""),
     #   "diobs"),
     tags$head(
       tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
+      tags$link(href = "https://fonts.googleapis.com/css?family=Lato&display=swap", rel = "stylesheet"),
+      
+      tags$style(HTML("
+      * {
+        font-family: 'Lato', sans-serif;
+      }
+    ")),
+      
       # Listen for dark-mode messages
       tags$script("
       $(document).ready(function(){
@@ -429,14 +528,14 @@ tabItem(
   tabName = "Abertura",
   h1('Abertura'),
 
- column(offset  = 2, width = 12,
-    img(src = 'imagem_obs.png'))
+ # column(offset  = 2, width = 12,
+ #    img(src = 'imagem_obs.png'))
   ),  
 
 #### Demografia --------------------------------------------------------------
 tabItem(
   tabName = "Demografia",
-  hr(), 
+ # hr(), 
   
   selectizeInput(inputId='select_1',label = 'Território:', choices = lista_demog,multiple = TRUE,
                  selected= 'FORTALEZA',width = '50%',
@@ -445,15 +544,15 @@ tabItem(
    fluidRow(
      ### Qtd Moradores 1
      #valueBoxOutput("vbox_mulher.1", width = 2),
-     column(width = 2,style = "padding: 2px; margin: 0px;",uiOutput('vbox_mulher.1')),
+     column(width = 2,style = "padding: 2px; margin-left: 5.5px",uiOutput('vbox_mulher.1')),
      #valueBoxOutput("vbox2.1", width = 2),
-     column(width = 2,style = "padding: 2px; margin: 0px;",uiOutput('vbox2.1')),
+     column(width = 2,style = "padding: 2px; margin: 0px",uiOutput('vbox2.1')),
      #valueBoxOutput("vbox1.1", width = 2),
-     column(width = 2,style = "padding: 2px; margin: 0px;",uiOutput('vbox1.1')),
+     column(width = 2,style = "padding: 2px; margin: 0px",uiOutput('vbox1.1')),
      ### Pizza sexo 1
-    column(width = 3,style = "padding: 2px; margin: 0px;",echarts4rOutput('pizza_1.1',height=150)),
+    column(width = 2,style = "padding: 2px; margin: 0px",echarts4rOutput('pizza_1.1',height=150,width = "100%")),
      ### Raça
-    column(width = 3,style = "padding: 2px; margin: 0px;",echarts4rOutput('raca1',height=150) )
+    column(width = 4,style ="padding: 2px; margin: -10px;top: 10px;",echarts4rOutput('raca1',height=150) )
     
     
   ),
@@ -461,15 +560,15 @@ tabItem(
                    fluidRow(
                      ### Qtd Moradores 2
                      #valueBoxOutput("vbox_mulher.2", width = 2),  
-                     column(width = 2,style = "padding: 2px; margin: 0px;",uiOutput('vbox_mulher.2')),
+                     column(width = 2,style = "padding: 2px; margin-left: 5.5px;",uiOutput('vbox_mulher.2')),
                      #valueBoxOutput("vbox2.2", width = 2), 
                      column(width = 2,style = "padding: 2px; margin: 0px;",uiOutput('vbox2.2')),
                      #valueBoxOutput("vbox1.2", width = 2),
                      column(width = 2,style = "padding: 2px; margin: 0px;",uiOutput('vbox1.2')),
                      ### Pizza sexo 2
-                     column(width = 3,style = "padding: 2px; margin: 0px;",echarts4rOutput('pizza_1.2',height=150 )),
+                     column(width = 2,style = "padding: 2px; margin: 0px;",echarts4rOutput('pizza_1.2',height=150 )),
                      ### Raça
-                     column(width = 3,style = "padding: 2px; margin: 0px;",echarts4rOutput('raca2',height=150))
+                     column(width = 4,style = "padding: 2px; margin: -10px;top: 10px;",echarts4rOutput('raca2',height=150))
                      ) )
   
 
@@ -477,14 +576,10 @@ tabItem(
   fluidRow(
     box(
     title = 'Pirâmide etária',
-    id = "mybox",
-    #status = "danger",
-    # background = 'white',
+    id = "mybox_piram",
     solidHeader = T,
     width = 8,
-    # gradient = TRUE,
-    # collapsible = TRUE,
-    # closable = TRUE,
+    maximizable = T,
     
     
     conditionalPanel(condition  = "input.select_1.length ==1 ",
@@ -500,8 +595,7 @@ tabItem(
     )),
   box(
     title = 'Mapa',
-    id = "mybox",
-    status = "danger",
+    maximizable = T,
     # background = 'white',
     solidHeader = F,
     width = 4,
@@ -539,20 +633,20 @@ tabItem(
   fluidRow(
   box(
     title = 'Composição de domicílios por sexo do responsável',
-    id = "mybox",
-    status = "danger",
+    id = "mybox_comp",
     solidHeader = F,
     width = 7,
     echarts4rOutput('composicao')),
+
+  
   box(
     title = 'Residentes em Favelas e Comunidades Urbanas',
-    id = "mybox",
-    status = "danger",
+    id = "mybox_resid",
     solidHeader = F,
     width = 5,
     echarts4rOutput('favela'))
     ),
-  
+
   hr(class = "divider"),
   p('Fonte: Censo Demográfico - IBGE - 2022')
   
@@ -583,7 +677,7 @@ h1('Crimes Violentos Letais e Intencionais - CVLI'),
 fluidRow(
   ####
   column(width=6, box(
-    title = 'Caso de CVLI por sexo', status = "danger",solidHeader = F,width = 12,
+    title = 'Caso de CVLI por sexo',solidHeader = F,width = 12,
     tabsetPanel(
       id = "tabs_viol",
       tabPanel(
@@ -608,27 +702,27 @@ fluidRow(
                         multiple = F,
                         options = list('plugins' = list('remove_button'))), 
          box(
-    title = textOutput("text_ano_mapa") , status = "danger",solidHeader = F,width = 12,   
+    title = textOutput("text_ano_mapa") ,solidHeader = F,width = 12,   
 
   leafletOutput("map",height = 360))),
 
   column(width=6, box(
-    title = 'Caso de Feminicídios', status = "danger",solidHeader = F,width = 12,
+    title = 'Caso de Feminicídios', solidHeader = F,width = 12,
     echarts4rOutput('viol_femin'))),
 
   column(width=6, box(
-    title = textOutput("text_ano_meios"), status = "danger",solidHeader = F,width = 12,
+    title = textOutput("text_ano_meios"), solidHeader = F,width = 12,
     fluidRow(
       column(width=6, echarts4rOutput('viol_meio_H',width ='110%')),
       column(width=6, echarts4rOutput('viol_meio_M',width ='110%'))
     ))),
   
   column(width=6, box(
-    title = textOutput("text_ano_etária"), status = "danger",solidHeader = F,width = 12,
+    title = textOutput("text_ano_etária"), solidHeader = F,width = 12,
     echarts4rOutput('faixa_etaria'))),
   
 column(width=6, box(
-  title = textOutput("text_ano_semana"), status = "danger",solidHeader = F,width = 12,
+  title = textOutput("text_ano_semana"), solidHeader = F,width = 12,
   echarts4rOutput('viol_semana')))
 ),
 hr(class = "divider"),
@@ -638,7 +732,7 @@ p('Fonte: Secretaria da Segurança Pública e Defesa Social do Estado do Ceará 
 #### Mercado de trabalho  --------------------------------------------------------  
   tabItem(
     tabName = "Mercado",
-    hr(),
+
   fluidRow(
     
  
@@ -672,43 +766,42 @@ p('Fonte: Secretaria da Segurança Pública e Defesa Social do Estado do Ceará 
   
     box(
       title = 'Tipo de ocupação',
-      id = "mybox",
-      status = "danger",
       solidHeader = F,
-      width = 6,
-      height=540,
+      width = 12,
+      height=600,
   
-      radioButtons(label= 'Sexo',
+      radioButtons(label= NULL,
                    inputId= "select_tipo_merc" ,
-                   c( "Geral", "Por mulher e homem"),
-                   selected = "Por mulher e homem",
-                   inline = F
+                   c( "Visão Geral", "Visão Comparativa"),
+                   selected = "Visão Comparativa",
+                   inline = T
       ),
       
       
-      conditionalPanel(condition  = "input.select_tipo_merc == 'Geral' ",
+      conditionalPanel(condition  = "input.select_tipo_merc == 'Visão Geral' ",
                        layout_columns(
                          withSpinner(d3plusOutput('F_cnaes'))
-                         #htmlOutput("pedro", container = tags$li, class = "custom-li-output")
+
                          
                        )
       ),
-      conditionalPanel(condition  = "input.select_tipo_merc =='Por mulher e homem' ",
+      conditionalPanel(condition  = "input.select_tipo_merc =='Visão Comparativa' ",
                        layout_columns(
-                         withSpinner(d3plusOutput('F_cnaes_form')),
-                         withSpinner(d3plusOutput('F_cnaes_inform'))
+                         withSpinner(d3plusOutput('F_cnaes_form',height = '500px')),
+                         withSpinner(d3plusOutput('F_cnaes_inform',height = '500px'))
                        )
       )
     ),
   
-    column(width = 6,
-           box(
-             title = textOutput("ano_mercado")  ,
-             id = "mybox",
-             status = "danger",
-             solidHeader = F,
-             width = 12, 
-             height=540,
+    column(width = 12,
+           #box(
+            card( 
+            # title = textOutput("ano_mercado")  ,
+            card_header(textOutput("ano_mercado")  ),
+           #  solidHeader = F,
+            # width = 12, 
+        
+             min_height  =540,
              tabsetPanel(
                id = "tabs_ocup",
                tabPanel(
@@ -729,16 +822,17 @@ p('Fonte: Secretaria da Segurança Pública e Defesa Social do Estado do Ceará 
              
                )
              )
+    )
           
           # height = 
         # withSpinner(reactableOutput('tab_ocup'))  
-         ),#htmlOutput('pedro')),
+        # )
+    ,#htmlOutput('pedro')),
 
 
 
     box(
     title = 'Pessoas ocupadas',
-    status = "danger",
     solidHeader = F,
     echarts4rOutput('ocupação_sexo'),
     width = 6
@@ -746,7 +840,6 @@ p('Fonte: Secretaria da Segurança Pública e Defesa Social do Estado do Ceará 
 
   box(
     title = 'Taxa de informalidade',
-    status = "danger",
     solidHeader = F,
     echarts4rOutput('perc_informal_sexo'),
     width = 6
@@ -755,14 +848,12 @@ p('Fonte: Secretaria da Segurança Pública e Defesa Social do Estado do Ceará 
   
   box(
     title = 'Taxa de desemprego',
-    status = "danger",
     solidHeader = F,
     echarts4rOutput('taxa_desemp_fort'),
     width = 6
   ),
   box(
     title = 'Rendimento médio real habitual (R$/mês)',
-    status = "danger",
     solidHeader = F,
     echarts4rOutput('renda_fort'),
     width = 6
@@ -782,7 +873,7 @@ tabItem(
   hr(),
   fluidRow(
   column(width=6,box(
-    title = 'Taxa de alfabetização', status = "danger",solidHeader = F,width = 12,
+    title = 'Taxa de alfabetização',solidHeader = F,width = 12,
     
     withSpinner(leafletOutput("map_educ",height=638))),
     'Taxa de alfabetização para maiores de 15 anos'    
