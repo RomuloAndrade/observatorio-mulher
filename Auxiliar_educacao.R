@@ -300,9 +300,6 @@ names(bairros_alfab)
 # 
 # 
 
-Analfab_mais_de_15_H = Pessoas_mais_de_15_H - Alfab_mais_de_15_H,
-Analfab_mais_de_15_M = Pessoas_mais_de_15_M - Alfab_mais_de_15_M,
-
 
 Qtd_alfab <- bairros_alfab |>
   select(NM_BAIRRO,7:10) |>

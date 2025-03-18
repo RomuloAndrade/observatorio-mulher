@@ -390,19 +390,19 @@ ui <- dashboardPage(
       sidebarHeader("Introdução"),
       menuItem(
         "Abertura",
-        tabName = "Abertura",
-        icon = icon("venus")
+        tabName = "Abertura"
+       # icon = icon("venus")
       ),
       sidebarHeader("Visualizações"),
       menuItem(
         "Demografia",
-        tabName = "Demografia",
-        icon = icon("users")
+        tabName = "Demografia"
+        #icon = icon("users")
       ),
       menuItem(
         "Educação",
-        tabName = "Educação",
-        icon = icon("book-open")
+        tabName = "Educação"
+        #icon = icon("book-open")
       ),
       # menuItem(
       #   "Saúde",
@@ -412,31 +412,31 @@ ui <- dashboardPage(
       
       menuItem(
         "Mercado de trabalho",
-        tabName = "Mercado",
-        icon = icon("money-bill-trend-up")
+        tabName = "Mercado"
+       # icon = icon("money-bill-trend-up")
       ),
       
       menuItem(
         "Violência",
-        tabName = "Violência",
-        icon = icon("gun")
+        tabName = "Violência"
+       # icon = icon("gun")
       ),
 
       sidebarHeader("Metadados"),
       menuItem(
         "Glossário",
-        tabName = "glossario",
-        icon = icon("magnifying-glass-chart")
+        tabName = "glossario"
+       # icon = icon("magnifying-glass-chart")
       ),
       menuItem(
         "Referências",
-        tabName = "fonte",
-        icon = icon("server")
+        tabName = "fonte"
+        #icon = icon("server")
       ),
       menuItem(
         "Sobre",
-        tabName = "sobre",
-        icon = icon("info")
+        tabName = "sobre"
+       # icon = icon("info")
       )
     )
   ),
@@ -462,31 +462,31 @@ ui <- dashboardPage(
     #use_theme(diobs_theme),
 
  
-    # CSS code to fix the graphs
-    tags$head(
-      tags$script(
-        "$(function() {
-              $('[data-card-widget=\"maximize\"]').on('click', function() {
-                setTimeout(function() {
-                  var isMaximized = $('html').hasClass('maximized-card');
-                  if (isMaximized) {
-                    $('#piramide_1.1').css('height', '100%');
-                    $('#plot2').css('height', '100%');
-                    $('#plot3').css('height', '100%');
-                  } else {
-                    $('#piramide_1.1').css('height', '355px');
-                    $('#plot2').css('height', '400px');
-                    $('#plot3').css('height', '400px');
-                  }
-                }, 300);
-                $('#piramide_1.1').trigger('resize');
-                $('#plot2').trigger('resize');
-                $('#plot3').trigger('resize');
-              });
-            });
-            "
-      )
-    ),
+    # # CSS code to fix the graphs
+    # tags$head(
+    #   tags$script(
+    #     "$(function() {
+    #           $('[data-card-widget=\"maximize\"]').on('click', function() {
+    #             setTimeout(function() {
+    #               var isMaximized = $('html').hasClass('maximized-card');
+    #               if (isMaximized) {
+    #                 $('#piramide_1.1').css('height', '100%');
+    #                 $('#plot2').css('height', '100%');
+    #                 $('#plot3').css('height', '100%');
+    #               } else {
+    #                 $('#piramide_1.1').css('height', '355px');
+    #                 $('#plot2').css('height', '400px');
+    #                 $('#plot3').css('height', '400px');
+    #               }
+    #             }, 300);
+    #             $('#piramide_1.1').trigger('resize');
+    #             $('#plot2').trigger('resize');
+    #             $('#plot3').trigger('resize');
+    #           });
+    #         });
+    #         "
+    #   )
+    # ),
     
     # e_theme_register(
     #   paste(readLines("www/atlas_capital_humano.json"), collapse = ""),
@@ -496,7 +496,7 @@ ui <- dashboardPage(
       tags$link(href = "https://fonts.googleapis.com/css?family=Lato&display=swap", rel = "stylesheet"),
       
       tags$style(HTML("
-      * {
+      .a , .p {
         font-family: 'Lato', sans-serif;
       }
     ")),
@@ -573,13 +573,15 @@ tabItem(
   
 
   ,
+ br(),
   fluidRow(
     box(
     title = 'Pirâmide etária',
     id = "mybox_piram",
     solidHeader = T,
+    collapsible = F,
+    height = 470,
     width = 8,
-    maximizable = T,
     
     
     conditionalPanel(condition  = "input.select_1.length ==1 ",
@@ -595,8 +597,8 @@ tabItem(
     )),
   box(
     title = 'Mapa',
-    maximizable = T,
-    # background = 'white',
+    height = 470,
+    collapsible = F,
     solidHeader = F,
     width = 4,
     tabsetPanel(
@@ -620,29 +622,33 @@ tabItem(
       )
       ),
     
-     withSpinner(leafletOutput('map_bairro',width = '100%', height = 355))
+     withSpinner(leafletOutput('map_bairro',width = '100%',height = 370))
   
     # br(),
     # fluidRow( downloadButton("down_bairro", ".GEOJSON"), downloadButton("down_bairro_xlsx", ".XLSX"))
   )
   ),
 
-  
-   reactableOutput("table_bairro"),
-  br(),
+ box(
+   title = 'Indicadores por bairro',
+   solidHeader = T,
+   width = 12,
+   collapsible = T,
+   reactableOutput("table_bairro")),
+    br(),
   fluidRow(
   box(
     title = 'Composição de domicílios por sexo do responsável',
-    id = "mybox_comp",
     solidHeader = F,
+    collapsible = F,
     width = 7,
     echarts4rOutput('composicao')),
 
   
   box(
     title = 'Residentes em Favelas e Comunidades Urbanas',
-    id = "mybox_resid",
     solidHeader = F,
+    collapsible = F,
     width = 5,
     echarts4rOutput('favela'))
     ),

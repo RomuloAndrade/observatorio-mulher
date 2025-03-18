@@ -14,6 +14,17 @@ a {
     background-color: transparent
 }
 
+body {
+    margin: 0;
+    font-family: 'Lato', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    text-align: left;
+    background-color: #fff
+}
+
 [class*=sidebar-light] .brand-link {
     border-bottom: 0px solid #dee2e6;
 }
