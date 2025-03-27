@@ -4,9 +4,9 @@ box::use(
   shinyjs[useShinyjs],
   shiny[...],
   bs4Dash[...],
- bslib[layout_columns,
+ bslib[layout_columns,layout_column_wrap,
        card_header,
-       card,
+       card,card_body,
        bs_theme],
   reactable[reactableOutput],
   echarts4r[echarts4rOutput,
@@ -29,6 +29,7 @@ box::use(
 
 # Load data -----------------------------------------------------------------------------------
 lista_demog <- readRDS('Dados/lista_demog.rds')
+
 glossario <-readxl::read_excel('Dados/Glossario.xlsx')
 
 # Funcao --------------------------------------------------------------------------------------
@@ -59,147 +60,147 @@ constroi_glossario <- function(nchunks = 3) {
 
 
 # Tema ----------------------------------------------------------------------------------------
-
-
-light_blue <- "#014ffd"
-red <- "#ff585d"
-
-yellow <- "#fbb81c"
-
-cyan <- "#1eb1e7"
-blue2 <- "#1a649d"
-orange1 <- "#ff9900"
-violet2 <- "#5b5b9b"
-
-orange2 <- "#925106"
-
-head <- '#0F072E'
-
-## Status colors ##
-
-
-primary <- yellow
-secondary <- violet2
-success <- NULL
-info <- blue2
-warning <- orange1
-danger <- red
-light <- NULL
-dark <- NULL
-
-
-## Main colors ##
-
-blue <- light_blue
-lightblue <- cyan
-navy <- NULL
-cyan <- NULL
-teal <- NULL
-olive <- NULL
-green <- NULL
-lime <- NULL
-orange <- NULL
-yellow <- NULL
-fuchsia <- NULL
-purple <- NULL
-maroon <- NULL
-red <- red
-black <- NULL
-gray_x_light <- NULL
-gray_600 <- NULL
-gray_800 <- NULL
-gray_900 <- NULL
-white <- NULL
-
-main_bg <- NULL
-text_dark <- NULL
-text_light <- NULL
-sidebar_light_bg <- main_bg
-sidebar_light_color <- text_light
-sidebar_light_hover_color <- NULL
-sidebar_light_submenu_bg <- main_bg
-sidebar_light_submenu_color <- NULL
-sidebar_light_submenu_hover_color <- NULL
-
-## FONTE LATO
-
-
-font1 <- "Lato"
-
-font2 <- 'Lato' #"Roboto"
-
-font3 <- 'Lato'# "Roboto Mono"
-
-main_font <- 'Lato'# "'Exo 2', sans-serif"
-
-secondary_font <-'Lato'# "'Roboto', sans-serif"
-
-monospace_font <-'Lato'# "'Roboto Mono', monospace"
-
-base_font <- 'Lato' # "Exo 2"
-
-diobs_theme <- create_theme(
-  bs4dash_font(
-    size_base = "1rem",
-    size_lg = NULL,
-    size_sm = NULL,
-    size_xs = NULL,
-    size_xl = NULL,
-    weight_light = NULL,
-    weight_normal = NULL,
-    weight_bold = NULL,
-    family_sans_serif = main_font,
-    family_monospace = monospace_font,
-    family_base = main_font
-  ),
-  bs4dash_color(
-    blue = blue,
-    lightblue = lightblue,
-    navy = navy,
-    cyan = cyan,
-    teal = teal,
-    olive = olive,
-    green = green,
-    lime = lime,
-    orange = orange,
-    yellow = yellow,
-    fuchsia = fuchsia,
-    purple = purple,
-    maroon = maroon,
-    red = red,
-    black = black,
-    gray_x_light = gray_x_light,
-    gray_600 = gray_600,
-    gray_800 = gray_800,
-    gray_900 = gray_900,
-    white = white
-  ),
-  bs4dash_status(
-    primary = primary,
-    secondary = secondary,
-    success = success,
-    info = info,
-    warning = warning,
-    danger = danger,
-    light = light,
-    dark = dark
-  ),
-  bs4dash_layout(
-    font_size_root = NULL,
-    sidebar_width = NULL,
-    sidebar_padding_x = NULL,
-    sidebar_padding_y = NULL,
-    sidebar_mini_width = NULL,
-    control_sidebar_width = NULL,
-    boxed_layout_max_width = NULL,
-    screen_header_collapse = NULL,
-    main_bg = main_bg,
-    content_padding_x = NULL,
-    content_padding_y = NULL
-  )
-)
-
-
+# 
+# 
+# light_blue <- "#014ffd"
+# red <- "#ff585d"
+# 
+# yellow <- "#fbb81c"
+# 
+# cyan <- "#1eb1e7"
+# blue2 <- "#1a649d"
+# orange1 <- "#ff9900"
+# violet2 <- "#5b5b9b"
+# 
+# orange2 <- "#925106"
+# 
+# head <- '#0F072E'
+# 
+# ## Status colors ##
+# 
+# 
+# primary <- yellow
+# secondary <- violet2
+# success <- NULL
+# info <- blue2
+# warning <- orange1
+# danger <- red
+# light <- NULL
+# dark <- NULL
+# 
+# 
+# ## Main colors ##
+# 
+# blue <- light_blue
+# lightblue <- cyan
+# navy <- NULL
+# cyan <- NULL
+# teal <- NULL
+# olive <- NULL
+# green <- NULL
+# lime <- NULL
+# orange <- NULL
+# yellow <- NULL
+# fuchsia <- NULL
+# purple <- NULL
+# maroon <- NULL
+# red <- red
+# black <- NULL
+# gray_x_light <- NULL
+# gray_600 <- NULL
+# gray_800 <- NULL
+# gray_900 <- NULL
+# white <- NULL
+# 
+# main_bg <- NULL
+# text_dark <- NULL
+# text_light <- NULL
+# sidebar_light_bg <- main_bg
+# sidebar_light_color <- text_light
+# sidebar_light_hover_color <- NULL
+# sidebar_light_submenu_bg <- main_bg
+# sidebar_light_submenu_color <- NULL
+# sidebar_light_submenu_hover_color <- NULL
+# 
+# ## FONTE LATO
+# 
+# 
+# font1 <- "Lato"
+# 
+# font2 <- 'Lato' #"Roboto"
+# 
+# font3 <- 'Lato'# "Roboto Mono"
+# 
+# main_font <- 'Lato'# "'Exo 2', sans-serif"
+# 
+# secondary_font <-'Lato'# "'Roboto', sans-serif"
+# 
+# monospace_font <-'Lato'# "'Roboto Mono', monospace"
+# 
+# base_font <- 'Lato' # "Exo 2"
+# 
+# diobs_theme <- create_theme(
+#   bs4dash_font(
+#     size_base = "1rem",
+#     size_lg = NULL,
+#     size_sm = NULL,
+#     size_xs = NULL,
+#     size_xl = NULL,
+#     weight_light = NULL,
+#     weight_normal = NULL,
+#     weight_bold = NULL,
+#     family_sans_serif = main_font,
+#     family_monospace = monospace_font,
+#     family_base = main_font
+#   ),
+#   bs4dash_color(
+#     blue = blue,
+#     lightblue = lightblue,
+#     navy = navy,
+#     cyan = cyan,
+#     teal = teal,
+#     olive = olive,
+#     green = green,
+#     lime = lime,
+#     orange = orange,
+#     yellow = yellow,
+#     fuchsia = fuchsia,
+#     purple = purple,
+#     maroon = maroon,
+#     red = red,
+#     black = black,
+#     gray_x_light = gray_x_light,
+#     gray_600 = gray_600,
+#     gray_800 = gray_800,
+#     gray_900 = gray_900,
+#     white = white
+#   ),
+#   bs4dash_status(
+#     primary = primary,
+#     secondary = secondary,
+#     success = success,
+#     info = info,
+#     warning = warning,
+#     danger = danger,
+#     light = light,
+#     dark = dark
+#   ),
+#   bs4dash_layout(
+#     font_size_root = NULL,
+#     sidebar_width = NULL,
+#     sidebar_padding_x = NULL,
+#     sidebar_padding_y = NULL,
+#     sidebar_mini_width = NULL,
+#     control_sidebar_width = NULL,
+#     boxed_layout_max_width = NULL,
+#     screen_header_collapse = NULL,
+#     main_bg = main_bg,
+#     content_padding_x = NULL,
+#     content_padding_y = NULL
+#   )
+# )
+# 
+# 
 
 
 # Load UI -------------------------------------------------------------------------------------
@@ -268,68 +269,7 @@ ui <- dashboardPage(
             tags$style(HTML("
           
           
-          
-            
-[class*=sidebar-light] .brand-link {
-    border-bottom: 0px solid #dee2e6;
-}
-
-            
-.nav-pills .nav-link.active, .nav-link:hover {
-              border-radius: 0rem;
-              margin: 0px
-              }
-
-.nav-sidebar .nav-item>.nav-link {
-    margin-bottom:.2rem;/
-}
-
-
-.sidebar-dark-info .nav-sidebar>.nav-item>.nav-link.active,.sidebar-light-info .nav-sidebar>.nav-item>.nav-link.active {
-    background-color: #C2ACFF;
-    color: #0F072E
-}
-
-[class*=sidebar-light-] .nav-sidebar>.nav-item>.nav-link.active {
-    color: #000;
-    box-shadow: 0 0px 0px rgba(0,0,0,.12),0 0px 0px rgba(0,0,0,.24);
-}
-
-.nav-item {
-          background-color:  #C2ACFF; /* Cor padrão */
-          transition: background-color 0.3s;
-	        color: #C2ACFF!important;
-
-        }
-
-.nav-tabs .nav-item.show .nav-link,.nav-tabs .nav-link.active {
-    color: #0D0629;
-    background-color: #C2ACFF;
-    border-color: #0D0629 #0D0629 #C2ACFF
-}
-
-
-.nav-tabs .nav-link {
-    border: 1px solid transparent;
-    border-top-left-radius: 0rem;
-    border-top-right-radius: 0rem;
-    
-}
-
-.nav-tabs .nav-link:focus,.nav-tabs .nav-link:hover {
-    color: #0D0629;
-    border-color: #e9ecef #e9ecef #dee2e6
-    
-}
-
-            
-            
-            
-            
-            
-            
-            
-              .bg-secondary {
+               .bg-secondary {
                 background-color: #0F072E!important;
                 height: 4.1rem;
               }
@@ -449,10 +389,10 @@ ui <- dashboardPage(
   
   body = dashboardBody(
 
- 
-    setBackgroundImage(
-      src = "/backgroundpaineis.png",
-      shinydashboard = T),
+    # 
+    # setBackgroundImage(
+    #   src = "/backgroundpaineis.png",
+    #   shinydashboard = T),
 
   
     #use_googlefont(font1),
@@ -538,7 +478,7 @@ tabItem(
  # hr(), 
   
   selectizeInput(inputId='select_1',label = 'Território:', choices = lista_demog,multiple = TRUE,
-                 selected= 'FORTALEZA',width = '50%',
+                 selected= 'Fortaleza',width = '50%',
                  options = list('plugins' = list('remove_button'),maxItems = 3,minItem=1)),
    
    fluidRow(
@@ -569,92 +509,84 @@ tabItem(
                      column(width = 2,style = "padding: 2px; margin: 0px;",echarts4rOutput('pizza_1.2',height=150 )),
                      ### Raça
                      column(width = 4,style = "padding: 2px; margin: -10px;top: 10px;",echarts4rOutput('raca2',height=150))
-                     ) )
-  
-
-  ,
+                     ) ),
  br(),
-  fluidRow(
-    box(
-    title = 'Pirâmide etária',
-    id = "mybox_piram",
-    solidHeader = T,
-    collapsible = F,
-    height = 470,
-    width = 8,
-    
-    
-    conditionalPanel(condition  = "input.select_1.length ==1 ",
-                     layout_columns( 
-                       withSpinner( echarts4rOutput("piramide_1.1"))
-                       )        
-    ),
-    conditionalPanel(condition  = "input.select_1.length == 2 ",
-                     layout_columns( 
-                       echarts4rOutput("piramide_2"),
-                       echarts4rOutput("piramide_1.2")
-                     )
-    )),
-  box(
-    title = 'Mapa',
-    height = 470,
-    collapsible = F,
-    solidHeader = F,
-    width = 4,
-    tabsetPanel(
-      id = "tabs_ba",
-      tabPanel(
-        title = '% de mulheres' ,
-       
-      ),
-      tabPanel(
-        title = 'Razão sexo',
-      
-      ),
-      tabPanel(
-        title = 'População',
-        
-      ),
-      tabPanel(
-        title = 'Densidade' ,
-       
-
-      )
-      ),
-    
+ 
+ fluidRow(
+   box(
+     title = 'Pirâmide etária',
+     id = "mybox_piram",
+     solidHeader = T,
+     collapsible = F,
+     height = 470,
+     width = 8,
+     
+     
+     conditionalPanel(condition  = "input.select_1.length ==1 ",
+                      layout_columns( 
+                        withSpinner( echarts4rOutput("piramide_1.1"))
+                      )        
+     ),
+     conditionalPanel(condition  = "input.select_1.length == 2 ",
+                      layout_columns( 
+                        echarts4rOutput("piramide_2"),
+                        echarts4rOutput("piramide_1.2")
+                      )
+     )),
+   box(
+     title = 'Mapa',
+     height = 470,
+     collapsible = F,
+     solidHeader = F,
+     width = 4,
+     tabsetPanel(
+       id = "tabs_ba",
+       tabPanel(
+         title = '% de mulheres' ,
+         
+       ),
+       tabPanel(
+         title = 'Razão sexo',
+         
+       ),
+       tabPanel(
+         title = 'População',
+         
+       ),
+       tabPanel(
+         title = 'Densidade' ,
+         
+         
+       )
+     ),
+     
      withSpinner(leafletOutput('map_bairro',width = '100%',height = 370))
-  
-    # br(),
-    # fluidRow( downloadButton("down_bairro", ".GEOJSON"), downloadButton("down_bairro_xlsx", ".XLSX"))
-  )
-  ),
-
- box(
-   title = 'Indicadores por bairro',
-   solidHeader = T,
-   width = 12,
-   collapsible = T,
+     
+     # br(),
+     # fluidRow( downloadButton("down_bairro", ".GEOJSON"), downloadButton("down_bairro_xlsx", ".XLSX"))
+   )
+ ),
+ 
+ br(),
+ card(
+   card_header('Indicadores por bairro' ,style=("font-size:17.6px") ),
    reactableOutput("table_bairro")),
     br(),
-  fluidRow(
-  box(
-    title = 'Composição de domicílios por sexo do responsável',
-    solidHeader = F,
-    collapsible = F,
-    width = 7,
-    echarts4rOutput('composicao')),
 
-  
-  box(
-    title = 'Residentes em Favelas e Comunidades Urbanas',
-    solidHeader = F,
-    collapsible = F,
-    width = 5,
-    echarts4rOutput('favela'))
-    ),
+ layout_column_wrap(
+   width = 1/2,
+    card(
+      card_header('Composição de domicílios por sexo do responsável' ,style=("font-size:17.6px") ),
+      echarts4rOutput('composicao')),
+    card(
+      card_header('Residentes em Favelas e Comunidades Urbanas' ,style=("font-size:17.6px") ),
+      echarts4rOutput('favela'))
+ ),
+
 
   hr(class = "divider"),
-  p('Fonte: Censo Demográfico - IBGE - 2022')
+  p('Fonte: Censo Demográfico - IBGE - 2022'),
+
   
   ),
   
@@ -803,7 +735,7 @@ p('Fonte: Secretaria da Segurança Pública e Defesa Social do Estado do Ceará 
            #box(
             card( 
             # title = textOutput("ano_mercado")  ,
-            card_header(textOutput("ano_mercado")  ),
+            card_header(textOutput("ano_mercado") ,style=("font-size:17.6px") ),
            #  solidHeader = F,
             # width = 12, 
         
@@ -876,34 +808,37 @@ p('Fonte: IBGE. Pesquisa Nacional por Amostra de Domicílios Contínua')
 #### Educação  --------------------------------------------------------  
 tabItem(
   tabName = "Educação",
-  hr(),
+  div(h2(textOutput('text_selected')) , style = "text-align:center"),
+  br(),
   fluidRow(
-  column(width=6,box(
-    title = 'Taxa de alfabetização',solidHeader = F,width = 12,
-    
-    withSpinner(leafletOutput("map_educ",height=638))),
+  column(width=6,
+    card(
+    card_header( 'Alfabetização por bairro',style=("font-size:17.6px") ),
+    style=('background:#FCF5EC'),
+    withSpinner(leafletOutput("map_educ",height=741))),
     'Taxa de alfabetização para maiores de 15 anos'    
     ),
 
   
   column(width=6, 
-         div(h2(textOutput('text_selected')) , style = "text-align:center"),
-         br(),
+         
     fluidRow(valueBoxOutput("alf_M", width = 4),
              valueBoxOutput("alf_posicao", width = 4),
              valueBoxOutput("alf", width = 4)),      
          
-    #      box(
-    # title = textOutput("Alfabetização"), status = "danger",solidHeader = F,width = 12,
+    card(
+      card_header('Alfabetização por sexo e faixa etária',style=("font-size:17.6px") ),width = 12,style=('background:#FCF5EC'),
    
-    fluidRow(
+fluidRow(
+      column(width=6,style = "padding: 0px; margin: 0px;", echarts4rOutput('pizza_alfab_M',width ='100%',height=250)),
       
-      column(width=6, echarts4rOutput('pizza_alfab_M',width ='100%',height=250)),
-      column(width=6, echarts4rOutput('pizza_alfab_H',width ='110%',height=250))
-    #)
+      column(width=6,style = "padding: 0px; margin: 0px;", echarts4rOutput('pizza_alfab_H',width ='100%',height=250))
     ),
-    echarts4rOutput('idade_alfab',height=325)
+
+    echarts4rOutput('idade_alfab',height=325,width ='100%')
+    
     )
+  )
 
       ),
   hr(class = "divider"),

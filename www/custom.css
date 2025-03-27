@@ -3,7 +3,80 @@
     margin-right: 1rem;
 }
 
+body {
+      background-image: url('backgroundpaineis.png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    margin: 0;
+    font-family: 'Lato', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    text-align: left;
 
+
+    }
+.content-wrapper {
+     background-color:none;
+     background: none
+}         
+            
+[class*=sidebar-light] .brand-link {
+    border-bottom: 0px solid #dee2e6;
+}
+
+            
+.nav-pills .nav-link.active, .nav-link:hover {
+              border-radius: 0rem;
+              margin: 0px
+              }
+
+.nav-sidebar .nav-item>.nav-link {
+    margin-bottom:.2rem;/
+}
+
+
+.sidebar-dark-info .nav-sidebar>.nav-item>.nav-link.active,.sidebar-light-info .nav-sidebar>.nav-item>.nav-link.active {
+    background-color: #C2ACFF;
+    color: #0F072E
+}
+
+[class*=sidebar-light-] .nav-sidebar>.nav-item>.nav-link.active {
+    color: #000;
+    box-shadow: 0 0px 0px rgba(0,0,0,.12),0 0px 0px rgba(0,0,0,.24);
+}
+
+.nav-item {
+          background-color:  #C2ACFF; /* Cor padrão */
+          transition: background-color 0.3s;
+	        color: #C2ACFF!important;
+
+        }
+
+.nav-tabs .nav-item.show .nav-link,.nav-tabs .nav-link.active {
+    color: #0D0629;
+    background-color: #C2ACFF;
+    border-color: #0D0629 #0D0629 #C2ACFF
+}
+
+
+.nav-tabs .nav-link {
+    border: 1px solid transparent;
+    border-top-left-radius: 0rem;
+    border-top-right-radius: 0rem;
+    
+}
+
+.nav-tabs .nav-link:focus,.nav-tabs .nav-link:hover {
+    color: #0D0629;
+    border-color: #e9ecef #e9ecef #dee2e6
+    
+}
+
+            
+            
  .d3plus-text, .d3plus-label, .d3plus-title {
         font-family: 'Lato', sans-serif !important;
       }
@@ -14,16 +87,7 @@ a {
     background-color: transparent
 }
 
-body {
-    margin: 0;
-    font-family: 'Lato', sans-serif;
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.5;
-    color: #212529;
-    text-align: left;
-    background-color: #fff
-}
+
 
 [class*=sidebar-light] .brand-link {
     border-bottom: 0px solid #dee2e6;

@@ -128,6 +128,8 @@ bairros_demografia <- readRDS('Dados/bairros_demografia.rds')
 df_faixa <- readRDS('Dados/df_faixa_.rds')
 df_cor_ <- readRDS('Dados/df_cor_.rds')
 df_sexo <- readRDS('Dados/df_sexo.rds')
+
+
 shp_Bairros <- readRDS('Dados/shp_bairros_demografia.rds')
 composicao <- readRDS('Dados/composicao.rds')
 favela <- readRDS('Dados/favela.rds')
@@ -504,7 +506,7 @@ output$piramide_1.1 <- renderEcharts4r({
       ) |>
       e_grid(left='20%',bottom= "0%") |> 
       e_color(c(cor_h,cor_m)) |> 
-      e_legend( top= "3%")# |> 
+      e_legend( top= "3%",icon = 'circle', right= 0)# |> 
     #e_title(text=input$select_1[1])#,subtext="Segundo sexo e grupo de idade" )  
   })  
 output$piramide_1.2 <- renderEcharts4r({
@@ -541,7 +543,7 @@ output$piramide_1.2 <- renderEcharts4r({
     ) |>
     e_grid(left='28%',bottom= "0%") |> 
       e_color(c(cor_h,cor_m)) |> 
-    e_legend( top= "3%")|> 
+    e_legend( top= "3%",icon = 'circle', right= 0) |> 
     e_title(text=input$select_1[2])#,subtext="Segundo sexo e grupo de idade" )  
 })  
 output$piramide_2 <- renderEcharts4r({
@@ -578,7 +580,7 @@ output$piramide_2 <- renderEcharts4r({
     ) |>
     e_grid(left='28%',bottom= "0%") |> 
     e_color(c(cor_h,cor_m)) |> 
-    e_legend( top= "3%") |>
+    e_legend( show=F) |>
     e_title(text=input$select_1[1])
 })  
 
@@ -622,10 +624,10 @@ output$raca2 <- renderEcharts4r({
     e_tooltip(
       trigger="axis",formatter = e_tooltip_pointer_formatter(
         style = c( "percent"),digits = 1) )|>  
-    e_legend(icon = 'circle', left= 0) |> 
+    e_legend(show = F, icon = 'circle', left= 0) |> 
     e_y_axis(show=F) |> 
     e_x_axis( axisLine= list(show=F), axisTick = list(show=F), axisLabel= list(color='black',interval= 0,overflow= 'truncate')) |> 
-    e_grid(top = "5%",bottom= "20%") |>
+    e_grid(top = "5%",bottom= "20%",left="0%",width='100%') |>
     e_group("decomp") |> 
     e_connect_group("decomp")
 })
@@ -669,13 +671,13 @@ output$table_bairro <- renderReactable({
   
   
   reactable(shp_Bairros[,c(1,6,3,7,8,4,5,2)],
-            bordered = F,compact = TRUE,defaultPageSize = 15,
+            bordered = F,compact = TRUE,defaultPageSize = 15,showSortable = TRUE,
             highlight = TRUE, searchable = TRUE,defaultColDef = colDef(   
             #headerClass = "sort-header",
               footerStyle = list(fontWeight = "bold",align = "center")),
             columns = list(
               Bairro = colDef(name = "Bairro",footer='Geral', sticky = "left"),
-              Área_km2 = colDef(name = "Área km2", footer=format(areaB,big.mark = ".",decimal.mark=","), 
+              Área_km2 = colDef(name = "Área km²", footer=format(areaB,big.mark = ".",decimal.mark=","), 
                                 align = "right", 
                                 cell = data_bars(shp_Bairros,
                                                  fill_color = cor_m,
@@ -939,7 +941,7 @@ output$tab_Cat <- renderReactable({
   
   
   rend |> 
-    reactable(bordered = TRUE,compact = T,defaultPageSize = 15,
+    reactable(bordered = F,compact = T,defaultPageSize = 15,
               highlight = TRUE, 
               defaultColDef = colDef(
                 style = list(fontSize = 14,headerClass = "sort-header"
@@ -947,38 +949,39 @@ output$tab_Cat <- renderReactable({
               ),
               
               columns = list(
-                `Categoria do emprego` = colDef(width = 600),
+                `Grupos ocupacionais` = colDef(width = 500),
                 Rendimento_Homem = colDef(name = "Homens", align = "left", # width = 200,
                                           cell = function(value) {
                                             width <- paste0(value / max(rend$Rendimento_Homem) * 100,'%')
                                             value <- format(value,big.mark = ".",decimal.mark=",")
-                                            value <- format(value, width = 9, justify = "right")
+                                            value <- paste0('R$ ', format(value, width = 9, justify = "right"))
                                             bar_chart(value, width = width,background = "#e1e1e1",fill = cor_h)
                                           }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
                 Rendimento_Mulher = colDef(name = "Mulheres", align = "left", # width = 200,
                                            cell = function(value) {
                                              width <- paste0(value / max(rend$Rendimento_Homem) * 100,'%')
                                              value <- format(value,big.mark = ".",decimal.mark=",")
-                                             value <- format(value, width = 9, justify = "right")
-                                             bar_chart(value, width = width,background = "#e1e1e1",fill =cor_m)
-                                           }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
+                                             value <- paste0('R$ ', format(value, width = 9, justify = "right"))
+                                             bar_chart(value, width = width,background = "#e1e1e1",fill = cor_m)
+                                           },
+                                           style = list(fontFamily = "monospace", whiteSpace = "pre")),
                 Qtd_Homem = colDef(name = "Homens", align = "left", # width = 200,
                                    cell = function(value) {
-                                     width <- paste0(value / max(rend$Qtd_Mulher) * 100,'%')
+                                     width <- paste0(value / max(rend$Qtd_Homem) * 100,'%')
                                      value <- format(value,big.mark = ".",decimal.mark=",")
                                      value <- format(value, width = 9, justify = "right")
                                      bar_chart(value, width = width,background = "#e1e1e1",fill = cor_h)
                                    }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
                 Qtd_Mulher = colDef(name = "Mulheres", align = "left", # width = 200,
                                     cell = function(value) {
-                                      width <- paste0(value / max(rend$Qtd_Mulher) * 100,'%')
+                                      width <- paste0(value / max(rend$Qtd_Homem) * 100,'%')
                                       value <- format(value,big.mark = ".",decimal.mark=",")
                                       value <- format(value, width = 9, justify = "right")
-                                      bar_chart(value, width = width,background = "#e1e1e1",fill =cor_m)
+                                      bar_chart(value, width = width,background = "#e1e1e1",fill = cor_h)
                                     }, style = list(fontFamily = "monospace", whiteSpace = "pre"))
               ),
               columnGroups = list(
-                colGroup(name = "Rendimento (R$)", columns = c("Rendimento_Homem", "Rendimento_Mulher")),
+                colGroup(name = "Rendimento médio", columns = c("Rendimento_Homem", "Rendimento_Mulher")),
                 colGroup(name = "Quantidade", columns = c("Qtd_Homem", "Qtd_Mulher"))
               ),
     )
@@ -998,7 +1001,7 @@ output$tab_Ativ <- renderReactable({
     drop_na()
   
   rend |> 
-    reactable(bordered = TRUE,compact = T,defaultPageSize = 15,
+    reactable(bordered = F,compact = T,defaultPageSize = 15,
               highlight = TRUE, 
               defaultColDef = colDef(
                 style = list(fontSize = 14,headerClass = "sort-header"
@@ -1006,38 +1009,39 @@ output$tab_Ativ <- renderReactable({
               ),
               
               columns = list(
-                `Atividade do empreendimento` = colDef(width = 600),
+                `Grupos ocupacionais` = colDef(width = 500),
                 Rendimento_Homem = colDef(name = "Homens", align = "left", # width = 200,
                                           cell = function(value) {
                                             width <- paste0(value / max(rend$Rendimento_Homem) * 100,'%')
                                             value <- format(value,big.mark = ".",decimal.mark=",")
-                                            value <- format(value, width = 9, justify = "right")
+                                            value <- paste0('R$ ', format(value, width = 9, justify = "right"))
                                             bar_chart(value, width = width,background = "#e1e1e1",fill = cor_h)
                                           }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
                 Rendimento_Mulher = colDef(name = "Mulheres", align = "left", # width = 200,
                                            cell = function(value) {
                                              width <- paste0(value / max(rend$Rendimento_Homem) * 100,'%')
                                              value <- format(value,big.mark = ".",decimal.mark=",")
-                                             value <- format(value, width = 9, justify = "right")
-                                             bar_chart(value, width = width,background = "#e1e1e1",fill =cor_m)
-                                           }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
+                                             value <- paste0('R$ ', format(value, width = 9, justify = "right"))
+                                             bar_chart(value, width = width,background = "#e1e1e1",fill = cor_m)
+                                           },
+                                           style = list(fontFamily = "monospace", whiteSpace = "pre")),
                 Qtd_Homem = colDef(name = "Homens", align = "left", # width = 200,
                                    cell = function(value) {
-                                     width <- paste0(value / max(rend$Qtd_Mulher) * 100,'%')
+                                     width <- paste0(value / max(rend$Qtd_Homem) * 100,'%')
                                      value <- format(value,big.mark = ".",decimal.mark=",")
                                      value <- format(value, width = 9, justify = "right")
                                      bar_chart(value, width = width,background = "#e1e1e1",fill = cor_h)
                                    }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
                 Qtd_Mulher = colDef(name = "Mulheres", align = "left", # width = 200,
                                     cell = function(value) {
-                                      width <- paste0(value / max(rend$Qtd_Mulher) * 100,'%')
+                                      width <- paste0(value / max(rend$Qtd_Homem) * 100,'%')
                                       value <- format(value,big.mark = ".",decimal.mark=",")
                                       value <- format(value, width = 9, justify = "right")
-                                      bar_chart(value, width = width,background = "#e1e1e1",fill =cor_m)
+                                      bar_chart(value, width = width,background = "#e1e1e1",fill = cor_h)
                                     }, style = list(fontFamily = "monospace", whiteSpace = "pre"))
               ),
               columnGroups = list(
-                colGroup(name = "Rendimento (R$)", columns = c("Rendimento_Homem", "Rendimento_Mulher")),
+                colGroup(name = "Rendimento médio", columns = c("Rendimento_Homem", "Rendimento_Mulher")),
                 colGroup(name = "Quantidade", columns = c("Qtd_Homem", "Qtd_Mulher"))
               ),
     )
@@ -1066,25 +1070,34 @@ output$tab_Grup <- renderReactable({
               columns = list(
                 `Grupos ocupacionais` = colDef(width = 500),
                 Rendimento_Homem = colDef(name = "Homens", align = "left", # width = 200,
-                                          cell = data_bars(rend,
-                                                           fill_color = cor_h,
-                                                           text_position = "outside-base",
-                                                           number_fmt =scales::number_format(prefix = "R$ ", accuracy  = 0.01, big.mark = ".",decimal.mark=",") ), style = list(fontFamily = "monospace", whiteSpace = "pre")),
+                                          cell = function(value) {
+                                            width <- paste0(value / max(rend$Rendimento_Homem) * 100,'%')
+                                            value <- format(value,big.mark = ".",decimal.mark=",")
+                                            value <- paste0('R$ ', format(value, width = 9, justify = "right"))
+                                            bar_chart(value, width = width,background = "#e1e1e1",fill = cor_h)
+                                          }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
                 Rendimento_Mulher = colDef(name = "Mulheres", align = "left", # width = 200,
-                                           cell = data_bars(rend,
-                                                            fill_color = cor_m,
-                                                            text_position = "outside-base",
-                                                            number_fmt =scales::number_format(prefix = "R$ ", accuracy  = 0.01, big.mark = ".",decimal.mark=",") ), style = list(fontFamily = "monospace", whiteSpace = "pre")),
+                                           cell = function(value) {
+                                             width <- paste0(value / max(rend$Rendimento_Homem) * 100,'%')
+                                             value <- format(value,big.mark = ".",decimal.mark=",")
+                                             value <- paste0('R$ ', format(value, width = 9, justify = "right"))
+                                             bar_chart(value, width = width,background = "#e1e1e1",fill = cor_m)
+                                           },
+                                           style = list(fontFamily = "monospace", whiteSpace = "pre")),
                 Qtd_Homem = colDef(name = "Homens", align = "left", # width = 200,
-                                   cell = data_bars(rend,
-                                                    fill_color = cor_h,
-                                                    text_position = "outside-base",
-                                                    number_fmt =scales::number_format(accuracy  = 0.01, big.mark = ".",decimal.mark=",") ), style = list(fontFamily = "monospace", whiteSpace = "pre")),
+                                   cell = function(value) {
+                                     width <- paste0(value / max(rend$Qtd_Mulher) * 100,'%')
+                                     value <- format(value,big.mark = ".",decimal.mark=",")
+                                     value <- format(value, width = 9, justify = "right")
+                                     bar_chart(value, width = width,background = "#e1e1e1",fill = cor_h)
+                                   }, style = list(fontFamily = "monospace", whiteSpace = "pre")),
                 Qtd_Mulher = colDef(name = "Mulheres", align = "left", # width = 200,
-                                    cell = data_bars(rend,
-                                                     fill_color = cor_m,
-                                                     text_position = "outside-base",
-                                                     number_fmt =scales::number_format( accuracy  = 0.01, big.mark = ".",decimal.mark=",") ), style = list(fontFamily = "monospace", whiteSpace = "pre"))
+                                    cell = function(value) {
+                                      width <- paste0(value / max(rend$Qtd_Mulher) * 100,'%')
+                                      value <- format(value,big.mark = ".",decimal.mark=",")
+                                      value <- format(value, width = 9, justify = "right")
+                                      bar_chart(value, width = width,background = "#e1e1e1",fill = cor_h)
+                                    }, style = list(fontFamily = "monospace", whiteSpace = "pre"))
               ),
               columnGroups = list(
                 colGroup(name = "Rendimento médio", columns = c("Rendimento_Homem", "Rendimento_Mulher")),
@@ -1605,36 +1618,65 @@ output$map <- renderLeaflet({
 #  Serve Educação ----------------------------------------------------------------
 
 
-output$alf_M <- renderValueBox({
-valueBox(
-  value = paste0(format( bairros_alfab[bairros_alfab$NM_BAIRRO==selected() ,"Tx_alfab_mais_de_15_M"]*100  ,digits= 2  , nsmall = 2, big.mark   = '.',decimal.mark = ','),"%") ,
-  subtitle = "Taxa de Alfabetização" ,
-  color = "purple",
-  icon = icon("book-open-reader"),
-  footer = 'Mulheres' ,
-  gradient = T
-)
-})
-output$alf_posicao <- renderValueBox({
-  valueBox(
-    value = paste0(bairros_alfab[bairros_alfab$NM_BAIRRO==selected() , "posição"],'º') ,
-    subtitle = "Entre as melhores taxas" ,
-    color = "teal",
-    icon = icon("book-open-reader"),
-    footer = paste0('Posição entre ', if_else(selected() == 'Fortaleza', 'as capitais', 'os bairros')    ) , 
-    gradient = T
+# output$alf_M <- renderValueBox({
+# valueBox(
+#   value = paste0(format( bairros_alfab[bairros_alfab$NM_BAIRRO==selected() ,"Tx_alfab_mais_de_15_M"]*100  ,digits= 2  , nsmall = 2, big.mark   = '.',decimal.mark = ','),"%") ,
+#   subtitle = "Taxa de Alfabetização" ,
+#   color = "purple",
+#   icon = icon("book-open-reader"),
+#   footer = 'Mulheres' ,
+#   gradient = T
+# )
+# })
+# output$alf_posicao <- renderValueBox({
+#   valueBox(
+#     value = paste0(bairros_alfab[bairros_alfab$NM_BAIRRO==selected() , "posição"],'º') ,
+#     subtitle = "Entre as melhores taxas" ,
+#     color = "teal",
+#     icon = icon("book-open-reader"),
+#     footer = paste0('Posição entre ', if_else(selected() == 'Fortaleza', 'as capitais', 'os bairros')    ) , 
+#     gradient = T
+#   )
+# })
+# output$alf <- renderValueBox({
+#   
+#   
+#   valueBox(
+#     value = paste0(format( bairros_alfab[bairros_alfab$NM_BAIRRO=='Fortaleza' ,'Tx_alfab_mais_de_15']*100 ,digits= 2,nsmall = 2,  big.mark   = '.',decimal.mark = ','),'%') ,
+#     subtitle = "Taxa de alfabetização",
+#     color = "warning",
+#     icon = icon("book-open-reader"),
+#     footer = 'Geral em Fortaleza',
+#     gradient = T
+#   )
+# })
+
+output$alf_M <- renderUI({
+  value_box(
+    title = span(paste0(format( bairros_alfab[bairros_alfab$NM_BAIRRO==selected() ,"Tx_alfab_mais_de_15_M"]*100  ,digits= 2  , nsmall = 2, big.mark   = '.',decimal.mark = ','),"%")  , class = "value-box-title"),
+    value =  "Taxa de Alfabetização"  ,
+    span('Mulheres', style = "font-size: 17px;color: #F3ECE4") ,
+    theme = value_box_theme(bg = "#271F41", fg = "#C2ACFF"),
+    height = 150
   )
 })
-output$alf <- renderValueBox({
-  
-  
-  valueBox(
-    value = paste0(format( bairros_alfab[bairros_alfab$NM_BAIRRO=='Fortaleza' ,'Tx_alfab_mais_de_15']*100 ,digits= 2,nsmall = 2,  big.mark   = '.',decimal.mark = ','),'%') ,
-    subtitle = "Taxa de alfabetização",
-    color = "warning",
-    icon = icon("book-open-reader"),
-    footer = 'Geral em Fortaleza',
-    gradient = T
+output$alf_posicao <- renderUI({
+  value_box(
+    title = span(paste0(bairros_alfab[bairros_alfab$NM_BAIRRO==selected() , "posição"],'º')   , class = "value-box-title"),
+    value =  "Entre as melhores taxas"   ,
+    span(paste0('Posição entre ', if_else(selected() == 'Fortaleza', 'as capitais', 'os bairros')), style = "font-size: 17px;color: #F3ECE4") ,
+    theme = value_box_theme(bg = "#271F41", fg = "#C2ACFF"),
+    height = 150
+  )
+})
+
+output$alf <- renderUI({
+  value_box(
+    title = span(paste0(format( bairros_alfab[bairros_alfab$NM_BAIRRO=='Fortaleza' ,'Tx_alfab_mais_de_15']*100 ,digits= 2,nsmall = 2,  big.mark   = '.',decimal.mark = ','),'%')   , class = "value-box-title"),
+    value =  "Taxa de alfabetização"   ,
+    span('Geral em Fortaleza', style = "font-size: 17px;color: #F3ECE4") ,
+    theme = value_box_theme(bg = "#271F41", fg = "#C2ACFF"),
+    height = 150
   )
 })
 output$pizza_alfab_H <- renderEcharts4r({
@@ -1643,15 +1685,16 @@ Qtd_alfab |>
   filter(V2007== 'Homem' ) |> 
   e_charts(Tipo,reorder = F) |> 
   e_pie(Qtd,radius = c("30%", "60%"),startAngle = 150,
+        labelLine= list(show=T,length=5, length2= 10),
         label = list(color='black',show = T,formatter = "{b} \n {d}%"),
         emphasis = list(
           label = list( 
             show = T,
-            fontSize = 15,
+            fontSize = 13,
             fontWeight = "bold"))) |>
   e_tooltip() |> 
   e_legend(show=F) |> 
-  e_color(c( "#4B9695","#D1EB28")) |> 
+  e_color(c( "#079284","#FF815A") ,background = '#FCF5EC') |> 
   e_title(text='Homem',left= "center") 
 })
 output$pizza_alfab_M <- renderEcharts4r({
@@ -1660,15 +1703,16 @@ output$pizza_alfab_M <- renderEcharts4r({
     filter(V2007== 'Mulher' ) |> 
     e_charts(Tipo,reorder = F) |> 
     e_pie(Qtd,radius = c("30%", "60%"),startAngle = 150,
+          labelLine= list(show=T,length=5, length2= 10),
           label = list(color='black',show = T,formatter = "{b} \n {d}%"),
           emphasis = list(
             label = list( 
               show = T,
-              fontSize = 15,
+              fontSize = 13,
               fontWeight = "bold"))) |>
     e_tooltip() |> 
     e_legend(show=F) |> 
-    e_color(c( "#4B9695","#D1EB28"))|> 
+    e_color(c( "#079284","#FF815A"),background = '#FCF5EC')|> 
     e_title(text='Mulher',left= "center") 
 })
 
@@ -1703,19 +1747,20 @@ output$idade_alfab <- renderEcharts4r({
   Tx_faixa_alfab |> 
   filter(NM_BAIRRO == selected(), V2007!='Geral') |>
   group_by(V2007) |>   
-  e_chart(x=Tipo,) |> 
-  e_bar(Alfabetização) |> 
-  e_y_axis(min=.19) |> 
-  e_tooltip(
-    trigger="axis",formatter = e_tooltip_pointer_formatter(
-      style = c( "percent"),digits = 1) )|>  
-      # e_legend( orient= "vertical",
-      #           ) |> 
-      e_y_axis(show=T,name="Taxa de alfabetização",
-               formatter=e_axis_formatter(style = c("percent"),
-                                          locale = 'PT-BR')) |> 
-      #e_grid(top = "-5%") |> 
-  e_color(c(cor_h,cor_m))
+    e_chart(x=Tipo) |> 
+    e_bar(Alfabetização) |> 
+    e_y_axis(min=.19) |> 
+    e_legend( icon = 'circle', right= '2%',top='3%') |> 
+    e_tooltip(
+      trigger="axis",formatter = e_tooltip_pointer_formatter(
+        style = c( "percent"),digits = 1) )|>  
+    e_y_axis(show=T,name="Taxa de alfabetização",
+             formatter=e_axis_formatter(style = c("percent"),
+                                        locale = 'PT-BR')) |> 
+    e_x_axis(
+      axisLabel = list(interval= 0,rotate = 45,color='black') ) |> 
+    e_color(c(cor_h,cor_m),background = '#FCF5EC') |> 
+    e_grid(right='3%')  
   
 })
 
@@ -1744,7 +1789,7 @@ output$map_educ <-  renderLeaflet({
                                    dragging = F,
                                    doubleClickZoom = FALSE,
                                    scrollWheelZoom = F) ) |>
-    setMapWidgetStyle(list(background = "white"))  |> 
+    setMapWidgetStyle(list(background = "#FCF5EC"))  |> 
     addScaleBar(position = "bottomright",
                 options = scaleBarOptions(imperial = F))  |>
     setView(-38.51782, -3.795804, zoom = 12) |> 

@@ -1,0 +1,13 @@
+name: previa-painel-mulher-2
+title: observatorio-mulher
+username: romulo-andrade
+account: romulo-andrade
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14324888
+bundleId: 10012791
+url: https://romulo-andrade.shinyapps.io/previa-painel-mulher-2/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .Rprofile|Auxiliar.R|Auxiliar_cor.R|Auxiliar_educacao.R|Auxiliar_mercado.R|Auxiliar_violencia.R|bairros.xlsx|Demografia_bairros.xlsx|graficos_piramid.R|mapa.R|README.md|shp_Bairros_alfab.geojson|shp_Bairros_Alfab_2022_Censo.geojson
