@@ -1,3 +1,17 @@
+composicao <- readRDS('Dados/composicao.rds')
+
+composicao_ <- composicao |>
+  mutate(Composição = dplyr::case_when(
+    Composição =='Com cônjuge e ao menos um filho de apenas um deles' ~ 'Com cônjuge e\n ao menos um filho\n de apenas um deles',
+    Composição =='Com cônjuge, sem filhos' ~ 'Com cônjuge,\n sem filhos',
+    Composição =='Com cônjuge e apenas filhos de ambos' ~ 'Com cônjuge e\n apenas filhos de ambos',
+    Composição =='Sem cônjuge e com filhos ou enteados' ~ 'Sem cônjuge e com\n filhos ou enteados',
+    TRUE ~  Composição
+  ))
+# 
+saveRDS(composicao_,'Dados/composicao.rds')
+
+
 
 df_faixa_ <- df_faixa |> 
   mutate(grupo_de_idade =as.factor(grupo_de_idade ),
@@ -60,41 +74,66 @@ df_faixa_ <- df_faixa |>
 
   e_title(text='População residente em Fortaleza',subtext="Segundo sexo e grupo de idade" )
 
-
-
+ df_serie <- readxl::read_excel('Dados/serie_pop_sexo.xlsx')
+saveRDS(df_serie,'Dados/serie_pop_sexo.rds')
 # library(stringr)
 # library(dplyr)
 # library(sf)
 # library(echarts4r)
 # library(leaflet)
 # library(leaflet.extras)
-# # bairros_demografia<- readxl::read_excel("Dados/Agregados_por_bairros_demografia_BR.xlsx")
-# # 
-# # bairros_demografia <- bairros_demografia |>
-# #   filter(str_detect(CD_BAIRRO, "^230440")) |>
-# #   mutate_at(vars(starts_with("V")), as.numeric )
-# # 
-# # saveRDS(bairros_demografia,'Dados/bairros_demografia.rds')
-# # bairros_demografia <- readRDS('Dados/bairros_demografia.rds') 
-# # 
-# # bairros_demografia_fort <- data.frame(NM_BAIRRO = c('FORTALEZA'),
-# #            V01006 = c(2428708),
-# #            V01007 = c(1126929),
-# #            V01008 = c(1301779))
-# # 
-# # bairros_demografia <- bind_rows(bairros_demografia,bairros_demografia_fort)
-# # 
-# # saveRDS(bairros_demografia,'Dados/bairros_demografia.rds')
+bairros_demografia<- readxl::read_excel("C:/Romulo/Dados/ObservatorioMulher/observatorio-mulher/Dados/Agregados_por_bairros_demografia_BR.xlsx")
+
+bairros_demografia <- bairros_demografia |>
+  filter(str_detect(CD_BAIRRO, "^230440")) |>
+  mutate_at(vars(starts_with("V")), as.numeric )
+
+#saveRDS(bairros_demografia,'Dados/bairros_demografia.rds')
+#bairros_demografia <- readRDS('Dados/bairros_demografia.rds')
+
+bairros_demografia_fort <- data.frame(NM_BAIRRO = c('Fortaleza'),
+           V01006 = c(2428708),
+           V01007 = c(1126929),
+           V01008 = c(1301779))
+
+bairros_demografia <- bind_rows(bairros_demografia,bairros_demografia_fort)
+
+bairros_demografia_<- bairros_demografia |>
+  select(NM_BAIRRO,V01006, V01007, V01008) |> 
+  mutate(razao_sexo = round(V01008/V01007,2))
+
+
+
+saveRDS(bairros_demografia_,'C:/Romulo/Dados/ObservatorioMulher/observatorio-mulher-2/Dados/bairros_demografia.rds')
+
+
+
 # 
-# 
+shp_Bairros <- readRDS('Dados/shp_bairros_demografia.rds')
+shp_Bairros_<- shp_Bairros |> st_drop_geometry()
+saveRDS(shp_Bairros_,'C:/Romulo/Dados/ObservatorioMulher/observatorio-mulher-2/Dados/tab_Bairros.rds')
+
+tab_Bairros_ <- shp_Bairros_ |> left_join(bairros_demografia |> 
+                           select(NM_BAIRRO,V01007,V01006 ),by=c('Bairro'='NM_BAIRRO'))
+saveRDS(tab_Bairros_,'C:/Romulo/Dados/ObservatorioMulher/observatorio-mulher-2/Dados/tab_Bairros.rds')
+
 # ##
+
 # 
-# # bairros_CD2022 <- read_sf('Dados/CE_bairros_CD2022.shp')|> 
-# #   filter(NM_MUN == "Fortaleza") |> 
-# #   select(NM_BAIRRO,
-# #          AREA_KM2,
-# #          v0001:v0007)
-# # 
+bairros_CD2022 <- read_sf('C:/Romulo/Dados/ObservatorioMulher/observatorio-mulher/Dados/CE_bairros_CD2022.shp')|>
+  filter(NM_MUN == "Fortaleza") |>
+  select(NM_BAIRRO,
+         AREA_KM2,
+         v0001:v0007)
+
+bairros_CD2022 <- read_sf('C:/Romulo/Dados/ObservatorioMulher/observatorio-mulher/Dados/CE_bairros_CD2022.shp')|>
+  filter(NM_MUN == "Fortaleza") |>
+  select(NM_BAIRRO)
+
+shp_bairros_demografia  <- shp_Bairros |> left_join(bairros_CD2022,by=c('Bairro'='NM_BAIRRO'))
+
+saveRDS(shp_bairros_demografia,'C:/Romulo/Dados/ObservatorioMulher/observatorio-mulher-2/Dados/shp_bairros_demografia.rds')
+w# # ;
 # # bairros_CD2022 <- bairros_CD2022 |> st_transform(4326)
 # # saveRDS(bairros_CD2022,'Dados/bairros_CD2022.rds')
 # 

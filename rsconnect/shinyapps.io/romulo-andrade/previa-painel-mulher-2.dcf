@@ -1,11 +1,11 @@
 name: previa-painel-mulher-2
-title: observatorio-mulher
+title: previa-painel-mulher-2
 username: romulo-andrade
 account: romulo-andrade
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 14324888
-bundleId: 10012791
+bundleId: 10031461
 url: https://romulo-andrade.shinyapps.io/previa-painel-mulher-2/
 version: 1
 asMultiple: FALSE

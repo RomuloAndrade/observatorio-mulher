@@ -330,19 +330,19 @@ ui <- dashboardPage(
       sidebarHeader("Introdução"),
       menuItem(
         "Abertura",
-        tabName = "Abertura"
-       # icon = icon("venus")
+        tabName = "Abertura",
+        icon = icon("venus")
       ),
       sidebarHeader("Visualizações"),
       menuItem(
         "Demografia",
-        tabName = "Demografia"
-        #icon = icon("users")
+        tabName = "Demografia",
+        icon = icon("users")
       ),
       menuItem(
         "Educação",
-        tabName = "Educação"
-        #icon = icon("book-open")
+        tabName = "Educação",
+        icon = icon("book-open")
       ),
       # menuItem(
       #   "Saúde",
@@ -352,31 +352,31 @@ ui <- dashboardPage(
       
       menuItem(
         "Mercado de trabalho",
-        tabName = "Mercado"
-       # icon = icon("money-bill-trend-up")
+        tabName = "Mercado",
+        icon = icon("money-bill-trend-up")
       ),
       
       menuItem(
         "Violência",
-        tabName = "Violência"
-       # icon = icon("gun")
+        tabName = "Violência",
+        icon = icon("gun")
       ),
 
       sidebarHeader("Metadados"),
       menuItem(
         "Glossário",
-        tabName = "glossario"
-       # icon = icon("magnifying-glass-chart")
+        tabName = "glossario",
+        icon = icon("magnifying-glass-chart")
       ),
       menuItem(
         "Referências",
-        tabName = "fonte"
-        #icon = icon("server")
+        tabName = "fonte",
+        icon = icon("server")
       ),
       menuItem(
         "Sobre",
-        tabName = "sobre"
-       # icon = icon("info")
+        tabName = "sobre",
+        icon = icon("info")
       )
     )
   ),
