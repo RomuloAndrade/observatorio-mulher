@@ -4,6 +4,9 @@
 |----------------------------------|----------------------------------|
 | [Sem tema](https://romulo-andrade.shinyapps.io/previa-painel-mulher/) | [Com tema](https://romulo-andrade.shinyapps.io/previa-painel-mulher-2/) |
 
-| [![Dashboard](www/screenshot.png)](https://romulo-andrade-diobs.shinyapps.io/observatorio-mulher-demografia/) | |
+| [![Dashboard](www/demografia.png)](https://romulo-andrade-diobs.shinyapps.io/observatorio-mulher-demografia/) | |
 |----------------------------------|----------------------------------|
 | [Demografia](https://romulo-andrade-diobs.shinyapps.io/observatorio-mulher-demografia/) |  
+| [![Dashboard](www/mercado.png)](https://romulo-andrade-diobs.shinyapps.io/observatorio-mulher-mercado/) | |
+|----------------------------------|----------------------------------|
+| [Demografia](https://romulo-andrade-diobs.shinyapps.io/observatorio-mulher-mercado/) |  
